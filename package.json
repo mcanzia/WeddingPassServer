@@ -21,6 +21,7 @@
     "firebase": "^9.9.4",
     "firebase-admin": "^12.4.0",
     "https": "^1.0.0",
+    "inversify": "^6.0.2",
     "reflect-metadata": "^0.2.2",
     "winston": "^3.10.0"
   },
