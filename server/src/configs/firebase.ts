@@ -12,11 +12,8 @@ if (process.env.NODE_ENV === 'test') {
 } else {
   admin.initializeApp({
     credential: admin.credential.cert(serviceKey as ServiceAccount),
-    databaseURL: process.env.FIREBASE_DATABASE_URL
-      ? process.env.FIREBASE_DATABASE_URL
-      : 'https://weddingpass-dev-default-rtdb.firebaseio.com/'
   });
 }
 
-export const db = admin.database();
+export const db = admin.firestore();
 export const firebaseAdmin = admin;

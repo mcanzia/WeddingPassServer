@@ -8,8 +8,7 @@ import Logger from './util/logs/logger';
 import { CustomError } from './util/error/CustomError';
 import { ErrorHandler } from './util/error/ErrorHandler';
 import { AuthServiceImpl } from './services/AuthService';
-
-var { unless } = require("express-unless");
+import path from 'path';
 
 const port: number = Number(process.env.VITE_PORT) || 7500;
 const app: Express = express();
@@ -38,18 +37,15 @@ const authMiddleware = async (request : Request, response : Response, next : Nex
   }
 };
 
-authMiddleware.unless = unless;
-
-app.use(
-  authMiddleware.unless({
-  path: [
-    { url: /^\/api\/room(\/|$)/, methods: ['GET', 'POST', 'PUT', 'DELETE'] }
-  ]
-}));
-
+//SSR
+app.use(express.static(path.join(__dirname, '../public')));
 
 //Routes Definitions
 app.use('/api', routes);
+
+app.get('/upload', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/upload.html'));
+});
 
 //Error Handling
 app.use((error : CustomError, request : Request, response : Response, next : NextFunction) => {
