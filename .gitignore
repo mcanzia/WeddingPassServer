@@ -1,5 +1,6 @@
 node_modules
 /server/dist/
+/frontend/dist/
 .env.*
 /server/src/configs/serviceAccountKey.json
 *.log
