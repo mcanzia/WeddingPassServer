@@ -25,17 +25,17 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
-// Room Authorization
-const authMiddleware = async (request : Request, response : Response, next : NextFunction) => {
+// User Authorization
+app.use(async (request : Request, response : Response, next : NextFunction) => {
   try {
-    const roomId = await AuthServiceImpl.validateAuthToken(request.headers.authorization)
-    response.locals.roomId = roomId;
+    const userUID = await AuthServiceImpl.validateAuthToken(request.headers.authorization)
+    response.locals.userAuth = userUID;
     next();
   } catch(error) {
     Logger.error("Authorization attempt failed");
     return response.status(403).json({ error: 'User is not authorized to perform this action' });
   }
-};
+});
 
 //SSR
 app.use(express.static(path.join(__dirname, '../public')));
