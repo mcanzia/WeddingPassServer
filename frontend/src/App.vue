@@ -1,15 +1,13 @@
 <template>
   <div class="bg-background">
-    <div v-if="!userStore.isLoading && userStore.isLoggedIn">
+    <div v-if="userStore.isLoggedIn">
       <Navbar />
       <div class="bg-background">
-        <router-view />
+        <router-view v-if="!userStore.isLoading"/>
+        <div v-else>Loading...</div>
       </div>
     </div>
     <Login v-else-if="!userStore.isLoading" />
-    <div v-else class="center">
-       Loading...
-    </div>
   </div>
 </template>
 

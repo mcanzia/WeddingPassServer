@@ -6,7 +6,7 @@ const router = express.Router();
 router.use(express.json());
 
 router.use('/pass', passRoutes);
-router.use('/guest', guestRoutes);
+router.use('/guests', guestRoutes);
 export default router;
 
 

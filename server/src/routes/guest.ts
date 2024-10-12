@@ -12,8 +12,10 @@ router.get('/id/:guestId', (req, res, next) => guestController.getGuestbyId(req,
 router.get('/name/:guestName', (req, res, next) => guestController.getGuestbyName(req, res, next));
 router.get('/:serialNumber', (req, res, next) => guestController.getGuestbySerialNumber(req, res, next));
 router.post('/', (req, res, next) => guestController.createGuest(req, res, next));
+router.post('/batch', (req, res, next) => guestController.batchCreateGuests(req, res, next));
 router.post('/upload', upload.single('file'), (req, res, next) => guestController.uploadGuests(req, res, next));
 router.put('/:passId', (req, res, next) => guestController.updateGuest(req, res, next));
 router.delete('/', (req, res, next) => guestController.deleteGuest(req, res, next));
+router.delete('/batch', (req, res, next) => guestController.batchDeleteGuests(req, res, next));
 
 export default router;

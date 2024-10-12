@@ -1,12 +1,30 @@
 import { createRouter, createWebHistory } from "vue-router";
 import GuestList from "@/components/GuestList.vue";
+import AddGuest from "@/components/AddGuest.vue";
 import Landing from "@/components/Landing.vue";
+import EventAttendance from "@/components/events/EventAttendance.vue";
 
 const routes = [
     { 
       path: '/guests',
       name: 'guests',
       component: GuestList,
+      meta: {
+         requiresAuth: true
+      }
+   },
+   { 
+      path: '/add-guest',
+      name: 'add-guest',
+      component: AddGuest,
+      meta: {
+         requiresAuth: true
+      }
+   },
+   { 
+      path: '/event-attendance',
+      name: 'event-attendance',
+      component: EventAttendance,
       meta: {
          requiresAuth: true
       }

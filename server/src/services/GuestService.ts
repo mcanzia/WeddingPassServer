@@ -19,7 +19,9 @@ export class GuestService {
                         id: '',
                         name: data['Name'] || '',
                         email: data['Email'] || '',
+                        phone: data['Phone'] || '',
                         serialNumber: data['Serial Number'] || '',
+                        events: data['Events'] || '',
                     });
                 })
                 .on('end', () => {

@@ -25,23 +25,43 @@ export class GuestController {
         }
     }
 
-    async addGuests(userAuthToken: any, guests: Array<Guest>) {
+    async addGuest(userAuthToken: any, guest: Guest) {
         try {
             const requestUrl = `${RequestUtil.getAPIUrl()}/api/guests`;
-            const response = await fetch(requestUrl, RequestUtil.POSTRequestParams(userAuthToken, guests));
-            return response;
+            await fetch(requestUrl, RequestUtil.POSTRequestParams(userAuthToken, guest));
+            return;
         } catch (error: any) {
-            ErrorHandler.handleAddError<Guest>(userAuthToken, ObjectType.GUEST, guests, error);
+            ErrorHandler.handleAddError<Guest>(userAuthToken, ObjectType.GUEST, guest, error);
         }
     }
 
-    async deleteGuests(userAuthToken: any, guests: Array<Guest>) {
+    async batchAddGuests(userAuthToken: any, guests: Array<Guest>) {
+        try {
+            const requestUrl = `${RequestUtil.getAPIUrl()}/api/guests/batch`;
+            await fetch(requestUrl, RequestUtil.POSTRequestParams(userAuthToken, guests));
+            return;
+        } catch (error: any) {
+            ErrorHandler.handleBatchAddError<Guest>(userAuthToken, ObjectType.GUEST, guests, error);
+        }
+    }
+
+    async deleteGuest(userAuthToken: any, guest: Guest) {
         try {
             const requestUrl = `${RequestUtil.getAPIUrl()}/api/guests`;
+            await fetch(requestUrl, RequestUtil.DELETERequestParams(userAuthToken, guest));
+            return;
+        } catch (error: any) {
+            ErrorHandler.handleDeleteError<Guest>(ObjectType.GUEST);
+        }
+    }
+
+    async batchDeleteGuests(userAuthToken: any, guests: Array<Guest>) {
+        try {
+            const requestUrl = `${RequestUtil.getAPIUrl()}/api/guests/batch`;
             const response = await fetch(requestUrl, RequestUtil.DELETERequestParams(userAuthToken, guests));
             return response;
         } catch (error: any) {
-            ErrorHandler.handleDeleteError<Guest>(userAuthToken, ObjectType.GUEST, guests, error);
+            ErrorHandler.handleBatchDeleteError<Guest>(ObjectType.GUEST);
         }
     }
 }

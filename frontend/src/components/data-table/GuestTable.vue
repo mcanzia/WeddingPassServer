@@ -1,9 +1,13 @@
 <template>
     <div class="w-full">
         <div class="flex gap-2 items-center py-4">
-            <Input class="max-w-sm" placeholder="Filter emails..."
-                :model-value="table.getColumn('email')?.getFilterValue() as string"
-                @update:model-value=" table.getColumn('email')?.setFilterValue($event)" />
+            <Input class="max-w-sm" placeholder="Filter guests..."
+                :model-value="table.getColumn('name')?.getFilterValue() as string"
+                @update:model-value=" table.getColumn('name')?.setFilterValue($event)" />
+            <Button variant="outline" @click="goToAddGuest">Add Guest</Button>
+            <ConfirmAction alert-title="Do you want to delete these guests?" @on-confirm="deleteGuests" v-if="showDeleteButton">
+                <Button variant="destructive">Delete Selected Guests</Button>
+            </ConfirmAction>
             <DropdownMenu>
                 <DropdownMenuTrigger as-child>
                     <Button variant="outline" class="ml-auto">
@@ -14,7 +18,7 @@
                 <DropdownMenuContent align="end">
                     <DropdownMenuCheckboxItem
                         v-for="column in table.getAllColumns().filter((column) => column.getCanHide())" :key="column.id"
-                        class="capitalize" :checked="column.getIsVisible()" @update:checked="(value) => {
+                        class="capitalize" :checked="column.getIsVisible()" @update:checked="(value: any) => {
                             column.toggleVisibility(!!value)
                         }">
                         {{ column.id }}
@@ -94,7 +98,7 @@ import {
 } from '@tanstack/vue-table';
 import { ArrowUpDown, ChevronDown } from 'lucide-vue-next';
 
-import { h, ref } from 'vue'
+import { computed, h, ref } from 'vue'
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
@@ -116,26 +120,29 @@ import { valueUpdater } from '@/util/utils';
 import { Guest } from '@/models/Guest';
 import { GuestService } from '@/services/GuestService';
 import { onBeforeMount } from 'vue';
+import EventCircle from '@/components/data-table/EventCircle.vue';
+import { useRouter } from 'vue-router';
+import ConfirmAction from '@/components/data-table/ConfirmAction.vue';
 
 const guestService = new GuestService();
+const router = useRouter();
 const data = ref([]);
 
 onBeforeMount(async () => {
     data.value = await guestService.getAllGuests();
 });
 
-
 const columns: ColumnDef<Guest>[] = [
     {
         id: 'select',
         header: ({ table }) => h(Checkbox, {
             'checked': table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate'),
-            'onUpdate:checked': value => table.toggleAllPageRowsSelected(!!value),
+            'onUpdate:checked': (value: any) => table.toggleAllPageRowsSelected(!!value),
             'ariaLabel': 'Select all',
         }),
         cell: ({ row }) => h(Checkbox, {
             'checked': row.getIsSelected(),
-            'onUpdate:checked': value => row.toggleSelected(!!value),
+            'onUpdate:checked': (value: any) => row.toggleSelected(!!value),
             'ariaLabel': 'Select row',
         }),
         enableSorting: false,
@@ -143,8 +150,13 @@ const columns: ColumnDef<Guest>[] = [
     },
     {
         accessorKey: 'name',
-        header: 'Name',
-        cell: ({ row }) => h('div', { class: 'capitalize' }, row.getValue('status')),
+        header: ({ column }) => {
+            return h(Button, {
+                variant: 'ghost',
+                onClick: () => column.toggleSorting(column.getIsSorted() === 'asc'),
+            }, () => ['Name', h(ArrowUpDown, { class: 'ml-2 h-4 w-4' })])
+        },
+        cell: ({ row }) => h('div', { class: 'capitalize' }, row.getValue('name')),
     },
     {
         accessorKey: 'email',
@@ -155,6 +167,32 @@ const columns: ColumnDef<Guest>[] = [
             }, () => ['Email', h(ArrowUpDown, { class: 'ml-2 h-4 w-4' })])
         },
         cell: ({ row }) => h('div', { class: 'lowercase' }, row.getValue('email')),
+    },
+    {
+        accessorKey: 'phone',
+        header: ({ column }) => {
+            return h(Button, {
+                variant: 'ghost',
+                onClick: () => column.toggleSorting(column.getIsSorted() === 'asc'),
+            }, () => ['Phone Number', h(ArrowUpDown, { class: 'ml-2 h-4 w-4' })])
+        },
+        cell: ({ row }) => h('div', { class: 'lowercase' }, row.getValue('phone')),
+    },
+    {
+        accessorKey: 'events',
+        header: ({ column }) => {
+            return h(Button, {
+                variant: 'ghost',
+                onClick: () => column.toggleSorting(column.getIsSorted() === 'asc'),
+            }, () => ['Events', h(ArrowUpDown, { class: 'ml-2 h-4 w-4' })]);
+        },
+        cell: ({ row }) => {
+            const events: string[] = row.getValue('events') || [];
+            const circles = events.map(eventName =>
+                h(EventCircle, { eventName, key: eventName })
+            );
+            return h('div', { class: 'flex gap-1' }, circles);
+        },
     },
 ]
 
@@ -185,4 +223,22 @@ const table = useVueTable({
         get expanded() { return expanded.value },
     },
 })
+
+const showDeleteButton = computed(() => {
+    return Object.keys(rowSelection.value).length > 0;
+});
+
+function goToAddGuest() {
+    router.push('/add-guest');
+}
+
+async function deleteGuests() {
+    const guestsToDelete = data.value.filter((row, idx) => Object.keys(rowSelection.value).includes(idx.toString()));
+    await guestService.batchDeleteGuests(guestsToDelete);
+    await guestService.getAllGuests();
+    console.log('GUESTS DELETE SUCCESSFULLY');
+}
+
+
+
 </script>

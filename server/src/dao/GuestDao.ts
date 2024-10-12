@@ -1,5 +1,5 @@
 import { db } from '../configs/firebase';
-import { DatabaseError } from '../util/error/CustomError';
+import { DatabaseError, NoDataError } from '../util/error/CustomError';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '../configs/types';
 import { Guest } from '../models/Guest';
@@ -19,7 +19,7 @@ export class GuestDao {
             const snapshot: QuerySnapshot<DocumentData> = await this.guestsCollection.get();
 
             if (snapshot.empty) {
-                throw new Error('No guests found.');
+                throw new NoDataError('No guests found.');
             }
 
             const guests: Array<Guest> = [];
@@ -32,7 +32,7 @@ export class GuestDao {
 
             return guests;
         } catch (error) {
-            throw new DatabaseError("Could not retrieve guests from database: " + error);
+            throw error;
         }
     }
 
@@ -165,4 +165,27 @@ export class GuestDao {
             throw new DatabaseError("Could not delete guest from database: " + error);
         }
     }
+
+    async batchDeleteGuests(guests: Guest[]): Promise<void> {
+        try {
+            const batchSize = 500;
+            for (let i = 0; i < guests.length; i += batchSize) {
+                const batch = db.batch();
+                const batchGuests = guests.slice(i, i + batchSize);
+    
+                batchGuests.forEach(guest => {
+                    if (!guest.id) {
+                        throw new Error(`Guest at index ${i} does not have an id.`);
+                    }
+                    const guestRef = this.guestsCollection.doc(guest.id);
+                    batch.delete(guestRef);
+                });
+    
+                await batch.commit();
+            }
+        } catch (error : any) {
+            throw new DatabaseError(error.toString());
+        }
+    }
+    
 }

@@ -8,21 +8,20 @@
         <a href="/guests" class="text-sm font-medium text-muted-foreground transition-colors hover:text-primary">
           Guest List
         </a>
+        <a href="/event-attendance" class="text-sm font-medium text-muted-foreground transition-colors hover:text-primary">
+          Event Attendance
+        </a>
+        <a @click="logout"
+          class="text-sm font-medium text-muted-foreground transition-colors hover:text-primary cursor-pointer">
+          Logout
+        </a>
       </nav>
-      <div class="ml-auto flex items-center space-x-4">
-          <Search />
-      </div>
-      <div>
-        <a @click="logout" class="text-sm ml-4 font-medium text-muted-foreground transition-colors hover:text-primary cursor-pointer">Logout</a>
-      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import router from "@/router/index";
 import { cn } from '@/lib/utils';
-import Search from '@/components/Search.vue';
 import { useUserStore } from '@/stores/UserStore';
 
 const userStore = useUserStore();

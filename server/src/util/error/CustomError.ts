@@ -12,6 +12,12 @@ export class NotFoundError extends CustomError {
       super(message, 404);
     }
 }
+
+export class NoDataError extends CustomError {
+    constructor(message = 'No Data Found') {
+      super(message, 204);
+    }
+}
   
 export class InternalServerError extends CustomError {
     constructor(message = 'Internal Server Error') {

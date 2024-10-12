@@ -31,9 +31,14 @@ export class ErrorHandler {
         notificationStore.setMessage(`Error retrieving data. Please try again.`, NotificationType.ERROR);
     }
 
-    static handleAddError<T>(userAuthToken : any, itemType : string, itemsToAdd : T[], error : Error) {
+    static handleAddError<T>(userAuthToken : any, itemType : string, itemToAdd : T, error : Error) {
         const notificationStore = useNotificationStore();
-        notificationStore.setMessage(`Error updating ${itemType}s. Please try again.`, NotificationType.ERROR);
+        notificationStore.setMessage(`Error adding ${itemType}. Please try again.`, NotificationType.ERROR);
+    }
+
+    static handleBatchAddError<T>(userAuthToken : any, itemType : string, itemsToAdd : T[], error : Error) {
+        const notificationStore = useNotificationStore();
+        notificationStore.setMessage(`Error adding ${itemType}s. Please try again.`, NotificationType.ERROR);
     }
 
     static handleUpdateError<T>(userAuthToken : any, itemType : string, itemToUpdate : T, error : Error) {
@@ -41,7 +46,12 @@ export class ErrorHandler {
         notificationStore.setMessage(`Error updating ${itemType}. Please try again.`, NotificationType.ERROR);
     }
 
-    static handleDeleteError<T>(userAuthToken : any, itemType : string, itemsToDelete : T[], error : Error) {
+    static handleDeleteError<T>(itemType : string) {
+        const notificationStore = useNotificationStore();
+        notificationStore.setMessage(`Error deleting ${itemType}s. Please try again.`, NotificationType.ERROR);
+    }
+
+    static handleBatchDeleteError<T>(itemType : string) {
         const notificationStore = useNotificationStore();
         notificationStore.setMessage(`Error deleting ${itemType}s. Please try again.`, NotificationType.ERROR);
     }

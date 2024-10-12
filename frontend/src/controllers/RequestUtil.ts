@@ -2,7 +2,7 @@ import { RequestType } from "@/models/RequestType";
 
 export class RequestUtil {
     static getAPIUrl() {
-        return import.meta.env.VITE_SERVER_API_URL ? import.meta.env.VITE_SERVER_API_URL : "";
+        return import.meta.env.VITE_SERVER_API_URL ? import.meta.env.VITE_SERVER_API_URL : "http://localhost:7500";
     }
 
     static GETRequestParams(userAuthToken : any) {

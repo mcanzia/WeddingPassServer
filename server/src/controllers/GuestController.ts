@@ -68,7 +68,7 @@ export class GuestController {
             const guest: Guest = request.body;
             await this.guestDao.createGuest(guest);
             Logger.info(`Successfully added guest for ${guest.name}`);
-            response.status(200);
+            response.status(200).send('Success');
         } catch (error) {
             Logger.error("Error adding guest", error);
             response.status((error as CustomError).statusCode).send((error as CustomError).message);
@@ -81,7 +81,7 @@ export class GuestController {
             const guests: Array<Guest> = request.body;
             await this.guestDao.batchCreateGuests(guests);
             Logger.info(`Successfully added batch guests`);
-            response.status(200);
+            response.status(200).send('Success');
         } catch (error) {
             Logger.error("Error adding batch guests", error);
             response.status((error as CustomError).statusCode).send((error as CustomError).message);
@@ -94,7 +94,7 @@ export class GuestController {
             const guestId = request.params.guestId;
             const updateGuestDetails : Guest = request.body;
             await this.guestDao.updateGuest(guestId, updateGuestDetails);
-            response.status(200).send();
+            response.status(200).send('Success');
         } catch (error) {
             Logger.error("Error updating guest", error);
             response.status((error as CustomError).statusCode).send((error as CustomError).message);
@@ -106,9 +106,21 @@ export class GuestController {
             Logger.info(`Deleting guest ${JSON.stringify(request.body)}`);
             const guest : Guest = request.body;
             await this.guestDao.deleteGuest(guest.id);
-            response.status(200).send();
+            response.status(200).send('Success');
         } catch (error) {
             Logger.error("Error deleting guest", error);
+            response.status((error as CustomError).statusCode).send((error as CustomError).message);
+        }
+    }
+
+    async batchDeleteGuests(request : Request, response : Response, next : NextFunction) {
+        try {
+            Logger.info(`Deleting guests ${JSON.stringify(request.body)}`);
+            const guests: Array<Guest> = request.body;
+            await this.guestDao.batchDeleteGuests(guests);
+            response.status(200).send('Success');
+        } catch (error) {
+            Logger.error("Error batch deleting guests", error);
             response.status((error as CustomError).statusCode).send((error as CustomError).message);
         }
     }

@@ -16,7 +16,7 @@ export class GuestService {
         try {
             const userAccessToken = await this.userStore.getAccessToken();
             const response = await this.guestController.getAllGuests(userAccessToken);
-            const allGuests = response ? JSON.parse(response) : [];
+            const allGuests = response ? response : [];
             return allGuests;
         } catch (error) {
             throw error;
@@ -33,21 +33,41 @@ export class GuestService {
         }
     }
 
-    async addGuests(guests : Array<Guest>) {
+    async addGuest(guestToAdd: Guest) {
         try {
             const userAccessToken = await this.userStore.getAccessToken();
-            const guest = await this.guestController.addGuests(userAccessToken, guests);
-            return guest;   
+            await this.guestController.addGuest(userAccessToken, guestToAdd);
+            return;
         } catch (error) {
             throw error;
         }
     }
 
-    async deleteGuests(guests : Array<Guest>) {
+    async batchAddGuests(guests : Array<Guest>) {
         try {
             const userAccessToken = await this.userStore.getAccessToken();
-            const guest = await this.guestController.deleteGuests(userAccessToken, guests);
-            return guest;
+            const guest = await this.guestController.batchAddGuests(userAccessToken, guests);
+            return;   
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    async deleteGuest(guestToDelete: Guest) {
+        try {
+            const userAccessToken = await this.userStore.getAccessToken();
+            await this.guestController.deleteGuest(userAccessToken, guestToDelete);
+            return;
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    async batchDeleteGuests(guests : Array<Guest>) {
+        try {
+            const userAccessToken = await this.userStore.getAccessToken();
+            await this.guestController.batchDeleteGuests(userAccessToken, guests);
+            return;
         } catch (error) {
             throw error;
         }

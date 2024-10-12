@@ -1,48 +1,51 @@
 <template>
     <div class="flex-1 content-center justify-center h-screen w-screen">
-    <Card class="mx-auto max-w-sm">
-        <CardHeader>
-            <CardTitle class="text-2xl">
-                {{ loginRegisterText }}
-            </CardTitle>
-            <CardDescription>
-                Enter your email below to login to your account
-            </CardDescription>
-        </CardHeader>
-        <CardContent>
-            <div class="grid gap-4">
-                <div class="grid gap-2">
-                    <Label for="email">Email</Label>
-                    <Input id="email" type="email" v-model="loginForm.email" required ref="emailInputRef"/>
-                </div>
-                <div class="grid gap-2">
-                    <div class="flex items-center">
-                        <Label for="password">Password</Label>
-                        <a @click="sendPasswordResetEmail" class="ml-auto inline-block text-sm underline cursor-pointer" v-if="!newUser">
-                            Forgot your password?
-                        </a>
-                    </div>
-                    <Input id="password" type="password" v-model="loginForm.password" required ref="passwordInputRef" />
-                </div>
-                <div class="grid gap-2" v-if="newUser">
-                    <Label for="confirm-password">Confirm Password</Label>
-                    <Input id="confirm-password" type="password" v-model="loginForm.confirmPassword" required ref="confirmPasswordInputRef" />
-                </div>
-                <Button type="submit" @click="signInOrCreateUser" class="w-full">
+        <Card class="mx-auto max-w-sm">
+            <CardHeader>
+                <CardTitle class="text-2xl">
                     {{ loginRegisterText }}
-                </Button>
-                <Button variant="outline" class="w-full" @click="googleSignIn">
-                    Login with Google
-                </Button>
-            </div>
-            <div class="mt-4 text-center text-sm">
-                {{ haveAccountText }}
-                <a @click="toggleNewUser" class="underline cursor-pointer">
-                    {{ signInText }}
-                </a>
-            </div>
-        </CardContent>
-    </Card>
+                </CardTitle>
+                <CardDescription>
+                    Enter your email below to login to your account
+                </CardDescription>
+            </CardHeader>
+            <CardContent>
+                <div class="grid gap-4">
+                    <div class="grid gap-2">
+                        <Label for="email">Email</Label>
+                        <Input id="email" type="email" v-model="loginForm.email" required ref="emailInputRef" />
+                    </div>
+                    <div class="grid gap-2">
+                        <div class="flex items-center">
+                            <Label for="password">Password</Label>
+                            <a @click="sendPasswordResetEmail"
+                                class="ml-auto inline-block text-sm underline cursor-pointer" v-if="!newUser">
+                                Forgot your password?
+                            </a>
+                        </div>
+                        <Input id="password" type="password" v-model="loginForm.password" required
+                            ref="passwordInputRef" />
+                    </div>
+                    <div class="grid gap-2" v-if="newUser">
+                        <Label for="confirm-password">Confirm Password</Label>
+                        <Input id="confirm-password" type="password" v-model="loginForm.confirmPassword" required
+                            ref="confirmPasswordInputRef" />
+                    </div>
+                    <Button type="submit" @click="signInOrCreateUser" class="w-full">
+                        {{ loginRegisterText }}
+                    </Button>
+                    <Button variant="outline" class="w-full" @click="googleSignIn">
+                        Login with Google
+                    </Button>
+                </div>
+                <div class="mt-4 text-center text-sm">
+                    {{ haveAccountText }}
+                    <a @click="toggleNewUser" class="underline cursor-pointer">
+                        {{ signInText }}
+                    </a>
+                </div>
+            </CardContent>
+        </Card>
     </div>
 </template>
 
@@ -52,7 +55,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useUserStore } from '@/stores/UserStore';
-import {ref, computed} from 'vue';
+import { ref, computed } from 'vue';
 
 const userStore = useUserStore();
 
@@ -71,7 +74,7 @@ const passwordInputRef = ref<{ inputRef: HTMLInputElement | null } | null>(null)
 const confirmPasswordInputRef = ref<{ inputRef: HTMLInputElement | null } | null>(null);
 
 const signInText = computed(() => {
-    return newUser.value ? 'Sign in' : 'Sign up'; 
+    return newUser.value ? 'Sign in' : 'Sign up';
 });
 
 const haveAccountText = computed(() => {
@@ -95,7 +98,7 @@ async function signInOrCreateUser() {
                 userStore.loginUser(loginForm.value.email, loginForm.value.password);
             }
         }
-    } catch (error : any) {
+    } catch (error: any) {
         errorMessage.value = error.message;
     }
 
@@ -106,7 +109,7 @@ async function googleSignIn() {
     errorMessage.value = '';
     try {
         await userStore.loginUserGoogle();
-    } catch (error : any) {
+    } catch (error: any) {
         errorMessage.value = error.message;
     }
 }
@@ -170,12 +173,12 @@ function validateConfirmPasswordField() {
     return true;
 }
 
-function setWarningMessage(refTarget : any, message : string) {
-  refTarget.setCustomValidity(message);
-  refTarget.reportValidity();
-  setTimeout(() => {
-    refTarget.setCustomValidity("");
-  },2000);
+function setWarningMessage(refTarget: any, message: string) {
+    refTarget.setCustomValidity(message);
+    refTarget.reportValidity();
+    setTimeout(() => {
+        refTarget.setCustomValidity("");
+    }, 2000);
 }
 
 </script>

@@ -83,7 +83,7 @@ export class PassController {
             const pass: Pass = request.body;
             await this.passDao.createPass(pass);
             Logger.info(`Successfully added pass for ${pass.name}`);
-            response.status(200);
+            response.status(200).send('Success');
         } catch (error) {
             Logger.error("Error adding pass", error);
             response.status((error as CustomError).statusCode).send((error as CustomError).message);
