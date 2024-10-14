@@ -17,11 +17,21 @@ export class GuestController {
 
     async getGuestById(userAuthToken: any, guestId: string) {
         try {
-            const requestUrl = `${RequestUtil.getAPIUrl()}/api/guests/${guestId}`;
+            const requestUrl = `${RequestUtil.getAPIUrl()}/api/guests/id/${guestId}`;
             const response = await fetch(requestUrl, RequestUtil.GETRequestParams(userAuthToken));
             return response.json();
         } catch (error: any) {
             ErrorHandler.handleGetByIdError<Guest>(userAuthToken, ObjectType.GUEST, guestId, error);
+        }
+    }
+
+    async getGuestsForEvent(userAuthToken: any, eventId: string) {
+        try {
+            const requestUrl = `${RequestUtil.getAPIUrl()}/api/guests/event/${eventId}`;
+            const response = await fetch(requestUrl, RequestUtil.GETRequestParams(userAuthToken));
+            return response.json();
+        } catch (error: any) {
+            ErrorHandler.handleGetByIdError<Guest>(userAuthToken, ObjectType.GUEST, eventId, error);
         }
     }
 
@@ -42,6 +52,17 @@ export class GuestController {
             return;
         } catch (error: any) {
             ErrorHandler.handleBatchAddError<Guest>(userAuthToken, ObjectType.GUEST, guests, error);
+        }
+    }
+
+    async updateGuest(userAuthToken: any, guest: Guest) {
+        try {
+            const requestUrl = `${RequestUtil.getAPIUrl()}/api/guests/${guest.id}`;
+            console.log('REQUEST', guest);
+            const response = await fetch(requestUrl, RequestUtil.PUTRequestParams(userAuthToken, guest));
+            return response;
+        } catch (error: any) {
+            ErrorHandler.handleUpdateError<Guest>(userAuthToken, ObjectType.GUEST, guest, error);
         }
     }
 

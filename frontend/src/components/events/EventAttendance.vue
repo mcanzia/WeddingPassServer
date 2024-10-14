@@ -8,16 +8,18 @@
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-                <DropdownMenuCheckboxItem v-for="weddingEvent in weddingEvents" :key="weddingEvent.id" class="capitalize" @update:checked="() => {openEvent(weddingEvent)}">
+                <DropdownMenuCheckboxItem v-for="weddingEvent in weddingEvents" :key="weddingEvent.id"
+                    class="capitalize" @update:checked="() => { openEvent(weddingEvent) }">
                     {{ weddingEvent.name }}
                 </DropdownMenuCheckboxItem>
             </DropdownMenuContent>
         </DropdownMenu>
+        <EventGuests :wedding-event="selectedEvent!" />
     </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { onBeforeMount, ref } from 'vue';
 import {
     DropdownMenu,
     DropdownMenuCheckboxItem,
@@ -27,38 +29,20 @@ import {
 import { Button } from '@/components/ui/button';
 import { ChevronDown } from 'lucide-vue-next';
 import { WeddingEvent } from '@/models/WeddingEvent';
+import { EventService } from '@/services/EventService';
+import EventGuests from '@/components/events/EventGuests.vue';
 
 
 const weddingEvents = ref<WeddingEvent[]>([]);
 const selectedEvent = ref<WeddingEvent | null>(null);
 
-onMounted(() => {
-    weddingEvents.value= [
-        {
-            id: '1',
-            name: 'Mehendi'
-        },
-        {
-            id: '2',
-            name: 'Haldi'
-        },
-        {
-            id: '3',
-            name: 'Sangeet'
-        },
-        {
-            id: '4',
-            name: 'Morning Ceremony'
-        },
-        {
-            id: '5',
-            name: 'Evening Ceremony'
-        },
-    ];
+onBeforeMount(async () => {
+    const eventService = new EventService();
+    weddingEvents.value = await eventService.getAllEvents();
     selectedEvent.value = weddingEvents.value[0];
 });
 
-function openEvent(wedEvent : WeddingEvent) {
+function openEvent(wedEvent: WeddingEvent) {
     selectedEvent.value = wedEvent;
 }
 </script>

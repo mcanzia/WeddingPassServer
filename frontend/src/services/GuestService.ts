@@ -33,6 +33,16 @@ export class GuestService {
         }
     }
 
+    async getGuestsForEvent(eventId : string) {
+        try {
+            const userAccessToken = await this.userStore.getAccessToken();
+            const guest = await this.guestController.getGuestsForEvent(userAccessToken, eventId);
+            return guest;
+        } catch (error) {
+            throw error;
+        }
+    }
+
     async addGuest(guestToAdd: Guest) {
         try {
             const userAccessToken = await this.userStore.getAccessToken();
@@ -48,6 +58,16 @@ export class GuestService {
             const userAccessToken = await this.userStore.getAccessToken();
             const guest = await this.guestController.batchAddGuests(userAccessToken, guests);
             return;   
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    async updateGuest(guest : Guest) {
+        try {
+            const userAccessToken = await this.userStore.getAccessToken();
+            await this.guestController.updateGuest(userAccessToken, guest);
+            return;
         } catch (error) {
             throw error;
         }

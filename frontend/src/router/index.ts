@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from "vue-router";
 import GuestList from "@/components/GuestList.vue";
 import AddGuest from "@/components/AddGuest.vue";
+import EditGuest from "@/components/EditGuest.vue";
 import Landing from "@/components/Landing.vue";
 import EventAttendance from "@/components/events/EventAttendance.vue";
 
@@ -21,6 +22,15 @@ const routes = [
          requiresAuth: true
       }
    },
+   { 
+      path: '/edit-guest/:guestId',
+      name: 'edit-guest',
+      component: EditGuest,
+      props: true,
+      meta: {
+          requiresAuth: true
+      }
+  },
    { 
       path: '/event-attendance',
       name: 'event-attendance',

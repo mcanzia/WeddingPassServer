@@ -3,7 +3,7 @@
         <Card class="mx-auto max-w-sm">
             <CardHeader>
                 <CardTitle class="text-2xl">
-                    Add Guest
+                    Editing Guest 
                 </CardTitle>
                 <CardDescription>
                     Enter guest details below
@@ -12,32 +12,28 @@
             <CardContent>
                 <div class="grid gap-4">
                     <div class="grid gap-2">
-                        <Label for="first-name">First Name</Label>
-                        <Input id="first-name" type="text" v-model="newUserForm.firstName" required />
-                    </div>
-                    <div class="grid gap-2">
-                        <Label for="last-name">Last Name</Label>
-                        <Input id="last-name" type="text" v-model="newUserForm.lastName" required />
+                        <Label for="name">Name</Label>
+                        <Input id="name" type="text" v-model="editUserForm.name" required />
                     </div>
                     <div class="grid gap-2">
                         <Label for="email">Email</Label>
-                        <Input id="email" type="email" v-model="newUserForm.email" required />
+                        <Input id="email" type="email" v-model="editUserForm.email" required />
                     </div>
                     <div class="grid gap-2">
                         <Label for="phone">Phone</Label>
-                        <Input id="phone" type="phone" v-model="newUserForm.phone" required />
+                        <Input id="phone" type="phone" v-model="editUserForm.phone" required />
                     </div>
                     <div class="grid gap-2">
                         <Label for="events">Events</Label>
                         <ToggleGroup type="multiple" variant="outline" class="grid grid-cols-2 sm:grid-cols-3 gap-2"
-                            v-model="newUserForm.events">
+                            v-model="editUserForm.events">
                             <ToggleGroupItem v-for="weddingEvent in weddingEvents" :value="weddingEvent.id!" :key="weddingEvent.id">
                                 {{ weddingEvent.name }}
                             </ToggleGroupItem>
                         </ToggleGroup>
                     </div>
                     <div class="inline-flex gap-4 justify-end">
-                        <Button @click="saveGuest">Save</Button>
+                        <Button @click="updateGuest">Save</Button>
                         <Button @click="cancel" variant="outline">Cancel</Button>
                     </div>
                 </div>
@@ -59,32 +55,53 @@ import { EventService } from '@/services/EventService';
 import { WeddingEvent } from '@/models/WeddingEvent';
 import { Guest } from '@/models/Guest';
 
+const props = defineProps<{
+    guestId: string;
+}>();
+
 const router = useRouter();
 
 onMounted(async () => {
     const eventService = new EventService();
     weddingEvents.value = await eventService.getAllEvents();
+
+    const guestService = new GuestService();
+    const editGuest = await guestService.getGuestById(props.guestId);
+
+    if (!editGuest.value) {
+        console.log('Target guest not found');
+    }
+
+    editUserForm.value.id = props.guestId;
+    editUserForm.value.name = editGuest.name;
+    editUserForm.value.email = editGuest.email;
+    editUserForm.value.phone = editGuest.phone;
+    editUserForm.value.events = editGuest.events.map((event: { id: any; }) => event.id);
 });
 
 const weddingEvents = ref<WeddingEvent[]>([]);
 
-const newUserForm = ref({
-    firstName: '',
-    lastName: '',
+const editUserForm = ref<{
+    id: string;
+    name: string;
+    email: string;
+    phone: string;
+    events: string[];
+}>({
+    id: '',
+    name: '',
     email: '',
     phone: '',
     events: []
 });
 
-async function saveGuest() {
-    const newGuest : Guest = {
-        name: `${newUserForm.value.firstName} ${newUserForm.value.lastName}`,
-        email: newUserForm.value.email,
-        phone: newUserForm.value.phone,
-        events: newUserForm.value.events.map(eventId => weddingEvents.value.find(wedEvent => wedEvent.id === eventId) as WeddingEvent)
+async function updateGuest() {
+    const updatedGuestDetails : Guest = {
+        ...editUserForm.value,
+        events: editUserForm.value.events.map(eventId => weddingEvents.value.find(wedEvent => wedEvent.id === eventId) as WeddingEvent)
     }
     const guestService = new GuestService();
-    await guestService.addGuest(newGuest);
+    await guestService.updateGuest(updatedGuestDetails);
     router.push('/guests');
 }
 

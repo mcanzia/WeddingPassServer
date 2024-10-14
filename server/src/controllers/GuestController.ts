@@ -62,6 +62,18 @@ export class GuestController {
         }
     }
 
+    async getGuestsForEvent(request : Request, response : Response, next : NextFunction) {
+        try {
+            Logger.info(`Retrieving guests for event: ${request.params.eventId}`);
+            const eventId : string = request.params.eventId;
+            const guests : Array<Guest> = await this.guestDao.getGuestsForEvent(eventId);
+            response.status(200).json(guests);
+        } catch (error) {
+            Logger.error(`Error retrieving guests for ${request.params.eventId}`);
+            response.status((error as CustomError).statusCode).send((error as CustomError).message);
+        }
+    }
+
     async createGuest(request : Request, response : Response, next : NextFunction) {
         try {
             Logger.info(`Creating new guest`);

@@ -8,6 +8,7 @@
             <ConfirmAction alert-title="Do you want to delete these guests?" @on-confirm="deleteGuests" v-if="showDeleteButton">
                 <Button variant="destructive">Delete Selected Guests</Button>
             </ConfirmAction>
+            <Button variant="secondary" @click="goToEditGuest" v-if="showEditButton">Edit Selected Guest</Button>
             <DropdownMenu>
                 <DropdownMenuTrigger as-child>
                     <Button variant="outline" class="ml-auto">
@@ -123,10 +124,11 @@ import { onBeforeMount } from 'vue';
 import EventCircle from '@/components/data-table/EventCircle.vue';
 import { useRouter } from 'vue-router';
 import ConfirmAction from '@/components/data-table/ConfirmAction.vue';
+import { WeddingEvent } from '@/models/WeddingEvent';
 
 const guestService = new GuestService();
 const router = useRouter();
-const data = ref([]);
+const data = ref<Guest[]>([]);
 
 onBeforeMount(async () => {
     data.value = await guestService.getAllGuests();
@@ -187,9 +189,9 @@ const columns: ColumnDef<Guest>[] = [
             }, () => ['Events', h(ArrowUpDown, { class: 'ml-2 h-4 w-4' })]);
         },
         cell: ({ row }) => {
-            const events: string[] = row.getValue('events') || [];
-            const circles = events.map(eventName =>
-                h(EventCircle, { eventName, key: eventName })
+            const events: WeddingEvent[] = row.getValue('events') || [];
+            const circles = events.map(event =>
+                h(EventCircle, { event, key: event.id })
             );
             return h('div', { class: 'flex gap-1' }, circles);
         },
@@ -228,15 +230,23 @@ const showDeleteButton = computed(() => {
     return Object.keys(rowSelection.value).length > 0;
 });
 
+const showEditButton = computed(() => {
+    return Object.keys(rowSelection.value).length === 1;
+});
+
 function goToAddGuest() {
     router.push('/add-guest');
+}
+
+function goToEditGuest() {
+    const guestId = data.value.at(Number(Object.keys(rowSelection.value)))!.id;
+    router.push({ name: 'edit-guest', params: { guestId: guestId } });
 }
 
 async function deleteGuests() {
     const guestsToDelete = data.value.filter((row, idx) => Object.keys(rowSelection.value).includes(idx.toString()));
     await guestService.batchDeleteGuests(guestsToDelete);
     await guestService.getAllGuests();
-    console.log('GUESTS DELETE SUCCESSFULLY');
 }
 
 

@@ -3,12 +3,12 @@
         <Tooltip>
             <TooltipTrigger>
                 <span :class="['inline-flex items-center justify-center w-6 h-6 rounded-full', colorClass]"
-                    :title="eventName">
+                    :title="event.name">
                     <span class="text-center text-white font-semibold">{{ eventNameInitial }}</span>
                 </span>
             </TooltipTrigger>
             <TooltipContent>
-                <p>{{ eventName }}</p>
+                <p>{{ event.name }}</p>
             </TooltipContent>
         </Tooltip>
     </TooltipProvider>
@@ -23,17 +23,18 @@ import {
   TooltipProvider,
   TooltipTrigger
 } from '@/components/ui/tooltip'
+import { WeddingEvent } from '@/models/WeddingEvent';
 
 const props = defineProps<{
-    eventName: string;
+    event: WeddingEvent;
 }>();
 
 const colorClass = computed(() => {
-    return eventColorMap[props.eventName] || 'bg-gray-500';
+    return eventColorMap[props.event.name] || 'bg-gray-500';
 });
 
 const eventNameInitial = computed(() => {
-    return props.eventName.charAt(0).toLocaleUpperCase();
+    return props.event.name.charAt(0).toLocaleUpperCase();
 });
 </script>
 
