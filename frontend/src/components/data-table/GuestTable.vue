@@ -1,31 +1,48 @@
 <template>
     <div class="w-full">
-        <div class="flex gap-2 items-center py-4">
-            <Input class="max-w-sm" placeholder="Filter guests..."
-                :model-value="table.getColumn('name')?.getFilterValue() as string"
-                @update:model-value=" table.getColumn('name')?.setFilterValue($event)" />
-            <Button variant="outline" @click="goToAddGuest">Add Guest</Button>
-            <ConfirmAction alert-title="Do you want to delete these guests?" @on-confirm="deleteGuests" v-if="showDeleteButton">
-                <Button variant="destructive">Delete Selected Guests</Button>
-            </ConfirmAction>
-            <Button variant="secondary" @click="goToEditGuest" v-if="showEditButton">Edit Selected Guest</Button>
-            <DropdownMenu>
-                <DropdownMenuTrigger as-child>
-                    <Button variant="outline" class="ml-auto">
-                        Columns
-                        <ChevronDown class="ml-2 h-4 w-4" />
+        <div class="flex flex-col md:flex-row gap-2 items-center py-4">
+            <div class="flex flex-1 gap-2 items-center w-full">
+                <Input class="w-full md:max-w-sm" placeholder="Filter guests..."
+                    :model-value="table.getColumn('name')?.getFilterValue() as string"
+                    @update:model-value="table.getColumn('name')?.setFilterValue($event)" />
+
+                <DropdownMenu>
+                    <DropdownMenuTrigger as-child>
+                        <Button variant="outline" class="w-full md:w-auto">
+                            Columns
+                            <ChevronDown class="ml-2 h-4 w-4" />
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                        <DropdownMenuCheckboxItem
+                            v-for="column in table.getAllColumns().filter((column) => column.getCanHide())"
+                            :key="column.id" class="capitalize" :checked="column.getIsVisible()" @update:checked="(value: any) => {
+                                column.toggleVisibility(!!value);
+                            }">
+                            {{ column.id }}
+                        </DropdownMenuCheckboxItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+            </div>
+
+            <div class="flex gap-2 items-center mt-2 md:mt-0 w-full md:w-auto">
+                <Button variant="outline" class="w-full md:w-auto" @click="goToAddGuest">
+                    Add Guest
+                </Button>
+
+                <ConfirmAction alert-title="Do you want to delete these guests?" @on-confirm="deleteGuests"
+                    v-if="showDeleteButton">
+                    <Button variant="destructive" class="w-full md:w-auto">
+                        Delete Selected Guests
                     </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                    <DropdownMenuCheckboxItem
-                        v-for="column in table.getAllColumns().filter((column) => column.getCanHide())" :key="column.id"
-                        class="capitalize" :checked="column.getIsVisible()" @update:checked="(value: any) => {
-                            column.toggleVisibility(!!value)
-                        }">
-                        {{ column.id }}
-                    </DropdownMenuCheckboxItem>
-                </DropdownMenuContent>
-            </DropdownMenu>
+                </ConfirmAction>
+            </div>
+
+            <div class="flex items-center mt-2 md:mt-0 w-full md:w-auto">
+                <Button variant="secondary" class="w-full md:w-auto" @click="goToEditGuest" v-if="showEditButton">
+                    Edit Selected Guest
+                </Button>
+            </div>
         </div>
         <div class="rounded-md border">
             <Table>

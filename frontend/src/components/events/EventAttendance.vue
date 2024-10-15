@@ -19,7 +19,7 @@
 </template>
 
 <script setup lang="ts">
-import { onBeforeMount, ref } from 'vue';
+import { onBeforeMount, ref, watch } from 'vue';
 import {
     DropdownMenu,
     DropdownMenuCheckboxItem,
@@ -31,7 +31,10 @@ import { ChevronDown } from 'lucide-vue-next';
 import { WeddingEvent } from '@/models/WeddingEvent';
 import { EventService } from '@/services/EventService';
 import EventGuests from '@/components/events/EventGuests.vue';
+import { useRouter, useRoute } from 'vue-router';
 
+const router = useRouter();
+const route = useRoute();
 
 const weddingEvents = ref<WeddingEvent[]>([]);
 const selectedEvent = ref<WeddingEvent | null>(null);
@@ -39,10 +42,40 @@ const selectedEvent = ref<WeddingEvent | null>(null);
 onBeforeMount(async () => {
     const eventService = new EventService();
     weddingEvents.value = await eventService.getAllEvents();
-    selectedEvent.value = weddingEvents.value[0];
+
+    const eventIdFromRoute = route.query.event as string;
+
+    if (eventIdFromRoute) {
+        const event = weddingEvents.value.find(event => event.id === eventIdFromRoute);
+        initializeEvent(event);
+    } else {
+        selectedEvent.value = weddingEvents.value[0];
+        router.replace({ path: '/event-attendance', query: { event: selectedEvent.value.id } });
+    }
+    openEvent(weddingEvents.value[0])
 });
+
+watch(
+    () => route.query.event,
+    (newEventId, oldEventId) => {
+        if (newEventId !== oldEventId) {
+            const event : WeddingEvent | undefined = weddingEvents.value.find(event => event.id === newEventId);
+            initializeEvent(event);
+        }
+    }
+);
+
+function initializeEvent(event : WeddingEvent | undefined) {
+    if (event) {
+        selectedEvent.value = event;
+    } else {
+        selectedEvent.value = weddingEvents.value[0];
+        router.replace({ path: '/event-attendance', query: { event: selectedEvent.value.id } });
+    }
+}
 
 function openEvent(wedEvent: WeddingEvent) {
     selectedEvent.value = wedEvent;
+    router.push({ path: '/event-attendance', query: { event: wedEvent.id } });
 }
 </script>
