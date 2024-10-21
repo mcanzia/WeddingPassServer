@@ -1,7 +1,7 @@
 export const eventColorMap: Record<string, string> = {
-    'Mehendi': 'bg-blue-500',
-    'Haldi': 'bg-green-500',
-    'Sangeet': 'bg-yellow-500',
-    'Morning Ceremony': 'bg-purple-500',
-    'Evening Ceremony': 'bg-red-500',
+    'Mehendi': 'bg-red-500',
+    'Haldi': 'bg-[#FEB84B]',
+    'Sangeet': 'bg-[#053C88]',
+    'Morning Ceremony': 'bg-[#008A48]',
+    'Evening Ceremony': 'bg-[#C37962]',
   };

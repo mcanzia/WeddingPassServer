@@ -142,9 +142,14 @@ import EventCircle from '@/components/data-table/EventCircle.vue';
 import { useRouter } from 'vue-router';
 import ConfirmAction from '@/components/data-table/ConfirmAction.vue';
 import { WeddingEvent } from '@/models/WeddingEvent';
+import { useNotificationStore } from '@/stores/NotificationStore';
+import { NotificationType } from '@/models/NotificationType';
 
 const guestService = new GuestService();
 const router = useRouter();
+const notificationStore = useNotificationStore();
+const {setMessage} = notificationStore;
+
 const data = ref<Guest[]>([]);
 
 onBeforeMount(async () => {
@@ -263,6 +268,7 @@ function goToEditGuest() {
 async function deleteGuests() {
     const guestsToDelete = data.value.filter((row, idx) => Object.keys(rowSelection.value).includes(idx.toString()));
     await guestService.batchDeleteGuests(guestsToDelete);
+    setMessage('Deleted user.', NotificationType.SUCCESS);
     await guestService.getAllGuests();
 }
 

@@ -26,7 +26,7 @@ export class ErrorHandler {
         
     }
 
-    static handleGetByIdError<T>(userAuthToken : any, itemType : string, itemId : string, error : Error) {
+    static handleGetByIdError() {
         const notificationStore = useNotificationStore();
         notificationStore.setMessage(`Error retrieving data. Please try again.`, NotificationType.ERROR);
     }
@@ -41,7 +41,7 @@ export class ErrorHandler {
         notificationStore.setMessage(`Error adding ${itemType}s. Please try again.`, NotificationType.ERROR);
     }
 
-    static handleUpdateError<T>(userAuthToken : any, itemType : string, itemToUpdate : T, error : Error) {
+    static handleUpdateError(itemType : string) {
         const notificationStore = useNotificationStore();
         notificationStore.setMessage(`Error updating ${itemType}. Please try again.`, NotificationType.ERROR);
     }
@@ -54,5 +54,10 @@ export class ErrorHandler {
     static handleBatchDeleteError<T>(itemType : string) {
         const notificationStore = useNotificationStore();
         notificationStore.setMessage(`Error deleting ${itemType}s. Please try again.`, NotificationType.ERROR);
+    }
+
+    static handleGuestUploadError() {
+        const notificationStore = useNotificationStore();
+        notificationStore.setMessage(`Error uploading guests. Please try again.`, NotificationType.ERROR);
     }
 }

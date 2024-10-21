@@ -92,4 +92,14 @@ export class GuestService {
             throw error;
         }
     }
+
+    async guestFileUpload(guestFile : File) {
+        try {
+            const userAccessToken = await this.userStore.getAccessToken();
+            const guestValidation = await this.guestController.guestFileUpload(userAccessToken, guestFile);
+            return {...guestValidation, uploadIssues: new Map(Object.entries(guestValidation.uploadIssues))};
+        } catch (error) {
+            throw error;
+        }
+    }
 }

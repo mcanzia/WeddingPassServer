@@ -1,7 +1,11 @@
 import { defineStore } from 'pinia'
-import { auth, db, doc, getDoc } from '@/firebase';
+import { auth } from '@/firebase';
 import { ErrorHandler } from '@/util/error/ErrorHandler';
 import { SuccessHandler } from '@/util/SuccessHandler';
+import { AuthService } from '@/services/AuthService';
+import { Roles } from '@/models/Roles';
+import { Role } from '@/models/Role';
+import { toRaw } from 'vue';
 
 interface IUserState {
   user : any,
@@ -19,8 +23,17 @@ export const useUserStore = defineStore('userStore', {
     actions: {
       async initalizeAuthListener() {
         this.isLoading = true;
-        await auth.onAuthStateChanged(authUser => {
+        await auth.onAuthStateChanged(async authUser => {
           this.user = authUser ? authUser : null;
+          if (this.user) {
+            const authService = new AuthService();
+            // const roles = this.user.reloadUserInfo.customAttributes ? JSON.parse(this.user.reloadUserInfo.customAttributes) : null;
+            const roles = await authService.getUserRoles(this.user.uid);
+            console.log('USER ROLES', roles);
+            if (!roles || !roles.role) {
+              await authService.setUserRole(this.user.uid, new Role(Roles.ADMIN));
+            }
+          }
           setTimeout(() => {
             this.isLoading = false;
           }, 1000);
@@ -36,7 +49,8 @@ export const useUserStore = defineStore('userStore', {
       },
       async registerUser(email : string, password : string) {
         try {
-          await auth.createUserWithEmailAndPassword(auth, email, password);
+          const registeredUser = await auth.createUserWithEmailAndPassword(auth, email, password);
+          console.log(registeredUser);
         } catch (error : any) {
           ErrorHandler.handleUserAuthError(this.user, error);
         }

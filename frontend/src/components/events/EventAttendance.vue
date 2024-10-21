@@ -7,11 +7,11 @@
                     <ChevronDown class="ml-2 h-4 w-4" />
                 </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-                <DropdownMenuCheckboxItem v-for="weddingEvent in weddingEvents" :key="weddingEvent.id"
-                    class="capitalize" @update:checked="() => { openEvent(weddingEvent) }">
+            <DropdownMenuContent>
+                <DropdownMenuItem v-for="weddingEvent in weddingEvents" :key="weddingEvent.id"
+                    class="capitalize" @click="() => { openEvent(weddingEvent) }">
                     {{ weddingEvent.name }}
-                </DropdownMenuCheckboxItem>
+                </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>
         <EventGuests :wedding-event="selectedEvent!" />
@@ -22,7 +22,7 @@
 import { onBeforeMount, ref, watch } from 'vue';
 import {
     DropdownMenu,
-    DropdownMenuCheckboxItem,
+    DropdownMenuItem,
     DropdownMenuContent,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';

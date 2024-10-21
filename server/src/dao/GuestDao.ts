@@ -6,6 +6,7 @@ import { injectable } from 'inversify';
 import { Guest } from '../models/Guest';
 import { WeddingEvent } from '../models/WeddingEvent';
 import { CollectionReference, DocumentData, QuerySnapshot, QueryDocumentSnapshot } from 'firebase-admin/firestore';
+import validator from 'validator';
 
 @injectable()
 export class GuestDao {
@@ -58,7 +59,7 @@ export class GuestDao {
             const snapshot: QuerySnapshot<DocumentData> = await this.guestsCollection.get();
 
             if (snapshot.empty) {
-                throw new NoDataError('No guests found.');
+                return [];
             }
 
             const guests: Array<Guest> = [];
@@ -101,8 +102,8 @@ export class GuestDao {
             });
 
             return guests;
-        } catch (error) {
-            throw error;
+        } catch (error : any) {
+            throw new CustomError(error.message, error.statusCode);
         }
     }
 
@@ -211,6 +212,10 @@ export class GuestDao {
 
             const newGuestRef = this.guestsCollection.doc();
             guest.id = newGuestRef.id;
+            guest.name = validator.escape(guest.name.trim());
+            guest.email = validator.escape(guest.email.trim());
+            guest.phone = validator.escape(guest.phone.trim());
+            guest.attendingEvents = [];
 
             const newGuest = guest.toObject ? { ...guest.toObject(), events: validatedEvents } : { ...guest, events: validatedEvents };
 
@@ -272,6 +277,10 @@ export class GuestDao {
                 batchGuests.forEach(guest => {
                     const newGuestRef = this.guestsCollection.doc();
                     guest.id = newGuestRef.id;
+                    guest.name = validator.escape(guest.name.trim());
+                    guest.email = validator.escape(guest.email.trim());
+                    guest.phone = validator.escape(guest.phone.trim());
+                    guest.attendingEvents = [];
                     batch.set(newGuestRef, guest);
                 });
 
@@ -292,7 +301,10 @@ export class GuestDao {
             }
 
             const updatedData = { 
-                ...updatedGuest, 
+                ...updatedGuest,
+                name: validator.escape(updatedGuest.name.trim()),
+                email: validator.escape(updatedGuest.email.trim()),
+                phone: validator.escape(updatedGuest.phone.trim()),
                 events: updatedGuest.events.map(event => event.id), 
                 attendingEvents: updatedGuest.attendingEvents?.map(event => event.id) 
             };

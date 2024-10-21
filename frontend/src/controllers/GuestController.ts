@@ -21,7 +21,7 @@ export class GuestController {
             const response = await fetch(requestUrl, RequestUtil.GETRequestParams(userAuthToken));
             return response.json();
         } catch (error: any) {
-            ErrorHandler.handleGetByIdError<Guest>(userAuthToken, ObjectType.GUEST, guestId, error);
+            ErrorHandler.handleGetByIdError();
         }
     }
 
@@ -31,7 +31,7 @@ export class GuestController {
             const response = await fetch(requestUrl, RequestUtil.GETRequestParams(userAuthToken));
             return response.json();
         } catch (error: any) {
-            ErrorHandler.handleGetByIdError<Guest>(userAuthToken, ObjectType.GUEST, eventId, error);
+            ErrorHandler.handleGetByIdError();
         }
     }
 
@@ -62,7 +62,7 @@ export class GuestController {
             const response = await fetch(requestUrl, RequestUtil.PUTRequestParams(userAuthToken, guest));
             return response;
         } catch (error: any) {
-            ErrorHandler.handleUpdateError<Guest>(userAuthToken, ObjectType.GUEST, guest, error);
+            ErrorHandler.handleUpdateError(ObjectType.GUEST);
         }
     }
 
@@ -83,6 +83,17 @@ export class GuestController {
             return response;
         } catch (error: any) {
             ErrorHandler.handleBatchDeleteError<Guest>(ObjectType.GUEST);
+        }
+    }
+
+    async guestFileUpload(userAuthToken: any, file: File) {
+        try {
+            const requestUrl = `${RequestUtil.getAPIUrl()}/api/guests/upload`;
+            const response = await fetch(requestUrl, RequestUtil.FileRequestParams(userAuthToken, file));
+            return response.json();
+        } catch (error: any) {
+            console.log('SHOW ME ERROR', error);
+            ErrorHandler.handleGuestUploadError();
         }
     }
 }

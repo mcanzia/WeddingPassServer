@@ -1,15 +1,14 @@
 import multer from 'multer';
 import path from 'path';
-import { CustomError } from './error/CustomError';
+import { CustomError } from '../error/CustomError';
 
 const storage = multer.memoryStorage();
 
 const fileFilter = (req: Express.Request, file: Express.Multer.File, callback: multer.FileFilterCallback) => {
     const filetypes = /csv|xlsx|xls/;
     const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
-    const mimetype = filetypes.test(file.mimetype);
 
-    if (extname && mimetype) {
+    if (extname) {
         return callback(null, true);
     } else {
         callback(new CustomError('Only CSV and Excel files are allowed!'));

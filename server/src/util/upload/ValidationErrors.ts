@@ -1,0 +1,8 @@
+export const NAME_MISSING = "Name field is empty.";
+export const NAME_TOO_LONG = "Name field must be less than 50 characters.";
+export const EMAIL_MISSING = "Email field is empty.";
+export const EMAIL_TOO_LONG = "Email field must be less than 50 characters.";
+export const EMAIL_BAD_FORMAT = "Email field has incorrect format (test@example.com).";
+export const PHONE_TOO_LONG = "Phone field must be less than 50 characters.";
+export const DUPLICATE_GUEST = "A guest with this name already exists.";
+export const MISSING_EVENT = "A guest must be invited to at least one event.";

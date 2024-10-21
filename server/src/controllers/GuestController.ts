@@ -6,6 +6,7 @@ import { CustomError } from '../util/error/CustomError';
 import { GuestDao } from '../dao/GuestDao';
 import { TYPES } from '../configs/types';
 import { GuestService } from '../services/GuestService';
+import { UploadValidation } from '../models/UploadValidation';
 
 @injectable()
 export class GuestController {
@@ -159,26 +160,24 @@ export class GuestController {
                 guests = await this.guestService.parseExcel(fileBuffer);
             } else {
                 Logger.error('Unsupported file format.');
-                return response.status(400).json({ error: 'Unsupported file format.' });
+                return response.status(415).json({ error: 'Unsupported file format.' });
             }
 
             if (guests.length === 0) {
                 Logger.error('No guest data found in the file.');
-                return response.status(400).json({ error: 'No guest data found in the file.' });
+                return response.status(422).json({ error: 'No guest data found in the file.' });
             }
 
-            const validGuests = this.guestService.validateGuests(guests);
-            if (validGuests.length === 0) {
+            const validation : UploadValidation = await this.guestService.validateGuests(guests);
+            if (validation.validatedGuests.length === 0 && validation.uploadIssues.size === 0) {
                 Logger.error('No valid guest data to upload.');
-                return response.status(400).json({ error: 'No valid guest data to upload.' });
+                return response.status(422).json({ error: 'No valid guest data to upload.' });
             }
 
-            await this.guestDao.batchCreateGuests(validGuests);
-
-            Logger.info(`Successfully uploaded ${validGuests.length} guests.`);
-            response.status(200).json({ message: `Successfully uploaded ${validGuests.length} guests.` });
+            Logger.info(`Successfully validated ${validation.validatedGuests.length + validation.uploadIssues.size} guests.`); 
+            response.status(200).json({...validation, uploadIssues: Object.fromEntries(validation.uploadIssues)});
         } catch (error) {
-            Logger.error("Error uploading guests", error);
+            Logger.error("Error validating guests", error);
             if (error instanceof CustomError) {
                 response.status(error.statusCode).send(error.message);
             } else {

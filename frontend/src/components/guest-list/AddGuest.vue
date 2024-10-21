@@ -58,8 +58,12 @@ import { GuestService } from '@/services/GuestService';
 import { EventService } from '@/services/EventService';
 import { WeddingEvent } from '@/models/WeddingEvent';
 import { Guest } from '@/models/Guest';
+import { useNotificationStore } from '@/stores/NotificationStore';
+import { NotificationType } from '@/models/NotificationType';
 
 const router = useRouter();
+const notificationStore = useNotificationStore();
+const {setMessage} = notificationStore;
 
 onMounted(async () => {
     const eventService = new EventService();
@@ -81,10 +85,12 @@ async function saveGuest() {
         name: `${newUserForm.value.firstName} ${newUserForm.value.lastName}`,
         email: newUserForm.value.email,
         phone: newUserForm.value.phone,
+        attendingEvents: [],
         events: newUserForm.value.events.map(eventId => weddingEvents.value.find(wedEvent => wedEvent.id === eventId) as WeddingEvent)
     }
     const guestService = new GuestService();
     await guestService.addGuest(newGuest);
+    setMessage('Added user.', NotificationType.SUCCESS);
     router.push('/guests');
 }
 

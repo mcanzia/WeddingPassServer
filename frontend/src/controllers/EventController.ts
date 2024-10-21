@@ -21,7 +21,7 @@ export class EventController {
             const response = await fetch(requestUrl, RequestUtil.GETRequestParams(userAuthToken));
             return response.json();
         } catch (error: any) {
-            ErrorHandler.handleGetByIdError<WeddingEvent>(userAuthToken, ObjectType.EVENT, eventId, error);
+            ErrorHandler.handleGetByIdError();
         }
     }
 

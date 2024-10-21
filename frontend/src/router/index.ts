@@ -1,15 +1,24 @@
 import { createRouter, createWebHistory } from "vue-router";
-import GuestList from "@/components/GuestList.vue";
-import AddGuest from "@/components/AddGuest.vue";
-import EditGuest from "@/components/EditGuest.vue";
+import GuestList from "@/components/guest-list/GuestList.vue";
+import AddGuest from "@/components/guest-list/AddGuest.vue";
+import EditGuest from "@/components/guest-list/EditGuest.vue";
 import Landing from "@/components/Landing.vue";
 import EventAttendance from "@/components/events/EventAttendance.vue";
+import GuestUpload from "@/components/guest-list/GuestUpload.vue";
 
 const routes = [
     { 
       path: '/guests',
       name: 'guests',
       component: GuestList,
+      meta: {
+         requiresAuth: true
+      }
+   },
+   { 
+      path: '/guests-upload',
+      name: 'guests-upload',
+      component: GuestUpload,
       meta: {
          requiresAuth: true
       }

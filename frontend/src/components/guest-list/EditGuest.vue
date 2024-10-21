@@ -54,12 +54,16 @@ import { GuestService } from '@/services/GuestService';
 import { EventService } from '@/services/EventService';
 import { WeddingEvent } from '@/models/WeddingEvent';
 import { Guest } from '@/models/Guest';
+import { useNotificationStore } from '@/stores/NotificationStore';
+import { NotificationType } from '@/models/NotificationType';
 
 const props = defineProps<{
     guestId: string;
 }>();
 
 const router = useRouter();
+const notificationStore = useNotificationStore();
+const {setMessage} = notificationStore;
 
 onMounted(async () => {
     const eventService = new EventService();
@@ -68,7 +72,7 @@ onMounted(async () => {
     const guestService = new GuestService();
     const editGuest = await guestService.getGuestById(props.guestId);
 
-    if (!editGuest.value) {
+    if (!editGuest) {
         console.log('Target guest not found');
     }
 
@@ -76,6 +80,7 @@ onMounted(async () => {
     editUserForm.value.name = editGuest.name;
     editUserForm.value.email = editGuest.email;
     editUserForm.value.phone = editGuest.phone;
+    editUserForm.value.attendingEvents = editGuest.attendingEvents;
     editUserForm.value.events = editGuest.events.map((event: { id: any; }) => event.id);
 });
 
@@ -87,12 +92,14 @@ const editUserForm = ref<{
     email: string;
     phone: string;
     events: string[];
+    attendingEvents: WeddingEvent[]
 }>({
     id: '',
     name: '',
     email: '',
     phone: '',
-    events: []
+    events: [],
+    attendingEvents: []
 });
 
 async function updateGuest() {
@@ -102,6 +109,7 @@ async function updateGuest() {
     }
     const guestService = new GuestService();
     await guestService.updateGuest(updatedGuestDetails);
+    setMessage('Updated user.', NotificationType.SUCCESS);
     router.push('/guests');
 }
 

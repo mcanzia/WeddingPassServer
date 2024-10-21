@@ -24,8 +24,10 @@ export const useNotificationStore = defineStore('notificationStore', {
                 }
             }
         },
-        resetMessage() {
+        resetError() {
             this.errorMessage = null;
+        },
+        resetSuccess() {
             this.successMessage = null;
         }
     }

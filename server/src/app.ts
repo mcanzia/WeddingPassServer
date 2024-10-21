@@ -28,8 +28,9 @@ app.use(limiter);
 // User Authorization
 app.use(async (request : Request, response : Response, next : NextFunction) => {
   try {
-    const userUID = await AuthServiceImpl.validateAuthToken(request.headers.authorization)
-    response.locals.userAuth = userUID;
+    const userDetails = await AuthServiceImpl.validateAuthToken(request.headers.authorization)
+    response.locals.userAuth = userDetails.uid;
+    response.locals.userRole = userDetails.role;
     next();
   } catch(error) {
     Logger.error("Authorization attempt failed");
@@ -42,10 +43,6 @@ app.use(express.static(path.join(__dirname, '../public')));
 
 //Routes Definitions
 app.use('/api', routes);
-
-app.get('/upload', (req, res) => {
-  res.sendFile(path.join(__dirname, '../public/upload.html'));
-});
 
 //Error Handling
 app.use((error : CustomError, request : Request, response : Response, next : NextFunction) => {

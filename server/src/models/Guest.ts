@@ -3,7 +3,7 @@ import { WeddingEvent } from "./WeddingEvent";
 export class Guest {
 
     id: string;
-    serialNumber: string;
+    serialNumber?: string;
     name: string;
     email: string;
     phone: string;
