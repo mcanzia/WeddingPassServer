@@ -3,7 +3,7 @@
         <Card class="mx-auto max-w-sm">
             <CardHeader>
                 <CardTitle class="text-2xl">
-                    Editing Guest 
+                    Editing Guest
                 </CardTitle>
                 <CardDescription>
                     Enter guest details below
@@ -27,7 +27,8 @@
                         <Label for="events">Events</Label>
                         <ToggleGroup type="multiple" variant="outline" class="grid grid-cols-2 sm:grid-cols-3 gap-2"
                             v-model="editUserForm.events">
-                            <ToggleGroupItem v-for="weddingEvent in weddingEvents" :value="weddingEvent.id!" :key="weddingEvent.id">
+                            <ToggleGroupItem v-for="weddingEvent in weddingEvents" :value="weddingEvent.id!"
+                                :key="weddingEvent.id">
                                 {{ weddingEvent.name }}
                             </ToggleGroupItem>
                         </ToggleGroup>
@@ -56,6 +57,9 @@ import { WeddingEvent } from '@/models/WeddingEvent';
 import { Guest } from '@/models/Guest';
 import { useNotificationStore } from '@/stores/NotificationStore';
 import { NotificationType } from '@/models/NotificationType';
+import { useUserStore } from '@/stores/UserStore';
+import { ErrorHandler } from '@/util/error/ErrorHandler';
+import { storeToRefs } from 'pinia';
 
 const props = defineProps<{
     guestId: string;
@@ -63,7 +67,9 @@ const props = defineProps<{
 
 const router = useRouter();
 const notificationStore = useNotificationStore();
-const {setMessage} = notificationStore;
+const { setMessage } = notificationStore;
+const userStore = useUserStore();
+const { hasEditAuthority } = storeToRefs(userStore);
 
 onMounted(async () => {
     const eventService = new EventService();
@@ -103,14 +109,20 @@ const editUserForm = ref<{
 });
 
 async function updateGuest() {
-    const updatedGuestDetails : Guest = {
-        ...editUserForm.value,
-        events: editUserForm.value.events.map(eventId => weddingEvents.value.find(wedEvent => wedEvent.id === eventId) as WeddingEvent)
+    if (hasEditAuthority) {
+        const updatedGuestDetails: Guest = {
+            ...editUserForm.value,
+            events: editUserForm.value.events.map(eventId => weddingEvents.value.find(wedEvent => wedEvent.id === eventId) as WeddingEvent)
+        }
+        const guestService = new GuestService();
+        await guestService.updateGuest(updatedGuestDetails);
+        setMessage('Updated user.', NotificationType.SUCCESS);
+        router.push('/guests');
+    } else {
+        ErrorHandler.handleAuthorizationError();
+        cancel();
     }
-    const guestService = new GuestService();
-    await guestService.updateGuest(updatedGuestDetails);
-    setMessage('Updated user.', NotificationType.SUCCESS);
-    router.push('/guests');
+
 }
 
 function cancel() {

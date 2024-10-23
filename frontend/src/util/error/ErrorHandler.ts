@@ -19,6 +19,11 @@ export class ErrorHandler {
         }
 
     }
+
+    static handleAuthorizationError() {
+        const notificationStore = useNotificationStore();
+        notificationStore.setMessage("You don't access to perform this action.", NotificationType.ERROR);
+    }
     
     static handleGetAllError<T>(userAuthToken : any, itemType : string, error : Error) {
         const notificationStore = useNotificationStore();

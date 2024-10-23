@@ -5,7 +5,7 @@
                 <p class="text-sm font-medium leading-none">
                     {{ guest.name }}
                 </p>
-                <div class="justify-self-end">
+                <div :class="cn('justify-self-end', {'pointer-events-none': !hasEditAuthority})">
                     <ConfirmAction 
                         alert-title="Do you want to remove Attending status for this guest?" 
                         @on-confirm="removeAttending"
@@ -25,11 +25,15 @@
 </template>
 
 <script setup lang="ts">
+import { cn } from '@/lib/utils';
 import { Card, CardContent } from '@/components/ui/card';
 import { Guest } from '@/models/Guest';
 import { Badge } from '@/components/ui/badge'
 import ConfirmAction from '@/components/data-table/ConfirmAction.vue';
 import { computed } from 'vue';
+import { useUserStore } from '@/stores/UserStore';
+import { ErrorHandler } from '@/util/error/ErrorHandler';
+import { storeToRefs } from 'pinia';
 
 const props = defineProps<{
     guest?: Guest;
@@ -37,6 +41,9 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits(['addAttending', 'removeAttending']);
+
+const userStore = useUserStore();
+const {hasEditAuthority} = storeToRefs(userStore);
 
 const isAttending = computed(() => {
     return props.attendingEvent;
@@ -47,11 +54,19 @@ const attendingText = computed(() => {
 });
 
 function addAttending() {
-    emit('addAttending');
+    if (hasEditAuthority) {
+        emit('addAttending');
+    } else {
+        ErrorHandler.handleAuthorizationError();
+    }
 }
 
 function removeAttending() {
-    emit('removeAttending');
+    if (hasEditAuthority) {
+        emit('removeAttending');
+    } else {
+        ErrorHandler.handleAuthorizationError();
+    }
 }
 
 </script>

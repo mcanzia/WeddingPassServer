@@ -5,56 +5,57 @@ import EditGuest from "@/components/guest-list/EditGuest.vue";
 import Landing from "@/components/Landing.vue";
 import EventAttendance from "@/components/events/EventAttendance.vue";
 import GuestUpload from "@/components/guest-list/GuestUpload.vue";
+import { Roles } from "@/models/Roles";
+import { useUserStore } from "@/stores/UserStore";
+import { ErrorHandler } from "@/util/error/ErrorHandler";
+import { auth } from "@/firebase";
 
 const routes = [
-    { 
+   {
       path: '/guests',
       name: 'guests',
       component: GuestList,
       meta: {
-         requiresAuth: true
+         allowedRoles: [Roles.ADMIN, Roles.EDITOR, Roles.READONLY]
       }
    },
-   { 
+   {
       path: '/guests-upload',
       name: 'guests-upload',
       component: GuestUpload,
       meta: {
-         requiresAuth: true
+         allowedRoles: [Roles.ADMIN]
       }
    },
-   { 
+   {
       path: '/add-guest',
       name: 'add-guest',
       component: AddGuest,
       meta: {
-         requiresAuth: true
+         allowedRoles: [Roles.ADMIN, Roles.EDITOR]
       }
    },
-   { 
+   {
       path: '/edit-guest/:guestId',
       name: 'edit-guest',
       component: EditGuest,
       props: true,
       meta: {
-          requiresAuth: true
+         allowedRoles: [Roles.ADMIN, Roles.EDITOR]
       }
-  },
-   { 
+   },
+   {
       path: '/event-attendance',
       name: 'event-attendance',
       component: EventAttendance,
       meta: {
-         requiresAuth: true
+         allowedRoles: [Roles.ADMIN, Roles.EDITOR, Roles.READONLY]
       }
    },
-   { 
+   {
       path: '/',
       name: 'landing',
       component: Landing,
-      meta: {
-         requiresAuth: true
-      }
    }
 
 ]
@@ -62,16 +63,47 @@ const routes = [
 const router = createRouter({
    history: createWebHistory(),
    routes
+});
+
+
+router.beforeEach((to, from, next) => {
+   const userStore = useUserStore();
+ 
+   if (!userStore.isAuthReady) {
+     const unsubscribe = userStore.$subscribe((mutation, state) => {
+       if (state.isAuthReady) {
+         unsubscribe();
+         proceedWithNavigation();
+       }
+     });
+   } else {
+     proceedWithNavigation();
+   }
+ 
+   function proceedWithNavigation() {
+     const { user } = userStore;
+     let userRole = userStore.userRole;
+ 
+     const requiresAuth = to.matched.some((record) => record.meta.allowedRoles);
+ 
+     if (requiresAuth) {
+       if (!user) {
+         next("/");
+       } else {
+         const allowedRoles = to.matched.flatMap((record) => record.meta.allowedRoles || []);
+         const hasAccess = allowedRoles.includes(userRole);
+ 
+         if (hasAccess) {
+           next();
+         } else {
+           ErrorHandler.handleAuthorizationError();
+           next("/");
+         }
+       }
+     } else {
+       next();
+     }
+   }
  });
-
-
-// router.beforeEach((to, from, next) => {
-//    const currentUser = auth.currentUser;
-//    const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
-
-//    if (requiresAuth && !currentUser) next('login');
-//    else if (!requiresAuth && currentUser) next ('home');
-//    else next();
-// });
 
 export default router

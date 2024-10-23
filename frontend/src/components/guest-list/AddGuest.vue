@@ -31,7 +31,8 @@
                         <Label for="events">Events</Label>
                         <ToggleGroup type="multiple" variant="outline" class="grid grid-cols-2 sm:grid-cols-3 gap-2"
                             v-model="newUserForm.events">
-                            <ToggleGroupItem v-for="weddingEvent in weddingEvents" :value="weddingEvent.id!" :key="weddingEvent.id">
+                            <ToggleGroupItem v-for="weddingEvent in weddingEvents" :value="weddingEvent.id!"
+                                :key="weddingEvent.id">
                                 {{ weddingEvent.name }}
                             </ToggleGroupItem>
                         </ToggleGroup>
@@ -60,10 +61,15 @@ import { WeddingEvent } from '@/models/WeddingEvent';
 import { Guest } from '@/models/Guest';
 import { useNotificationStore } from '@/stores/NotificationStore';
 import { NotificationType } from '@/models/NotificationType';
+import { ErrorHandler } from '@/util/error/ErrorHandler';
+import { useUserStore } from '@/stores/UserStore';
+import { storeToRefs } from 'pinia';
 
 const router = useRouter();
 const notificationStore = useNotificationStore();
-const {setMessage} = notificationStore;
+const { setMessage } = notificationStore;
+const userStore = useUserStore();
+const { hasEditAuthority } = storeToRefs(userStore);
 
 onMounted(async () => {
     const eventService = new EventService();
@@ -81,17 +87,22 @@ const newUserForm = ref({
 });
 
 async function saveGuest() {
-    const newGuest : Guest = {
-        name: `${newUserForm.value.firstName} ${newUserForm.value.lastName}`,
-        email: newUserForm.value.email,
-        phone: newUserForm.value.phone,
-        attendingEvents: [],
-        events: newUserForm.value.events.map(eventId => weddingEvents.value.find(wedEvent => wedEvent.id === eventId) as WeddingEvent)
+    if (hasEditAuthority) {
+        const newGuest: Guest = {
+            name: `${newUserForm.value.firstName} ${newUserForm.value.lastName}`,
+            email: newUserForm.value.email,
+            phone: newUserForm.value.phone,
+            attendingEvents: [],
+            events: newUserForm.value.events.map(eventId => weddingEvents.value.find(wedEvent => wedEvent.id === eventId) as WeddingEvent)
+        }
+        const guestService = new GuestService();
+        await guestService.addGuest(newGuest);
+        setMessage('Added user.', NotificationType.SUCCESS);
+        router.push('/guests');
+    } else {
+        ErrorHandler.handleAuthorizationError();
+        cancel();
     }
-    const guestService = new GuestService();
-    await guestService.addGuest(newGuest);
-    setMessage('Added user.', NotificationType.SUCCESS);
-    router.push('/guests');
 }
 
 function cancel() {

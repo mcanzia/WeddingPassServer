@@ -6,4 +6,5 @@
 
 <script setup>
 import GuestTable from '@/components/data-table/GuestTable.vue';
+
 </script>

@@ -1,103 +1,107 @@
 <template>
     <div class="w-full">
-        <div class="flex flex-col md:flex-row gap-2 items-center py-4">
-            <div class="flex flex-1 gap-2 items-center w-full">
-                <Input class="w-full md:max-w-sm" placeholder="Filter guests..."
-                    :model-value="table.getColumn('name')?.getFilterValue() as string"
-                    @update:model-value="table.getColumn('name')?.setFilterValue($event)" />
+        <div v-if="!loading">
+            <div class="flex flex-col md:flex-row gap-2 items-center py-4">
+                <div class="flex flex-1 gap-2 items-center w-full">
+                    <Input class="w-full md:max-w-sm" placeholder="Filter guests..."
+                        :model-value="table.getColumn('name')?.getFilterValue() as string"
+                        @update:model-value="table.getColumn('name')?.setFilterValue($event)" />
 
-                <DropdownMenu>
-                    <DropdownMenuTrigger as-child>
-                        <Button variant="outline" class="w-full md:w-auto">
-                            Columns
-                            <ChevronDown class="ml-2 h-4 w-4" />
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                        <DropdownMenuCheckboxItem
-                            v-for="column in table.getAllColumns().filter((column) => column.getCanHide())"
-                            :key="column.id" class="capitalize" :checked="column.getIsVisible()" @update:checked="(value: any) => {
-                                column.toggleVisibility(!!value);
-                            }">
-                            {{ column.id }}
-                        </DropdownMenuCheckboxItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
-            </div>
+                    <DropdownMenu>
+                        <DropdownMenuTrigger as-child>
+                            <Button variant="outline" class="w-full md:w-auto">
+                                Columns
+                                <ChevronDown class="ml-2 h-4 w-4" />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                            <DropdownMenuCheckboxItem
+                                v-for="column in table.getAllColumns().filter((column) => column.getCanHide())"
+                                :key="column.id" class="capitalize" :checked="column.getIsVisible()" @update:checked="(value: any) => {
+                                    column.toggleVisibility(!!value);
+                                }">
+                                {{ column.id }}
+                            </DropdownMenuCheckboxItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                </div>
 
-            <div class="flex gap-2 items-center mt-2 md:mt-0 w-full md:w-auto">
-                <Button variant="outline" class="w-full md:w-auto" @click="goToAddGuest">
-                    Add Guest
-                </Button>
-
-                <ConfirmAction alert-title="Do you want to delete these guests?" @on-confirm="deleteGuests"
-                    v-if="showDeleteButton">
-                    <Button variant="destructive" class="w-full md:w-auto">
-                        Delete Selected Guests
+                <div class="flex gap-2 items-center mt-2 md:mt-0 w-full md:w-auto" v-if="hasEditAuthority">
+                    <Button variant="outline" class="w-full md:w-auto" @click="goToAddGuest">
+                        Add Guest
                     </Button>
-                </ConfirmAction>
-            </div>
 
-            <div class="flex items-center mt-2 md:mt-0 w-full md:w-auto">
-                <Button variant="secondary" class="w-full md:w-auto" @click="goToEditGuest" v-if="showEditButton">
-                    Edit Selected Guest
-                </Button>
+                    <ConfirmAction alert-title="Do you want to delete these guests?" @on-confirm="deleteGuests"
+                        v-if="showDeleteButton">
+                        <Button variant="destructive" class="w-full md:w-auto">
+                            Delete Selected Guests
+                        </Button>
+                    </ConfirmAction>
+                </div>
+
+                <div class="flex items-center mt-2 md:mt-0 w-full md:w-auto" v-if="hasEditAuthority">
+                    <Button variant="secondary" class="w-full md:w-auto" @click="goToEditGuest" v-if="showEditButton">
+                        Edit Selected Guest
+                    </Button>
+                </div>
             </div>
-        </div>
-        <div class="rounded-md border">
-            <Table>
-                <TableHeader>
-                    <TableRow v-for="headerGroup in table.getHeaderGroups()" :key="headerGroup.id">
-                        <TableHead v-for="header in headerGroup.headers" :key="header.id">
-                            <FlexRender v-if="!header.isPlaceholder" :render="header.column.columnDef.header"
-                                :props="header.getContext()" />
-                        </TableHead>
-                    </TableRow>
-                </TableHeader>
-                <TableBody>
-                    <template v-if="table.getRowModel().rows?.length">
-                        <template v-for="row in table.getRowModel().rows" :key="row.id">
-                            <TableRow :data-state="row.getIsSelected() && 'selected'">
-                                <TableCell v-for="cell in row.getVisibleCells()" :key="cell.id">
-                                    <FlexRender :render="cell.column.columnDef.cell" :props="cell.getContext()" />
-                                </TableCell>
-                            </TableRow>
-                            <TableRow v-if="row.getIsExpanded()">
-                                <TableCell :colspan="row.getAllCells().length">
-                                    {{ JSON.stringify(row.original) }}
-                                </TableCell>
-                            </TableRow>
+            <div class="rounded-md border">
+                <Table>
+                    <TableHeader>
+                        <TableRow v-for="headerGroup in table.getHeaderGroups()" :key="headerGroup.id">
+                            <TableHead v-for="header in headerGroup.headers" :key="header.id">
+                                <FlexRender v-if="!header.isPlaceholder" :render="header.column.columnDef.header"
+                                    :props="header.getContext()" />
+                            </TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        <template v-if="table.getRowModel().rows?.length">
+                            <template v-for="row in table.getRowModel().rows" :key="row.id">
+                                <TableRow :data-state="row.getIsSelected() && 'selected'">
+                                    <TableCell v-for="cell in row.getVisibleCells()" :key="cell.id">
+                                        <FlexRender :render="cell.column.columnDef.cell" :props="cell.getContext()" />
+                                    </TableCell>
+                                </TableRow>
+                                <TableRow v-if="row.getIsExpanded()">
+                                    <TableCell :colspan="row.getAllCells().length">
+                                        {{ JSON.stringify(row.original) }}
+                                    </TableCell>
+                                </TableRow>
+                            </template>
                         </template>
-                    </template>
 
-                    <TableRow v-else>
-                        <TableCell :colspan="columns.length" class="h-24 text-center">
-                            No results.
-                        </TableCell>
-                    </TableRow>
-                </TableBody>
-            </Table>
-        </div>
+                        <TableRow v-else>
+                            <TableCell :colspan="columns.length" class="h-24 text-center">
+                                No results.
+                            </TableCell>
+                        </TableRow>
+                    </TableBody>
+                </Table>
+            </div>
 
-        <div class="flex items-center justify-end space-x-2 py-4">
-            <div class="flex-1 text-sm text-muted-foreground">
-                {{ table.getFilteredSelectedRowModel().rows.length }} of
-                {{ table.getFilteredRowModel().rows.length }} row(s) selected.
-            </div>
-            <div class="space-x-2">
-                <Button variant="outline" size="sm" :disabled="!table.getCanPreviousPage()"
-                    @click="table.previousPage()">
-                    Previous
-                </Button>
-                <Button variant="outline" size="sm" :disabled="!table.getCanNextPage()" @click="table.nextPage()">
-                    Next
-                </Button>
+            <div class="flex items-center justify-end space-x-2 py-4">
+                <div class="flex-1 text-sm text-muted-foreground">
+                    {{ table.getFilteredSelectedRowModel().rows.length }} of
+                    {{ table.getFilteredRowModel().rows.length }} row(s) selected.
+                </div>
+                <div class="space-x-2">
+                    <Button variant="outline" size="sm" :disabled="!table.getCanPreviousPage()"
+                        @click="table.previousPage()">
+                        Previous
+                    </Button>
+                    <Button variant="outline" size="sm" :disabled="!table.getCanNextPage()" @click="table.nextPage()">
+                        Next
+                    </Button>
+                </div>
             </div>
         </div>
+        <Loader v-else />
     </div>
 </template>
 
 <script setup lang="ts">
+import Loader from '@/components/Loader.vue';
 import type {
     ColumnDef,
     ColumnFiltersState,
@@ -143,17 +147,25 @@ import { useRouter } from 'vue-router';
 import ConfirmAction from '@/components/data-table/ConfirmAction.vue';
 import { WeddingEvent } from '@/models/WeddingEvent';
 import { useNotificationStore } from '@/stores/NotificationStore';
+import { useUserStore } from '@/stores/UserStore';
 import { NotificationType } from '@/models/NotificationType';
+import { ErrorHandler } from '@/util/error/ErrorHandler';
+import { storeToRefs } from 'pinia';
 
 const guestService = new GuestService();
 const router = useRouter();
 const notificationStore = useNotificationStore();
-const {setMessage} = notificationStore;
+const { setMessage } = notificationStore;
+const userStore = useUserStore();
+const { hasEditAuthority } = storeToRefs(userStore);
 
 const data = ref<Guest[]>([]);
+const loading = ref<Boolean>(false);
 
 onBeforeMount(async () => {
+    loading.value = true;
     data.value = await guestService.getAllGuests();
+    loading.value = false;
 });
 
 const columns: ColumnDef<Guest>[] = [
@@ -266,10 +278,14 @@ function goToEditGuest() {
 }
 
 async function deleteGuests() {
-    const guestsToDelete = data.value.filter((row, idx) => Object.keys(rowSelection.value).includes(idx.toString()));
-    await guestService.batchDeleteGuests(guestsToDelete);
-    setMessage('Deleted user.', NotificationType.SUCCESS);
-    await guestService.getAllGuests();
+    if (hasEditAuthority) {
+        const guestsToDelete = data.value.filter((row, idx) => Object.keys(rowSelection.value).includes(idx.toString()));
+        await guestService.batchDeleteGuests(guestsToDelete);
+        setMessage('Deleted user.', NotificationType.SUCCESS);
+        await guestService.getAllGuests();
+    } else {
+        ErrorHandler.handleAuthorizationError();
+    }
 }
 
 

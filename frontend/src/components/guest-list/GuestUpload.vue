@@ -67,11 +67,16 @@ import {
 } from '@/components/ui/table'
 import { useNotificationStore } from '@/stores/NotificationStore';
 import { NotificationType } from '@/models/NotificationType';
+import { useUserStore } from '@/stores/UserStore';
+import { ErrorHandler } from '@/util/error/ErrorHandler';
+import { storeToRefs } from 'pinia';
 
 const guestService = new GuestService();
 
 const notificationStore = useNotificationStore();
 const {setMessage} = notificationStore;
+const userStore = useUserStore();
+const {hasEditAuthority} = storeToRefs(userStore);
 
 const dropZoneRef = ref<HTMLDivElement>()
 const guestValidation = ref<UploadValidation | null>();
@@ -110,8 +115,12 @@ const validationAreaDescription = computed(() => {
 });
 
 async function handleFileUpload(file: File) {
-    guestValidation.value = await guestService.guestFileUpload(file);
-    showValidationArea.value = true;
+    if (hasEditAuthority) {
+        guestValidation.value = await guestService.guestFileUpload(file);
+        showValidationArea.value = true;
+    } else {
+        ErrorHandler.handleAuthorizationError();
+    }
 }
 
 function cancelUpload() {

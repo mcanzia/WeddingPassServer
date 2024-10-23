@@ -42,7 +42,6 @@ import Search from '@/components/Search.vue';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import debounce from 'lodash/debounce';
 
-
 const props = defineProps<{
     weddingEvent: WeddingEvent | null;
 }>();

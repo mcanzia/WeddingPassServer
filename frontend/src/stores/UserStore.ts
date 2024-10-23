@@ -5,87 +5,96 @@ import { SuccessHandler } from '@/util/SuccessHandler';
 import { AuthService } from '@/services/AuthService';
 import { Roles } from '@/models/Roles';
 import { Role } from '@/models/Role';
-import { toRaw } from 'vue';
+import { User } from '@/models/User';
 
 interface IUserState {
-  user : any,
-  isLoading: boolean,
+    user: any,
+    userRole: any,
+    isLoading: boolean,
+    isAuthReady: boolean
 }
 
 export const useUserStore = defineStore('userStore', {
-    state: () : IUserState => ({
-      user: null,
-      isLoading: false,
+    state: (): IUserState => ({
+        user: null,
+        userRole: null,
+        isLoading: false,
+        isAuthReady: false
     }),
     getters: {
-      isLoggedIn: (state) => state.user !== null
+        isLoggedIn: (state) => state.user,
+        userEmail: (state) => state.user.email || null,
+        hasEditAuthority: (state) => [Roles.ADMIN, Roles.EDITOR].includes(state.userRole),
     },
     actions: {
-      async initalizeAuthListener() {
-        this.isLoading = true;
-        await auth.onAuthStateChanged(async authUser => {
-          this.user = authUser ? authUser : null;
-          if (this.user) {
-            const authService = new AuthService();
-            // const roles = this.user.reloadUserInfo.customAttributes ? JSON.parse(this.user.reloadUserInfo.customAttributes) : null;
-            const roles = await authService.getUserRoles(this.user.uid);
-            console.log('USER ROLES', roles);
-            if (!roles || !roles.role) {
-              await authService.setUserRole(this.user.uid, new Role(Roles.ADMIN));
+        initalizeAuthListener() {
+            this.isLoading = true;
+            auth.onAuthStateChanged(async authUser => {
+                this.user = authUser ? authUser : null;
+                if (this.user) {
+                    await this.setUserRole(this.user);
+                }
+                this.isAuthReady = true;
+                setTimeout(() => {
+                    this.isLoading = false;
+                }, 500);
+
+            });
+        },
+        async getAccessToken() {
+            try {
+                return this.user ? await this.user.getIdToken() : null;
+            } catch (error: any) {
+                ErrorHandler.handleUserAuthError(this.user, error);
             }
-          }
-          setTimeout(() => {
-            this.isLoading = false;
-          }, 1000);
-          
-        });
-      },
-      async getAccessToken() {
-        try {
-          return this.user ? await this.user.getIdToken() : null;
-        } catch (error : any) {
-          ErrorHandler.handleUserAuthError(this.user, error);
+        },
+        async registerUser(email: string, password: string) {
+            try {
+                await auth.createUserWithEmailAndPassword(auth, email, password);
+            } catch (error: any) {
+                ErrorHandler.handleUserAuthError(this.user, error);
+            }
+        },
+        async loginUser(email: string, password: string) {
+            try {
+                const userCredential = await auth.signInWithEmailAndPassword(auth, email, password);
+                const currentUser = userCredential.user;
+                this.setUserRole(currentUser);
+            } catch (error: any) {
+                ErrorHandler.handleUserAuthError(this.user, error);
+            }
+        },
+        async loginUserGoogle() {
+            try {
+                const userCredential = await auth.signInWithPopup(auth, new auth.GoogleAuthProvider());
+                const currentUser = userCredential.user;
+                this.setUserRole(currentUser);
+            } catch (error: any) {
+                ErrorHandler.handleUserAuthError(this.user, error);
+            }
+        },
+        async logoutUser() {
+            try {
+                await auth.signOut();
+            } catch (error: any) {
+                ErrorHandler.handleUserAuthError(this.user, error);
+            }
+        },
+        async sendPasswordResetEmail(email: string) {
+            try {
+                await auth.sendPasswordResetEmail(auth, email);
+                SuccessHandler.showNotification("Password reset instructions sent to your email.")
+            } catch (error: any) {
+                ErrorHandler.handleUserAuthError(this.user, error);
+            }
+        },
+        isMobile() {
+            return screen.width <= 770 ? true : false;
+        },
+        async setUserRole(currentUser : any) {
+            const idTokenResult = await currentUser.getIdTokenResult(true);
+            const claims = idTokenResult.claims;
+            this.userRole = claims.role || null;
         }
-      },
-      async registerUser(email : string, password : string) {
-        try {
-          const registeredUser = await auth.createUserWithEmailAndPassword(auth, email, password);
-          console.log(registeredUser);
-        } catch (error : any) {
-          ErrorHandler.handleUserAuthError(this.user, error);
-        }
-      },
-      async loginUser(email : string, password : string) {
-        try {
-          await auth.signInWithEmailAndPassword(auth, email, password);
-        } catch (error : any) {
-          ErrorHandler.handleUserAuthError(this.user, error);
-        }
-      },
-      async loginUserGoogle() {
-        try {
-          await auth.signInWithPopup(auth, new auth.GoogleAuthProvider());
-        } catch (error : any) {
-          ErrorHandler.handleUserAuthError(this.user, error);
-        }
-      },
-      async logoutUser() {
-        try {
-          await auth.signOut();
-        } catch (error : any) {
-          ErrorHandler.handleUserAuthError(this.user, error);
-        }
-      },
-      async sendPasswordResetEmail(email : string) {
-        try {
-          await auth.sendPasswordResetEmail(auth, email);
-          SuccessHandler.showNotification("Password reset instructions sent to your email.")
-        } catch (error : any) {
-          ErrorHandler.handleUserAuthError(this.user, error);
-        }
-      },
-      isMobile() {
-        return screen.width <= 770 ? true : false;
-      }
     }
 })
