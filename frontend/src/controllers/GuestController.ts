@@ -58,7 +58,6 @@ export class GuestController {
     async updateGuest(userAuthToken: any, guest: Guest) {
         try {
             const requestUrl = `${RequestUtil.getAPIUrl()}/api/guests/${guest.id}`;
-            console.log('REQUEST', guest);
             const response = await fetch(requestUrl, RequestUtil.PUTRequestParams(userAuthToken, guest));
             return response;
         } catch (error: any) {

@@ -1,34 +1,44 @@
 <template>
     <div class="flex-1 mt-5 h-screen">
-        <Card class="mx-auto max-w-sm">
-            <CardHeader>
-                <CardTitle class="text-2xl">
-                    Invited To {{ eventNameComputed }}
-                </CardTitle>
-                <ToggleGroup v-model="filterToggle" type="single" variant="outline"
-                    class="my-4 flex justify-center gap-6">
-                    <ToggleGroupItem value="attending" key="attending">
-                        Only Attending
-                    </ToggleGroupItem>
-                    <ToggleGroupItem value="invited" key="invited">
-                        Only Invited
-                    </ToggleGroupItem>
-                </ToggleGroup>
-                <Search class="mb-4" placeholder="Search guest name..." v-model="searchQuery" />
-                <Separator />
-            </CardHeader>
-            <CardContent>
-                <div v-if="filteredGuests.length === 0">
-                    No Guests
-                </div>
-                <div v-else v-for="guest in filteredGuests" :key="guest.id">
-                    <GuestCard :guest="guest" :attending-event="isGuestAttendingEvent(guest)"
-                        @add-attending="addAttending(guest)" @remove-attending="removeAttending(guest)" />
-                </div>
-            </CardContent>
-        </Card>
+      <Card class="mx-auto max-w-sm h-3/4 flex flex-col">
+        <CardHeader class="flex-none">
+          <CardTitle class="text-2xl">
+            Check In For {{ eventNameComputed }}
+          </CardTitle>
+          <ToggleGroup
+            v-model="filterToggle"
+            type="single"
+            variant="outline"
+            class="my-4 flex justify-center gap-6"
+          >
+            <ToggleGroupItem value="attending" key="attending">
+              Only Checked In
+            </ToggleGroupItem>
+            <ToggleGroupItem value="invited" key="invited">
+              Only Not Checked In
+            </ToggleGroupItem>
+          </ToggleGroup>
+          <Search
+            class="mb-4"
+            placeholder="Search guest name..."
+            v-model="searchQuery"
+          />
+          <Separator />
+        </CardHeader>
+        <CardContent class="flex-1 overflow-y-auto">
+          <div v-if="filteredGuests.length === 0">No Guests</div>
+          <div v-else v-for="guest in filteredGuests" :key="guest.id">
+            <GuestCard
+              :guest="guest"
+              :attending-event="isGuestAttendingEvent(guest)"
+              @add-attending="addAttending(guest)"
+              @remove-attending="removeAttending(guest)"
+            />
+          </div>
+        </CardContent>
+      </Card>
     </div>
-</template>
+  </template>
 
 <script setup lang="ts">
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';

@@ -34,11 +34,12 @@ import { ChevronDown } from 'lucide-vue-next';
 import { WeddingEvent } from '@/models/WeddingEvent';
 import { EventService } from '@/services/EventService';
 import EventGuests from '@/components/events/EventGuests.vue';
-import { useRouter, useRoute } from 'vue-router';
+import { useRoute } from 'vue-router';
 import Loader from '@/components/Loader.vue';
+import {useRouterHelper} from '@/util/composables/useRouterHelper';
 
-const router = useRouter();
 const route = useRoute();
+const {goToRouteSecured, replaceRouteSecured} = useRouterHelper();
 
 const weddingEvents = ref<WeddingEvent[]>([]);
 const selectedEvent = ref<WeddingEvent | null>(null);
@@ -56,7 +57,7 @@ onBeforeMount(async () => {
         initializeEvent(event);
     } else {
         selectedEvent.value = weddingEvents.value[0];
-        router.replace({ path: '/event-attendance', query: { event: selectedEvent.value.id } });
+        replaceRouteSecured('event-attendance', {}, { event: selectedEvent.value.id });
     }
     openEvent(weddingEvents.value[0])
     loading.value = false;
@@ -77,12 +78,12 @@ function initializeEvent(event : WeddingEvent | undefined) {
         selectedEvent.value = event;
     } else {
         selectedEvent.value = weddingEvents.value[0];
-        router.replace({ path: '/event-attendance', query: { event: selectedEvent.value.id } });
+        replaceRouteSecured('event-attendance', {}, { event: selectedEvent.value.id });
     }
 }
 
 function openEvent(wedEvent: WeddingEvent) {
     selectedEvent.value = wedEvent;
-    router.push({ path: '/event-attendance', query: { event: wedEvent.id } });
+    goToRouteSecured('event-attendance', {}, { event: wedEvent.id });
 }
 </script>

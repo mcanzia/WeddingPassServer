@@ -7,7 +7,7 @@
                 </p>
                 <div :class="cn('justify-self-end', {'pointer-events-none': !hasEditAuthority})">
                     <ConfirmAction 
-                        alert-title="Do you want to remove Attending status for this guest?" 
+                        alert-title="Do you want to remove Checked In status for this guest?" 
                         @on-confirm="removeAttending"
                         v-if="attendingEvent"
                     >
@@ -50,7 +50,7 @@ const isAttending = computed(() => {
 });
 
 const attendingText = computed(() => {
-    return props.attendingEvent ? 'Attending' : 'Invited';
+    return props.attendingEvent ? 'Checked In' : 'Not Checked In';
 });
 
 function addAttending() {

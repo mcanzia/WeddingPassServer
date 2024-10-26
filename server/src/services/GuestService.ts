@@ -120,15 +120,15 @@ export class GuestService {
                 return false;
             }
 
-            if (validator.isEmpty(guest.email)) {
-                uploadIssues.set(guest.name, EMAIL_MISSING);
-                return false;
-            }
+            // if (validator.isEmpty(guest.email)) {
+            //     uploadIssues.set(guest.name, EMAIL_MISSING);
+            //     return false;
+            // }
 
-            if (!this.isValidEmail(guest.email)) {
-                uploadIssues.set(guest.name, EMAIL_BAD_FORMAT);
-                return false;
-            }
+            // if (!this.isValidEmail(guest.email)) {
+            //     uploadIssues.set(guest.name, EMAIL_BAD_FORMAT);
+            //     return false;
+            // }
 
             if (!guest.events || guest.events.length === 0) {
                 uploadIssues.set(guest.name, MISSING_EVENT);
@@ -161,8 +161,8 @@ export class GuestService {
         return new UploadValidation(uploadIssues, validatedGuests);
     }
 
-    private isValidEmail(email : string) {
-        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-        return emailRegex.test(email);
-    }
+    // private isValidEmail(email : string) {
+    //     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    //     return emailRegex.test(email);
+    // }
 }

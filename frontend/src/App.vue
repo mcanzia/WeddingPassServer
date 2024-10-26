@@ -1,16 +1,16 @@
 <template>
   <div class="bg-background">
     <Toaster />
-    <div v-if="userStore.isLoggedIn">
+    <div v-if="isLoggedIn">
       <Navbar />
       <div class="bg-background">
-        <router-view v-if="!userStore.isLoading"/>
+        <router-view v-if="!isLoading"/>
         <div v-else>
           <Loader />
         </div>
       </div>
     </div>
-    <Login v-else-if="!userStore.isLoading" />
+    <Login v-else-if="!isLoading" />
   </div>
 </template>
 
@@ -25,8 +25,9 @@ import { useNotificationStore } from '@/stores/NotificationStore';
 import { onMounted, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 
-const userStore = useUserStore();
-userStore.initalizeAuthListener();
+const {isLoading, isLoggedIn} = storeToRefs(useUserStore());
+const {initializeAuthListener} = useUserStore();
+initializeAuthListener();
 
 const notificationStore = useNotificationStore();
 const {errorMessage, successMessage} = storeToRefs(notificationStore);

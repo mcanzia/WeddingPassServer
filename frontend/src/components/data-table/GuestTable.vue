@@ -143,7 +143,6 @@ import { Guest } from '@/models/Guest';
 import { GuestService } from '@/services/GuestService';
 import { onBeforeMount } from 'vue';
 import EventCircle from '@/components/data-table/EventCircle.vue';
-import { useRouter } from 'vue-router';
 import ConfirmAction from '@/components/data-table/ConfirmAction.vue';
 import { WeddingEvent } from '@/models/WeddingEvent';
 import { useNotificationStore } from '@/stores/NotificationStore';
@@ -151,9 +150,10 @@ import { useUserStore } from '@/stores/UserStore';
 import { NotificationType } from '@/models/NotificationType';
 import { ErrorHandler } from '@/util/error/ErrorHandler';
 import { storeToRefs } from 'pinia';
+import {useRouterHelper} from '@/util/composables/useRouterHelper';
 
 const guestService = new GuestService();
-const router = useRouter();
+const {goToRouteSecured} = useRouterHelper();
 const notificationStore = useNotificationStore();
 const { setMessage } = notificationStore;
 const userStore = useUserStore();
@@ -269,12 +269,12 @@ const showEditButton = computed(() => {
 });
 
 function goToAddGuest() {
-    router.push('/add-guest');
+    goToRouteSecured('add-guest');
 }
 
 function goToEditGuest() {
     const guestId = data.value.at(Number(Object.keys(rowSelection.value)))!.id;
-    router.push({ name: 'edit-guest', params: { guestId: guestId } });
+    goToRouteSecured('edit-guest', {guestId: guestId});
 }
 
 async function deleteGuests() {

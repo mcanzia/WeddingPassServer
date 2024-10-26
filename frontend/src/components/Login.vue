@@ -18,7 +18,7 @@
                     <div class="grid gap-2">
                         <div class="flex items-center">
                             <Label for="password">Password</Label>
-                            <a @click="sendPasswordResetEmail"
+                            <a @click="passwordResetEmail"
                                 class="ml-auto inline-block text-sm underline cursor-pointer" v-if="!newUser">
                                 Forgot your password?
                             </a>
@@ -57,7 +57,7 @@ import { Label } from '@/components/ui/label';
 import { useUserStore } from '@/stores/UserStore';
 import { ref, computed } from 'vue';
 
-const userStore = useUserStore();
+const {registerUser, loginUser, loginUserGoogle, sendPasswordResetEmail} = useUserStore();
 
 const newUser = ref(false);
 const loading = ref(false);
@@ -91,11 +91,11 @@ async function signInOrCreateUser() {
     try {
         if (newUser.value) {
             if (validateRegistrationForm()) {
-                userStore.registerUser(loginForm.value.email, loginForm.value.password);
+                registerUser(loginForm.value.email, loginForm.value.password);
             }
         } else {
             if (validateLoginForm()) {
-                userStore.loginUser(loginForm.value.email, loginForm.value.password);
+                loginUser(loginForm.value.email, loginForm.value.password);
             }
         }
     } catch (error: any) {
@@ -108,7 +108,7 @@ async function signInOrCreateUser() {
 async function googleSignIn() {
     errorMessage.value = '';
     try {
-        await userStore.loginUserGoogle();
+        await loginUserGoogle();
     } catch (error: any) {
         errorMessage.value = error.message;
     }
@@ -118,9 +118,9 @@ function toggleNewUser() {
     newUser.value = !newUser.value;
 }
 
-function sendPasswordResetEmail() {
+function passwordResetEmail() {
     if (validateEmailField()) {
-        userStore.sendPasswordResetEmail(loginForm.value.email);
+        sendPasswordResetEmail(loginForm.value.email);
     }
 }
 

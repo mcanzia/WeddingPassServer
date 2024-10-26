@@ -1,5 +1,6 @@
 import { AuthController } from '@/controllers/AuthController';
-import { Role } from '@/models/Role';
+import { User } from '@/models/User';
+import { WeddingRole } from '@/models/WeddingRole';
 import { useUserStore } from '@/stores/UserStore';
 
 export class AuthService {
@@ -12,6 +13,27 @@ export class AuthService {
         this.userStore = useUserStore();
     }
 
+    async getAllUsers() {
+        try {
+            const userAccessToken = await this.userStore.getAccessToken();
+            const response = await this.authController.getAllUsers(userAccessToken);
+            const allUsers = response ? response : [];
+            return allUsers;
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    async getUserById(uid : string) {
+        try {
+            const userAccessToken = await this.userStore.getAccessToken();
+            const user = await this.authController.getUserById(userAccessToken, uid);
+            return user;
+        } catch (error) {
+            throw error;
+        }
+    }
+
     async getUserRoles(userId : string) {
         try {
             const userAccessToken = await this.userStore.getAccessToken();
@@ -22,10 +44,40 @@ export class AuthService {
         }
     }
     
-    async setUserRole(userId : string, role: Role) {
+    async setUserRole(userId : string, role: WeddingRole) {
         try {
             const userAccessToken = await this.userStore.getAccessToken();
             await this.authController.setUserRole(userAccessToken, userId, role);
+            return;
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    async addUser(userToAdd: User) {
+        try {
+            const userAccessToken = await this.userStore.getAccessToken();
+            const user = await this.authController.addUser(userAccessToken, userToAdd);
+            return user;
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    async updateUser(user : User) {
+        try {
+            const userAccessToken = await this.userStore.getAccessToken();
+            await this.authController.updateUser(userAccessToken, user);
+            return;
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    async deleteUser(userToDelete: User) {
+        try {
+            const userAccessToken = await this.userStore.getAccessToken();
+            await this.authController.deleteUser(userAccessToken, userToDelete);
             return;
         } catch (error) {
             throw error;

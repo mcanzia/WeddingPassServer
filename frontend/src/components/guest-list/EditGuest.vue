@@ -35,7 +35,7 @@
                     </div>
                     <div class="inline-flex gap-4 justify-end">
                         <Button @click="updateGuest">Save</Button>
-                        <Button @click="cancel" variant="outline">Cancel</Button>
+                        <Button @click="close" variant="outline">Cancel</Button>
                     </div>
                 </div>
             </CardContent>
@@ -50,7 +50,6 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { ref, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
 import { GuestService } from '@/services/GuestService';
 import { EventService } from '@/services/EventService';
 import { WeddingEvent } from '@/models/WeddingEvent';
@@ -60,12 +59,13 @@ import { NotificationType } from '@/models/NotificationType';
 import { useUserStore } from '@/stores/UserStore';
 import { ErrorHandler } from '@/util/error/ErrorHandler';
 import { storeToRefs } from 'pinia';
+import {useRouterHelper} from '@/util/composables/useRouterHelper';
 
 const props = defineProps<{
     guestId: string;
 }>();
 
-const router = useRouter();
+const {goToRouteSecured} = useRouterHelper();
 const notificationStore = useNotificationStore();
 const { setMessage } = notificationStore;
 const userStore = useUserStore();
@@ -117,16 +117,16 @@ async function updateGuest() {
         const guestService = new GuestService();
         await guestService.updateGuest(updatedGuestDetails);
         setMessage('Updated user.', NotificationType.SUCCESS);
-        router.push('/guests');
+        close()
     } else {
         ErrorHandler.handleAuthorizationError();
-        cancel();
+        close();
     }
 
 }
 
-function cancel() {
-    router.push('/guests');
+function close() {
+    goToRouteSecured('guests');
 }
 
 

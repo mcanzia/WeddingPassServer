@@ -9,8 +9,8 @@ import { Roles } from '../models/Roles';
 const router = express.Router();
 const guestController = container.get<GuestController>(TYPES.GuestController);
 
-router.get('/', authorizeRoles([Roles.READONLY, Roles.EDITOR, Roles.ADMIN]), (req, res, next) => guestController.getGuests(req, res, next));
-router.get('/id/:guestId', authorizeRoles([Roles.READONLY, Roles.EDITOR, Roles.ADMIN]), (req, res, next) => guestController.getGuestbyId(req, res, next));
+router.get('/', (req, res, next) => guestController.getGuests(req, res, next));
+router.get('/id/:guestId', (req, res, next) => guestController.getGuestbyId(req, res, next));
 router.get('/name/:guestName', authorizeRoles([Roles.READONLY, Roles.EDITOR, Roles.ADMIN]), (req, res, next) => guestController.getGuestbyName(req, res, next));
 router.get('/:serialNumber', authorizeRoles([Roles.READONLY, Roles.EDITOR, Roles.ADMIN]), (req, res, next) => guestController.getGuestbySerialNumber(req, res, next));
 router.get('/event/:eventId', authorizeRoles([Roles.READONLY, Roles.EDITOR, Roles.ADMIN]), (req, res, next) => guestController.getGuestsForEvent(req, res, next));

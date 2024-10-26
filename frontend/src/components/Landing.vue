@@ -1,10 +1,6 @@
 <template>
-    <div>
-        <Loader />
-    </div>
+    <div>LANDING</div>
 </template>
 
 <script setup>
-import Loader from '@/components/Loader.vue';
-
 </script>

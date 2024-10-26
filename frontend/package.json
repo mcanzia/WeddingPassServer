@@ -20,6 +20,7 @@
     "clsx": "^2.1.1",
     "firebase": "^10.13.2",
     "ionicons": "^7.2.1",
+    "js-cookie": "^3.0.5",
     "lodash": "^4.17.21",
     "lucide-vue-next": "^0.446.0",
     "pinia": "^2.0.30",
@@ -31,6 +32,7 @@
     "vuedraggable": "^2.24.3"
   },
   "devDependencies": {
+    "@types/js-cookie": "^3.0.6",
     "@types/lodash": "^4.17.10",
     "@typescript-eslint/eslint-plugin": "^5.52.0",
     "@typescript-eslint/parser": "^5.52.0",
