@@ -183,6 +183,41 @@ export class UserDao {
         }
     }
 
+    async addUserToWedding(userId: string, newWeddingRole: WeddingRole): Promise<void> {
+        try {
+            if (!userId) {
+                throw new Error('Provided User ID is empty');
+            }
+            const userRef = this.usersCollection.doc(userId);
+            const userDoc = await userRef.get();
+
+            if (!userDoc.exists) {
+                throw new Error('User to update does not exist.');
+            }
+
+            const userData = userDoc.data();
+
+            if (!userData) {
+                throw new Error('User to update does not exist.');
+            }
+
+            const currentWeddingRoles = userData.weddingRoles;
+            let filteredWeddingRoles = currentWeddingRoles.filter((weddingRole : any) => weddingRole.wedding !== newWeddingRole.wedding.id);
+
+            filteredWeddingRoles.push({role: newWeddingRole.role, wedding: newWeddingRole.wedding.id});
+
+            const updatedData = {
+                ...userData,
+                weddingRoles: filteredWeddingRoles,
+            };
+
+            await userRef.update(updatedData);
+
+        } catch (error) {
+            throw new DatabaseError("Could not update user details: " + error);
+        }
+    }
+
     async deleteUser(userId: string): Promise<void> {
         try {
             const userRef = this.usersCollection.doc(userId);

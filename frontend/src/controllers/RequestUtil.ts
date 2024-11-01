@@ -1,33 +1,36 @@
 import { RequestType } from "@/models/RequestType";
+import { ErrorHandler } from "@/util/error/ErrorHandler";
 
 export class RequestUtil {
     static getAPIUrl() {
         return import.meta.env.VITE_SERVER_API_URL ? import.meta.env.VITE_SERVER_API_URL : "http://localhost:7500";
     }
 
-    static GETRequestParams(userAuthToken : any) {
+    static GETRequestParams(userAuthToken : any, role?: string) {
         const bearer : string = 'Bearer ' + userAuthToken;
         return {
             method: RequestType.GET,
             headers: {
-                'Authorization': bearer
+                'Authorization': bearer,
+                ...(role && { 'UserRole': role }),
             }
         }
     }
 
-    static POSTRequestParams(userAuthToken : any, body : any) {
+    static POSTRequestParams(userAuthToken : any, body : any, role?: string) {
         const bearer : string = 'Bearer ' + userAuthToken;
         return {
             method: RequestType.POST,
             headers: {
                 'Authorization': bearer,
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                ...(role && { 'UserRole': role }),
             },
             body: JSON.stringify(body)
         }
     }
 
-    static FileRequestParams(userAuthToken : any, file : File) {
+    static FileRequestParams(userAuthToken : any, file : File, role?: string) {
         const bearer : string = 'Bearer ' + userAuthToken;
 
         const formData = new FormData();
@@ -37,33 +40,55 @@ export class RequestUtil {
             method: RequestType.POST,
             headers: {
                 'Authorization': bearer,
+                ...(role && { 'UserRole': role }),
             },
             body: formData
         }
     }
 
-    static PUTRequestParams(userAuthToken : any, body : any) {
+    static PUTRequestParams(userAuthToken : any, body : any, role?: string) {
         const bearer : string = 'Bearer ' + userAuthToken;
         return {
             method: RequestType.PUT,
             headers: {
                 'Authorization': bearer,
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                ...(role && { 'UserRole': role }),
             },
             body: JSON.stringify(body)
         }
     }
 
-    static DELETERequestParams(userAuthToken : any, body : any) {
+    static DELETERequestParams(userAuthToken : any, body : any, role?: string) {
         const bearer : string = 'Bearer ' + userAuthToken;
         return {
             method: RequestType.DELETE,
             headers: {
                 'Authorization': bearer,
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                ...(role && { 'UserRole': role }),
             },
             body: JSON.stringify(body)
         }
     }
+
+    static async apiRequest<T>(url: string, options: RequestInit){
+        const response = await fetch(url, options);
+    
+        if (!response.ok) {
+            if (response.status === 403) {
+                ErrorHandler.handleAuthorizationError();
+                return;
+            } else {
+                throw new Error();
+            }
+        }
+    
+        if (response.status === 204) {
+            return;
+        }
+        return await response.json();
+    }
+    
 }
 

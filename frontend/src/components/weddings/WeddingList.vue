@@ -4,8 +4,8 @@
             <Search class="mb-4" placeholder="Search for wedding..." v-model="searchQuery" />
             <Button @click="goToAddWedding">Create Wedding</Button>
         </div>
-        <WeddingCard class="cursor-pointer" v-if="allWeddings.length" v-for="wedding in filteredWeddings" :wedding="wedding"
-            :key="wedding.id" @click="selectWedding(wedding)"/>
+        <WeddingCard class="cursor-pointer" v-if="allWeddingRoles.length" v-for="weddingRole in filteredWeddingRoles"
+            :wedding="weddingRole.wedding" :key="weddingRole.wedding.id" @click="selectWedding(weddingRole)" />
     </div>
 </template>
 
@@ -19,30 +19,31 @@ import debounce from 'lodash/debounce';
 import { useUserStore } from '@/stores/UserStore';
 import { storeToRefs } from 'pinia';
 import { useRouterHelper } from '@/util/composables/useRouterHelper';
+import { WeddingRole } from '@/models/WeddingRole';
 
 const userStore = useUserStore();
-const { localUser, selectedWedding } = storeToRefs(userStore);
+const { localUser, selectedWeddingRole } = storeToRefs(userStore);
 
 onMounted(() => {
     if (localUser.value) {
-        allWeddings.value = localUser.value.weddingRoles.map(weddingRole => weddingRole.wedding);
+        allWeddingRoles.value = localUser.value.weddingRoles;
     }
 });
 
-const {goToRoute, goToRouteSecured} = useRouterHelper(); 
+const { goToRoute, goToRouteSecured } = useRouterHelper();
 const searchQuery = ref('');
 const debouncedSearchQuery = ref('');
-const allWeddings = ref<Wedding[]>([]);
+const allWeddingRoles = ref<WeddingRole[]>([]);
 
-const filteredWeddings = computed(() => {
-    let localWeddings = allWeddings.value;
+const filteredWeddingRoles = computed(() => {
+    let localWeddingRoles = allWeddingRoles.value;
 
     if (debouncedSearchQuery.value) {
-        localWeddings = localWeddings.filter(wedding =>
-            wedding.name.toLowerCase().includes(debouncedSearchQuery.value.toLowerCase())
+        localWeddingRoles = localWeddingRoles.filter(weddingRole =>
+            weddingRole.wedding.name.toLowerCase().includes(debouncedSearchQuery.value.toLowerCase())
         );
     }
-    return localWeddings;
+    return localWeddingRoles;
 });
 
 const updateSearchQuery = debounce((value: string) => {
@@ -57,12 +58,12 @@ function goToAddWedding() {
     goToRoute('add-wedding');
 }
 
-function goToEditWedding(wedding : Wedding) {
-    goToRoute('edit-wedding', { weddingId: wedding.id });
+function goToEditWedding(weddingRole: WeddingRole) {
+    goToRoute('edit-wedding', { weddingId: weddingRole.wedding.id });
 }
 
-function selectWedding(wedding: Wedding) {
-    selectedWedding.value = wedding;
+function selectWedding(weddingRole: WeddingRole) {
+    selectedWeddingRole.value = weddingRole;
     goToRouteSecured('guests');
 }
 

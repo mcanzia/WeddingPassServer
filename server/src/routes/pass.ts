@@ -3,7 +3,7 @@ import { container } from '../configs/inversify.config';
 import { TYPES } from '../configs/types';
 import { PassController } from '../controllers/PassController';
 
-const router = express.Router();
+const router = express.Router({ mergeParams: true });
 const passController = container.get<PassController>(TYPES.PassController);
 
 router.get('/', (req, res, next) => passController.getPasses(req, res, next));

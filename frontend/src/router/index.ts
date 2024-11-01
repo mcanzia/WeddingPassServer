@@ -4,6 +4,7 @@ import AddGuest from "@/components/guest-list/AddGuest.vue";
 import AddWedding from "@/components/weddings/AddWedding.vue";
 import EditWedding from "@/components/weddings/EditWedding.vue";
 import EditGuest from "@/components/guest-list/EditGuest.vue";
+import InviteUser from "@/components/InviteUser.vue";
 import Home from "@/components/Home.vue";
 import EventAttendance from "@/components/events/EventAttendance.vue";
 import GuestUpload from "@/components/guest-list/GuestUpload.vue";
@@ -12,6 +13,9 @@ import { Roles } from "@/models/Roles";
 import { useUserStore } from "@/stores/UserStore";
 import { ErrorHandler } from "@/util/error/ErrorHandler";
 import { auth } from "@/firebase";
+import Login from "@/components/Login.vue";
+import { storeToRefs } from "pinia";
+import InvitePage from "@/components/InvitePage.vue";
 
 const routes = [
    {
@@ -48,6 +52,15 @@ const routes = [
       props: true,
       meta: {
          allowedRoles: [Roles.ADMIN, Roles.EDITOR]
+      }
+   },
+   {
+      path: '/:weddingId/invite-user',
+      name: 'invite-user',
+      component: InviteUser,
+      props: true,
+      meta: {
+         allowedRoles: [Roles.ADMIN]
       }
    },
    {
@@ -96,6 +109,16 @@ const routes = [
       path: '/:weddingId/',
       name: 'home',
       component: Home,
+   },
+   {
+      path: '/login',
+      name: 'login',
+      component: Login,
+   },
+   {
+      path: '/invite',
+      name: 'invite',
+      component: InvitePage,
    }
 
 ]
@@ -106,44 +129,53 @@ const router = createRouter({
 });
 
 
-// router.beforeEach((to, from, next) => {
-//    const userStore = useUserStore();
- 
-//    if (!userStore.isAuthReady) {
-//      const unsubscribe = userStore.$subscribe((mutation, state) => {
-//        if (state.isAuthReady) {
-//          unsubscribe();
-//          proceedWithNavigation();
-//        }
-//      });
-//    } else {
-//      proceedWithNavigation();
-//    }
- 
-//    function proceedWithNavigation() {
-//      const { user } = userStore;
-//      let userRole = userStore.localUser.user;
- 
-//      const requiresAuth = to.matched.some((record) => record.meta.allowedRoles);
- 
-//      if (requiresAuth) {
-//        if (!user) {
-//          next("/");
-//        } else {
-//          const allowedRoles = to.matched.flatMap((record) => record.meta.allowedRoles || []);
-//          const hasAccess = allowedRoles.includes(userRole);
- 
-//          if (hasAccess) {
-//            next();
-//          } else {
-//            ErrorHandler.handleAuthorizationError();
-//            next("/");
-//          }
-//        }
-//      } else {
-//        next();
-//      }
-//    }
-//  });
+router.beforeEach((to, from, next) => {
+   const userStore = useUserStore();
+   const { isAuthReady, user } = storeToRefs(userStore);
+
+   if (!isAuthReady.value) {
+      const unsubscribe = userStore.$subscribe((mutation, state) => {
+         if (state.isAuthReady) {
+            unsubscribe();
+            proceedWithNavigation();
+         }
+      });
+   } else {
+      proceedWithNavigation();
+   }
+
+   function proceedWithNavigation() {
+      const isAuthenticated = !!user.value;
+      // let userRole = userStore.localUser?.weddingRoles;
+      if(to.name !== 'login' && to.name !== 'invite' && !isAuthenticated) {
+         next({ name: 'login'});
+      } else if (to.name === 'login' && isAuthenticated) {
+         next({ name: 'landing' });
+      } else {
+         next();
+      }
+
+   //    const requiresAuth = to.matched.some((record) => record.meta.allowedRoles);
+
+   //    if (requiresAuth) {
+   //       if (!user) {
+   //          next("/");
+   //       } else {
+   //          const allowedRoles = to.matched.flatMap((record) => record.meta.allowedRoles || []);
+   //          const hasAccess = allowedRoles.includes(userRole);
+
+   //          if (hasAccess) {
+   //             next();
+   //          } else {
+   //             ErrorHandler.handleAuthorizationError();
+   //             next("/");
+   //          }
+   //       }
+   //    } else {
+   //       next();
+   //    }
+   // }
+   }
+});
 
 export default router

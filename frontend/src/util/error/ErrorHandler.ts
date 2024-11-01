@@ -20,6 +20,16 @@ export class ErrorHandler {
 
     }
 
+    static handleGenerateInviteLinkError() {
+        const notificationStore = useNotificationStore();
+        notificationStore.setMessage(`Error generating invite link.`, NotificationType.ERROR);
+    }
+
+    static handleProcessInviteLinkError() {
+        const notificationStore = useNotificationStore();
+        notificationStore.setMessage(`Error processing invite.`, NotificationType.ERROR);
+    }
+
     static handleAuthorizationError() {
         const notificationStore = useNotificationStore();
         notificationStore.setMessage("You don't access to perform this action.", NotificationType.ERROR);

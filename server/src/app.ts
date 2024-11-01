@@ -7,7 +7,7 @@ import routes from './routes/index';
 import Logger from './util/logs/logger';
 import { CustomError } from './util/error/CustomError';
 import { ErrorHandler } from './util/error/ErrorHandler';
-import { AuthServiceImpl } from './services/AuthService';
+import { AuthService } from './services/AuthService';
 import path from 'path';
 
 const port: number = Number(process.env.VITE_PORT) || 7500;
@@ -28,9 +28,9 @@ app.use(limiter);
 // User Authorization
 app.use(async (request : Request, response : Response, next : NextFunction) => {
   try {
-    const userDetails = await AuthServiceImpl.validateAuthToken(request.headers.authorization)
+    const userDetails = await AuthService.validateAuthToken(request.headers.authorization);
     response.locals.userAuth = userDetails.uid;
-    response.locals.userRole = userDetails.role;
+    response.locals.userRole = request.headers.userrole;
     next();
   } catch(error) {
     Logger.error("Authorization attempt failed");

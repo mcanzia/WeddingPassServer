@@ -18,12 +18,12 @@ export class GuestService {
 
     constructor(@inject(TYPES.EventDao) private eventDao: EventDao, @inject(TYPES.GuestDao) private guestDao: GuestDao) {}
 
-    parseCSV(buffer: Buffer): Promise<Guest[]> {
+    parseCSV(buffer: Buffer, weddingId: string): Promise<Guest[]> {
         return new Promise(async (resolve, reject) => {
             const guests: Guest[] = [];
             const stream = Readable.from(buffer.toString());
 
-            const weddingEvents : WeddingEvent[] = await this.eventDao.getAllEvents();
+            const weddingEvents : WeddingEvent[] = await this.eventDao.getAllEvents(weddingId);
 
             stream.pipe(csvParser())
                 .on('data', (data) => {
@@ -36,6 +36,7 @@ export class GuestService {
                     }
                     guests.push({
                         id: '',
+                        weddingId: weddingId,
                         name: data['Name'] || '',
                         email: data['Email'] || '',
                         phone: data['Phone'] || '',
@@ -51,7 +52,7 @@ export class GuestService {
         });
     }
 
-    async parseExcel(buffer: Buffer): Promise<Guest[]> {
+    async parseExcel(buffer: Buffer, weddingId: string): Promise<Guest[]> {
         const guests: Guest[] = [];
         const workbook = new ExcelJS.Workbook();
         await workbook.xlsx.load(buffer);
@@ -59,7 +60,7 @@ export class GuestService {
 
         const headers = worksheet.getRow(1).values as string[];
 
-        const weddingEvents : WeddingEvent[] = await this.eventDao.getAllEvents();
+        const weddingEvents : WeddingEvent[] = await this.eventDao.getAllEvents(weddingId);
 
         worksheet.eachRow({ includeEmpty: false }, (row, rowNumber) => {
             if (rowNumber === 1) return;
@@ -98,6 +99,7 @@ export class GuestService {
 
             guests.push({
                 id: '',
+                weddingId: weddingId,
                 name: guest.name || '',
                 email: guest.email || '',
                 phone: guest.phone || '',
@@ -108,8 +110,8 @@ export class GuestService {
         return guests;
     }
 
-    async validateGuests(guests: Guest[]): Promise<UploadValidation> {
-        const currentGuestNames = (await this.guestDao.getAllGuests()).map(guest => guest.name.toLowerCase());
+    async validateGuests(weddingId: string, guests: Guest[]): Promise<UploadValidation> {
+        const currentGuestNames = (await this.guestDao.getAllGuests(weddingId)).map(guest => guest.name.toLowerCase());
 
         let uploadIssues : Map<string, string> = new Map<string, string>();
         let validatedGuests : Array<Guest> = [];

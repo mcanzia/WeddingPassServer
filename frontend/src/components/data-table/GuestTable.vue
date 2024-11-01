@@ -150,10 +150,10 @@ import { useUserStore } from '@/stores/UserStore';
 import { NotificationType } from '@/models/NotificationType';
 import { ErrorHandler } from '@/util/error/ErrorHandler';
 import { storeToRefs } from 'pinia';
-import {useRouterHelper} from '@/util/composables/useRouterHelper';
+import { useRouterHelper } from '@/util/composables/useRouterHelper';
 
 const guestService = new GuestService();
-const {goToRouteSecured} = useRouterHelper();
+const { goToRouteSecured } = useRouterHelper();
 const notificationStore = useNotificationStore();
 const { setMessage } = notificationStore;
 const userStore = useUserStore();
@@ -274,7 +274,7 @@ function goToAddGuest() {
 
 function goToEditGuest() {
     const guestId = data.value.at(Number(Object.keys(rowSelection.value)))!.id;
-    goToRouteSecured('edit-guest', {guestId: guestId});
+    goToRouteSecured('edit-guest', { guestId: guestId });
 }
 
 async function deleteGuests() {

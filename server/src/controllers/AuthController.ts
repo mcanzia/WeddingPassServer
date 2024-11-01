@@ -7,11 +7,13 @@ import { WeddingRole } from '../models/WeddingRole';
 import { TYPES } from '../configs/types';
 import { UserDao } from '../dao/UserDao';
 import { User } from '../models/User';
+import { AuthService } from '../services/AuthService';
+import { InviteToken } from '../models/InviteToken';
 
 @injectable()
 export class AuthController {
 
-    constructor(@inject(TYPES.UserDao) private userDao: UserDao) {}
+    constructor(@inject(TYPES.UserDao) private userDao: UserDao, @inject(TYPES.AuthService) private authService: AuthService) {}
 
     async getUserRoles(request : Request, response : Response, next : NextFunction) {
         try {
@@ -35,7 +37,7 @@ export class AuthController {
             Logger.info(`Setting user role for: ${userId}`);
             const role: WeddingRole = request.body;
             await firebaseAdmin.auth().setCustomUserClaims(userId, { role: role.role });
-            response.status(200).send();
+            response.status(204).send();
         } catch (error) {
             Logger.error("Error setting user role", error);
             response.status((error as CustomError).statusCode).send((error as CustomError).message);
@@ -113,9 +115,36 @@ export class AuthController {
             Logger.info(`Deleting user ${JSON.stringify(request.body)}`);
             const user : User = request.body;
             await this.userDao.deleteUser(user.id);
-            response.status(200).send('Success');
+            response.status(204).send();
         } catch (error) {
             Logger.error("Error deleting user", error);
+            response.status((error as CustomError).statusCode).send((error as CustomError).message);
+        }
+    }
+
+    async generateInviteLink(request : Request, response : Response, next : NextFunction) {
+        try {
+            Logger.info(`Generating Invite Link`);
+            const weddingRole: WeddingRole = request.body;
+            const inviteToken : InviteToken = await this.authService.generateInviteLink(weddingRole);
+            Logger.info(`Successfully created invite link for ${weddingRole.wedding.id}`);
+            response.status(200).json(inviteToken);
+        } catch (error) {
+            Logger.error("Error generating invite link", error);
+            response.status((error as CustomError).statusCode).send((error as CustomError).message);
+        }
+    }
+
+    async processInvite(request : Request, response : Response, next : NextFunction) {
+        try {
+            Logger.info(`Processing Invite Link`);
+            const inviteToken: InviteToken = request.body;
+            const userId : string = response.locals.userAuth;
+            await this.authService.processInviteLink(inviteToken.token, userId);
+            Logger.info(`Successfully processed invite link for ${userId}`);
+            response.status(204).send();
+        } catch (error) {
+            Logger.error("Error processing invite link", error);
             response.status((error as CustomError).statusCode).send((error as CustomError).message);
         }
     }

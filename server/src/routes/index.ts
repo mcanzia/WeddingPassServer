@@ -5,13 +5,13 @@ import eventRoutes from './event';
 import weddingRoutes from './wedding';
 import authRoutes from './auth';
 
-const router = express.Router();
+const router = express.Router({ mergeParams: true });
 
 router.use(express.json());
 
 router.use('/pass', passRoutes);
-router.use('/guests', guestRoutes);
-router.use('/events', eventRoutes);
+router.use('/weddings/:weddingId/guests', guestRoutes);
+router.use('/weddings/:weddingId/events', eventRoutes);
 router.use('/weddings', weddingRoutes);
 router.use('/auth', authRoutes);
 export default router;

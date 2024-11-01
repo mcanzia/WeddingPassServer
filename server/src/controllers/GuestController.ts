@@ -17,7 +17,9 @@ export class GuestController {
         try {
             Logger.info(`Retrieving all guests`);
 
-            const guests : Array<Guest> = await this.guestDao.getAllGuests();
+            const { weddingId } = request.params;
+
+            const guests : Array<Guest> = await this.guestDao.getAllGuests(weddingId);
             
             Logger.info(`Number of guests retrieved successfully: ${guests.length}`);
             response.status(200).json(guests);
@@ -30,8 +32,8 @@ export class GuestController {
     async getGuestbyId(request : Request, response : Response, next : NextFunction) {
         try {
             Logger.info(`Retrieving guest with ID: ${request.params.guestId}`);
-            const guestId : string = request.params.guestId;
-            const guest : Guest = await this.guestDao.getGuestById(guestId);
+            const { weddingId, guestId } = request.params;
+            const guest : Guest = await this.guestDao.getGuestById(weddingId, guestId);
             response.status(200).json(guest);
         } catch (error) {
             Logger.error(`Error retrieving guest with ${request.params.guestId}`);
@@ -42,8 +44,8 @@ export class GuestController {
     async getGuestbyName(request : Request, response : Response, next : NextFunction) {
         try {
             Logger.info(`Retrieving guest with name: ${request.params.guestName}`);
-            const guestName : string = request.params.guestName;
-            const guest : Guest = await this.guestDao.getGuestByName(guestName);
+            const { weddingId, guestName } = request.params;
+            const guest : Guest = await this.guestDao.getGuestByName(weddingId, guestName);
             response.status(200).json(guest);
         } catch (error) {
             Logger.error(`Error retrieving guest with ${request.params.guestName}`);
@@ -54,8 +56,8 @@ export class GuestController {
     async getGuestbySerialNumber(request : Request, response : Response, next : NextFunction) {
         try {
             Logger.info(`Retrieving guest with serial number: ${request.params.serialNumber}`);
-            const serialNumber : string = request.params.serialNumber;
-            const guest : Guest = await this.guestDao.getGuestBySerialNumber(serialNumber);
+            const { weddingId, serialNumber } = request.params;
+            const guest : Guest = await this.guestDao.getGuestBySerialNumber(weddingId, serialNumber);
             response.status(200).json(guest);
         } catch (error) {
             Logger.error(`Error retrieving guest with ${request.params.serialNumber}`);
@@ -66,8 +68,8 @@ export class GuestController {
     async getGuestsForEvent(request : Request, response : Response, next : NextFunction) {
         try {
             Logger.info(`Retrieving guests for event: ${request.params.eventId}`);
-            const eventId : string = request.params.eventId;
-            const guests : Array<Guest> = await this.guestDao.getGuestsForEvent(eventId);
+            const { weddingId, eventId } = request.params;
+            const guests : Array<Guest> = await this.guestDao.getGuestsForEvent(weddingId, eventId);
             response.status(200).json(guests);
         } catch (error) {
             Logger.error(`Error retrieving guests for ${request.params.eventId}`);
@@ -78,10 +80,11 @@ export class GuestController {
     async createGuest(request : Request, response : Response, next : NextFunction) {
         try {
             Logger.info(`Creating new guest`);
+            const { weddingId } = request.params;
             const guest: Guest = request.body;
-            await this.guestDao.createGuest(guest);
+            await this.guestDao.createGuest(weddingId, guest);
             Logger.info(`Successfully added guest for ${guest.name}`);
-            response.status(200).send('Success');
+            response.status(204).send();
         } catch (error) {
             Logger.error("Error adding guest", error);
             response.status((error as CustomError).statusCode).send((error as CustomError).message);
@@ -91,10 +94,11 @@ export class GuestController {
     async batchCreateGuests(request : Request, response : Response, next : NextFunction) {
         try {
             Logger.info(`Batch creating new guests`);
+            const { weddingId } = request.params;
             const guests: Array<Guest> = request.body;
-            await this.guestDao.batchCreateGuests(guests);
+            await this.guestDao.batchCreateGuests(weddingId, guests);
             Logger.info(`Successfully added batch guests`);
-            response.status(200).send('Success');
+            response.status(204).send();
         } catch (error) {
             Logger.error("Error adding batch guests", error);
             response.status((error as CustomError).statusCode).send((error as CustomError).message);
@@ -104,10 +108,10 @@ export class GuestController {
     async updateGuest(request: Request, response: Response, next: NextFunction) {
         try {
             Logger.info(`Updating guest: ${JSON.stringify(request.body)}`);
-            const guestId = request.params.guestId;
+            const { weddingId, guestId } = request.params;
             const updateGuestDetails : Guest = request.body;
-            await this.guestDao.updateGuest(guestId, updateGuestDetails);
-            response.status(200).send('Success');
+            await this.guestDao.updateGuest(weddingId, guestId, updateGuestDetails);
+            response.status(204).send();
         } catch (error) {
             Logger.error("Error updating guest", error);
             response.status((error as CustomError).statusCode).send((error as CustomError).message);
@@ -117,9 +121,10 @@ export class GuestController {
     async deleteGuest(request : Request, response : Response, next : NextFunction) {
         try {
             Logger.info(`Deleting guest ${JSON.stringify(request.body)}`);
+            const { weddingId } = request.params;
             const guest : Guest = request.body;
-            await this.guestDao.deleteGuest(guest.id);
-            response.status(200).send('Success');
+            await this.guestDao.deleteGuest(weddingId, guest.id);
+            response.status(204).send();
         } catch (error) {
             Logger.error("Error deleting guest", error);
             response.status((error as CustomError).statusCode).send((error as CustomError).message);
@@ -129,9 +134,10 @@ export class GuestController {
     async batchDeleteGuests(request : Request, response : Response, next : NextFunction) {
         try {
             Logger.info(`Deleting guests ${JSON.stringify(request.body)}`);
+            const { weddingId } = request.params;
             const guests: Array<Guest> = request.body;
-            await this.guestDao.batchDeleteGuests(guests);
-            response.status(200).send('Success');
+            await this.guestDao.batchDeleteGuests(weddingId, guests);
+            response.status(204).send();
         } catch (error) {
             Logger.error("Error batch deleting guests", error);
             response.status((error as CustomError).statusCode).send((error as CustomError).message);
@@ -146,6 +152,7 @@ export class GuestController {
             }
 
             Logger.info(`Received file: ${request.file.originalname}`);
+            const { weddingId } = request.params;
 
             let guests: Guest[] = [];
 
@@ -155,9 +162,9 @@ export class GuestController {
             console.log('FILE EXTENSION', fileExtension);
 
             if (fileExtension === 'csv') {
-                guests = await this.guestService.parseCSV(fileBuffer);
+                guests = await this.guestService.parseCSV(fileBuffer, weddingId);
             } else if (fileExtension === 'xlsx' || fileExtension === 'xls') {
-                guests = await this.guestService.parseExcel(fileBuffer);
+                guests = await this.guestService.parseExcel(fileBuffer, weddingId);
             } else {
                 Logger.error('Unsupported file format.');
                 return response.status(415).json({ error: 'Unsupported file format.' });
@@ -168,7 +175,7 @@ export class GuestController {
                 return response.status(422).json({ error: 'No guest data found in the file.' });
             }
 
-            const validation : UploadValidation = await this.guestService.validateGuests(guests);
+            const validation : UploadValidation = await this.guestService.validateGuests(weddingId, guests);
             if (validation.validatedGuests.length === 0 && validation.uploadIssues.size === 0) {
                 Logger.error('No valid guest data to upload.');
                 return response.status(422).json({ error: 'No valid guest data to upload.' });

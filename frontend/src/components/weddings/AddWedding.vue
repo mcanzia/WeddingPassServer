@@ -53,7 +53,7 @@ const {goToRoute} = useRouterHelper();
 const notificationStore = useNotificationStore();
 const { setMessage } = notificationStore;
 const userStore = useUserStore();
-const { hasEditAuthority, user } = storeToRefs(userStore);
+const { hasEditAuthority, localUser } = storeToRefs(userStore);
 
 const newWeddingForm = ref({
     name: '',
@@ -62,12 +62,12 @@ const newWeddingForm = ref({
 });
 
 async function saveWedding() {
-    if (hasEditAuthority) {
+    if (hasEditAuthority && localUser.value) {
         const newWedding: Wedding = {
             name: newWeddingForm.value.name,
             date: new Date(newWeddingForm.value.date),
             location: newWeddingForm.value.location,
-            ownerId: user.value.id
+            ownerId: localUser.value.id
         };
         const weddingService = new WeddingService();
         await weddingService.addWedding(newWedding);

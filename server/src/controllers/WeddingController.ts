@@ -5,11 +5,14 @@ import { Wedding } from "../models/Wedding";
 import { CustomError } from '../util/error/CustomError';
 import { TYPES } from '../configs/types';
 import { WeddingDao } from '../dao/WeddingDao';
+import { UserDao } from '../dao/UserDao';
+import { WeddingRole } from '../models/WeddingRole';
+import { Roles } from '../models/Roles';
 
 @injectable()
 export class WeddingController {
 
-    constructor(@inject(TYPES.WeddingDao) private weddingDao: WeddingDao) {}
+    constructor(@inject(TYPES.WeddingDao) private weddingDao: WeddingDao, @inject(TYPES.UserDao) private userDao: UserDao) {}
 
     async getWeddings(request : Request, response : Response, next : NextFunction) {
         try {
@@ -68,9 +71,12 @@ export class WeddingController {
         try {
             Logger.info(`Creating new wedding`);
             const wedding: Wedding = request.body;
-            await this.weddingDao.createWedding(wedding);
+            const newWedding : Wedding = await this.weddingDao.createWedding(wedding);
             Logger.info(`Successfully added wedding for ${wedding.name}`);
-            response.status(200).send('Success');
+            const ownerRole : WeddingRole = new WeddingRole(Roles.ADMIN, newWedding);
+            await this.userDao.addUserToWedding(newWedding.ownerId, ownerRole);
+            Logger.info(`Successfully added user ${newWedding.ownerId} as owner for ${wedding.name}`);
+            response.status(204).send();
         } catch (error) {
             Logger.error("Error adding wedding", error);
             response.status((error as CustomError).statusCode).send((error as CustomError).message);
@@ -83,7 +89,7 @@ export class WeddingController {
             const weddings: Array<Wedding> = request.body;
             await this.weddingDao.batchCreateWeddings(weddings);
             Logger.info(`Successfully added batch weddings`);
-            response.status(200).send('Success');
+            response.status(204).send();
         } catch (error) {
             Logger.error("Error adding batch weddings", error);
             response.status((error as CustomError).statusCode).send((error as CustomError).message);
@@ -96,7 +102,7 @@ export class WeddingController {
             const weddingId = request.params.weddingId;
             const updateWeddingDetails : Wedding = request.body;
             await this.weddingDao.updateWedding(weddingId, updateWeddingDetails);
-            response.status(200).send('Success');
+            response.status(204).send();
         } catch (error) {
             Logger.error("Error updating wedding", error);
             response.status((error as CustomError).statusCode).send((error as CustomError).message);
@@ -108,7 +114,7 @@ export class WeddingController {
             Logger.info(`Deleting wedding ${JSON.stringify(request.body)}`);
             const wedding : Wedding = request.body;
             await this.weddingDao.deleteWedding(wedding.id);
-            response.status(200).send('Success');
+            response.status(204).send();
         } catch (error) {
             Logger.error("Error deleting wedding", error);
             response.status((error as CustomError).statusCode).send((error as CustomError).message);
@@ -120,7 +126,7 @@ export class WeddingController {
             Logger.info(`Deleting weddings ${JSON.stringify(request.body)}`);
             const weddings: Array<Wedding> = request.body;
             await this.weddingDao.batchDeleteWeddings(weddings);
-            response.status(200).send('Success');
+            response.status(204).send();
         } catch (error) {
             Logger.error("Error batch deleting weddings", error);
             response.status((error as CustomError).statusCode).send((error as CustomError).message);

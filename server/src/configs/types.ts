@@ -1,5 +1,8 @@
+import { AuthService } from "../services/AuthService";
+
 export const TYPES = {
     AuthController: Symbol.for("AuthController"),
+    AuthService: Symbol.for("AuthService"),
     UserDao: Symbol.for("UserDao"),
     PassController: Symbol.for("PassController"),
     PassDao: Symbol.for("PassDao"),

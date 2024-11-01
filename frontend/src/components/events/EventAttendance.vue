@@ -15,7 +15,7 @@
                     </DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>
-            <EventGuests :wedding-event="selectedEvent!" />
+            <EventGuests :wedding-event="selectedEvent!" v-if="selectedEvent" />
         </div>
         <Loader v-else />
     </div>
@@ -55,11 +55,10 @@ onBeforeMount(async () => {
     if (eventIdFromRoute) {
         const event = weddingEvents.value.find(event => event.id === eventIdFromRoute);
         initializeEvent(event);
-    } else {
+    } else if (weddingEvents.value[0]) {
         selectedEvent.value = weddingEvents.value[0];
         replaceRouteSecured('event-attendance', {}, { event: selectedEvent.value.id });
     }
-    openEvent(weddingEvents.value[0])
     loading.value = false;
 });
 

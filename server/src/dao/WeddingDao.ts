@@ -103,11 +103,14 @@ export class WeddingDao {
         }
     }
 
-    async createWedding(wedding: Wedding): Promise<void> {
+    async createWedding(wedding: Wedding): Promise<Wedding> {
         try {
             const newWeddingRef = this.weddingsCollection.doc();
             wedding.id = newWeddingRef.id;
             await newWeddingRef.set(wedding);
+
+            return wedding;
+
         } catch (error) {
             throw new DatabaseError("Could not add wedding to database: " + error);
         }

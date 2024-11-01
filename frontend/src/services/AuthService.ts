@@ -1,4 +1,5 @@
 import { AuthController } from '@/controllers/AuthController';
+import { InviteToken } from '@/models/InviteToken';
 import { User } from '@/models/User';
 import { WeddingRole } from '@/models/WeddingRole';
 import { useUserStore } from '@/stores/UserStore';
@@ -7,10 +8,12 @@ export class AuthService {
 
     private authController : AuthController;
     private userStore : any;
+    private weddingRole : WeddingRole;
 
     constructor() {
         this.authController = new AuthController();
         this.userStore = useUserStore();
+        this.weddingRole = this.userStore.selectedWeddingRole;
     }
 
     async getAllUsers() {
@@ -78,6 +81,26 @@ export class AuthService {
         try {
             const userAccessToken = await this.userStore.getAccessToken();
             await this.authController.deleteUser(userAccessToken, userToDelete);
+            return;
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    async generateInviteLink(newWeddingRole: WeddingRole) {
+        try {
+            const userAccessToken = await this.userStore.getAccessToken();
+            const inviteLink = await this.authController.generateInviteLink(userAccessToken, newWeddingRole, this.weddingRole);
+            return inviteLink;
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    async processInvite(token: InviteToken) {
+        try {
+            const userAccessToken = await this.userStore.getAccessToken();
+            await this.authController.processInvite(userAccessToken, token);
             return;
         } catch (error) {
             throw error;

@@ -55,7 +55,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useUserStore } from '@/stores/UserStore';
-import { ref, computed } from 'vue';
+import { useRouterHelper } from '@/util/composables/useRouterHelper';
+import { storeToRefs } from 'pinia';
+import { ref, computed, watch } from 'vue';
 
 const {registerUser, loginUser, loginUserGoogle, sendPasswordResetEmail} = useUserStore();
 
@@ -83,7 +85,21 @@ const haveAccountText = computed(() => {
 
 const loginRegisterText = computed(() => {
     return newUser.value ? "Register" : "Login";
-})
+});
+
+const userStore = useUserStore();
+const { isLoggedIn, isAuthReady } = storeToRefs(userStore);
+const { goToRouteSecured } = useRouterHelper();
+
+watch(
+  [isLoggedIn, isAuthReady],
+  ([newIsLoggedIn, newIsAuthReady]) => {
+    if (newIsLoggedIn && newIsAuthReady) {
+      goToRouteSecured('landing');
+    }
+  }
+);
+
 
 async function signInOrCreateUser() {
     loading.value = true;

@@ -1,0 +1,64 @@
+<template>
+    <div>
+        <Loader v-if="isProcessing" />
+        <div v-else>
+            <p v-if="error">{{ error }}</p>
+            <p v-else>Processing your invitation...</p>
+        </div>
+    </div>
+</template>
+
+<script setup lang="ts">
+import { ref, onMounted } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { useUserStore } from '@/stores/UserStore';
+import { useNotificationStore } from '@/stores/NotificationStore';
+import Loader from '@/components/Loader.vue';
+import { AuthService } from '@/services/AuthService';
+import { NotificationType } from '@/models/NotificationType';
+import { InviteToken } from '@/models/InviteToken';
+import { useRouterHelper } from '@/util/composables/useRouterHelper';
+
+const authService = new AuthService();
+const route = useRoute();
+const userStore = useUserStore();
+const notificationStore = useNotificationStore();
+const { goToRoute } = useRouterHelper();
+
+const isProcessing = ref(true);
+const error = ref<string | null>(null);
+
+onMounted(async () => {
+    const token = route.query.token as string;
+
+    if (!token) {
+        error.value = 'Invalid invite link.';
+        isProcessing.value = false;
+        return;
+    }
+
+    const inviteToken: InviteToken = new InviteToken(token);
+
+    console.log('INVITE PAGE');
+
+    if (userStore.isLoggedIn) {
+        await processInvite(inviteToken);
+    } else {
+        localStorage.setItem('inviteToken', token);
+        console.log('SET LOCAL STORE', localStorage.getItem('inviteToken'));
+        goToRoute('login');
+    }
+});
+
+async function processInvite(token: InviteToken) {
+    try {
+        await authService.processInvite(token);
+        notificationStore.setMessage('You have been added to the wedding.', NotificationType.SUCCESS);
+    } catch (err) {
+        error.value = 'Failed to process invite.';
+    } finally {
+        isProcessing.value = false;
+        goToRoute('landing');
+    }
+}
+</script>

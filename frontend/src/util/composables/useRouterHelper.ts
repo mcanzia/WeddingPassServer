@@ -1,6 +1,7 @@
 import { useRouter } from "vue-router";
 import { useUserStore } from '@/stores/UserStore';
 import { storeToRefs } from "pinia";
+import { computed } from "vue";
 export function useRouterHelper() {
 
   const { selectedWedding } = storeToRefs(useUserStore());
@@ -29,6 +30,6 @@ export function useRouterHelper() {
   return {
     goToRoute,
     goToRouteSecured,
-    replaceRouteSecured
+    replaceRouteSecured,
   }
 }

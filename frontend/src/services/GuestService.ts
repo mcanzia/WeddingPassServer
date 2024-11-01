@@ -1,21 +1,24 @@
 import { GuestController } from '@/controllers/GuestController';
 import { Guest } from '@/models/Guest';
+import { WeddingRole } from '@/models/WeddingRole';
 import { useUserStore } from '@/stores/UserStore';
 
 export class GuestService {
 
     private guestController : GuestController;
     private userStore : any;
+    private weddingRole : WeddingRole;
 
     constructor() {
         this.guestController = new GuestController();
         this.userStore = useUserStore();
+        this.weddingRole = this.userStore.selectedWeddingRole;
     }
 
     async getAllGuests() {
         try {
             const userAccessToken = await this.userStore.getAccessToken();
-            const response = await this.guestController.getAllGuests(userAccessToken);
+            const response = await this.guestController.getAllGuests(userAccessToken, this.weddingRole);
             const allGuests = response ? response : [];
             return allGuests;
         } catch (error) {
@@ -26,7 +29,7 @@ export class GuestService {
     async getGuestById(guestId : string) {
         try {
             const userAccessToken = await this.userStore.getAccessToken();
-            const guest = await this.guestController.getGuestById(userAccessToken, guestId);
+            const guest = await this.guestController.getGuestById(userAccessToken, this.weddingRole, guestId);
             return guest;
         } catch (error) {
             throw error;
@@ -36,7 +39,7 @@ export class GuestService {
     async getGuestsForEvent(eventId : string) {
         try {
             const userAccessToken = await this.userStore.getAccessToken();
-            const guest = await this.guestController.getGuestsForEvent(userAccessToken, eventId);
+            const guest = await this.guestController.getGuestsForEvent(userAccessToken, this.weddingRole, eventId);
             return guest;
         } catch (error) {
             throw error;
@@ -46,7 +49,7 @@ export class GuestService {
     async addGuest(guestToAdd: Guest) {
         try {
             const userAccessToken = await this.userStore.getAccessToken();
-            await this.guestController.addGuest(userAccessToken, guestToAdd);
+            await this.guestController.addGuest(userAccessToken, this.weddingRole, guestToAdd);
             return;
         } catch (error) {
             throw error;
@@ -56,7 +59,7 @@ export class GuestService {
     async batchAddGuests(guests : Array<Guest>) {
         try {
             const userAccessToken = await this.userStore.getAccessToken();
-            const guest = await this.guestController.batchAddGuests(userAccessToken, guests);
+            const guest = await this.guestController.batchAddGuests(userAccessToken, this.weddingRole, guests);
             return;   
         } catch (error) {
             throw error;
@@ -66,7 +69,7 @@ export class GuestService {
     async updateGuest(guest : Guest) {
         try {
             const userAccessToken = await this.userStore.getAccessToken();
-            await this.guestController.updateGuest(userAccessToken, guest);
+            await this.guestController.updateGuest(userAccessToken, this.weddingRole, guest);
             return;
         } catch (error) {
             throw error;
@@ -76,7 +79,7 @@ export class GuestService {
     async deleteGuest(guestToDelete: Guest) {
         try {
             const userAccessToken = await this.userStore.getAccessToken();
-            await this.guestController.deleteGuest(userAccessToken, guestToDelete);
+            await this.guestController.deleteGuest(userAccessToken, this.weddingRole, guestToDelete);
             return;
         } catch (error) {
             throw error;
@@ -86,7 +89,7 @@ export class GuestService {
     async batchDeleteGuests(guests : Array<Guest>) {
         try {
             const userAccessToken = await this.userStore.getAccessToken();
-            await this.guestController.batchDeleteGuests(userAccessToken, guests);
+            await this.guestController.batchDeleteGuests(userAccessToken, this.weddingRole, guests);
             return;
         } catch (error) {
             throw error;
@@ -96,7 +99,7 @@ export class GuestService {
     async guestFileUpload(guestFile : File) {
         try {
             const userAccessToken = await this.userStore.getAccessToken();
-            const guestValidation = await this.guestController.guestFileUpload(userAccessToken, guestFile);
+            const guestValidation = await this.guestController.guestFileUpload(userAccessToken, this.weddingRole, guestFile);
             return {...guestValidation, uploadIssues: new Map(Object.entries(guestValidation.uploadIssues))};
         } catch (error) {
             throw error;

@@ -54,12 +54,12 @@ export class PassController {
 
     async generateNewPass(request: Request, response: Response, next: NextFunction) {
         try {
-            const serialNumber = request.params.serialNumber;
+            const {weddingId, serialNumber} = request.params;
             Logger.info(`Generating new pass for number ${serialNumber}`);
             if (!serialNumber) {
                 return response.status(400).json({ error: 'Missing serialNumber parameter.' });
             }
-            const guest: Guest = await this.guestDao.getGuestBySerialNumber(serialNumber);
+            const guest: Guest = await this.guestDao.getGuestBySerialNumber(weddingId, serialNumber);
 
             Logger.info(`User found ${guest.name}`);
 
@@ -83,7 +83,7 @@ export class PassController {
             const pass: Pass = request.body;
             await this.passDao.createPass(pass);
             Logger.info(`Successfully added pass for ${pass.name}`);
-            response.status(200).send('Success');
+            response.status(204).send();
         } catch (error) {
             Logger.error("Error adding pass", error);
             response.status((error as CustomError).statusCode).send((error as CustomError).message);
@@ -96,7 +96,7 @@ export class PassController {
             const passId = request.params.passId;
             const updatePassDetails: Pass = request.body;
             await this.passDao.updatePass(passId, updatePassDetails);
-            response.status(200).send();
+            response.status(204).send();
         } catch (error) {
             Logger.error("Error updating pass", error);
             response.status((error as CustomError).statusCode).send((error as CustomError).message);
@@ -108,7 +108,7 @@ export class PassController {
             Logger.info(`Deleting pass ${JSON.stringify(request.body)}`);
             const pass: Pass = request.body;
             await this.passDao.deletePass(pass.id);
-            response.status(200).send();
+            response.status(204).send();
         } catch (error) {
             Logger.error("Error deleting pass", error);
             response.status((error as CustomError).statusCode).send((error as CustomError).message);

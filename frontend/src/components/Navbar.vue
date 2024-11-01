@@ -26,6 +26,12 @@
               {{ selectedWedding.name }}
             </a>
           </DropdownMenuItem>
+          <DropdownMenuItem class="capitalize" v-if="selectedWedding && hasEditAuthority" @click="goToRouteSecured('invite-user')">
+            <a
+              class="text-sm font-medium text-muted-foreground transition-colors hover:text-primary cursor-pointer">
+              Invite Users
+            </a>
+          </DropdownMenuItem>
           <DropdownMenuItem class="capitalize" @click="logout">
             <a
               class="text-sm font-medium text-muted-foreground transition-colors hover:text-primary cursor-pointer">
@@ -44,6 +50,12 @@
             <a
               class="text-sm font-medium text-muted-foreground transition-colors hover:text-primary cursor-pointer">
               Guests Upload
+            </a>
+          </DropdownMenuItem>
+          <DropdownMenuItem class="capitalize" v-if="selectedWedding && hasEditAuthority" @click="goToRouteSecured('invite-user')">
+            <a
+              class="text-sm font-medium text-muted-foreground transition-colors hover:text-primary cursor-pointer">
+              Invite Users
             </a>
           </DropdownMenuItem>
           <DropdownMenuItem class="capitalize" @click="logout">

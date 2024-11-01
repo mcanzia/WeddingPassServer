@@ -3,186 +3,204 @@ import { ref, computed, watch } from 'vue';
 import { auth } from '@/firebase';
 import { ErrorHandler } from '@/util/error/ErrorHandler';
 import { SuccessHandler } from '@/util/SuccessHandler';
+import { useRouterHelper } from '@/util/composables/useRouterHelper';
 import { AuthService } from '@/services/AuthService';
-import { Roles } from '@/models/Roles';
 import { WeddingRole } from '@/models/WeddingRole';
 import { User } from '@/models/User';
 import { Wedding } from '@/models/Wedding';
 import Cookies from 'js-cookie';
+import { InviteToken } from '@/models/InviteToken';
+import { Roles } from '@/models/Roles';
 
 export const useUserStore = defineStore('userStore', () => {
-  // State
-  const user = ref<any>(null);
-  const localUser = ref<User | null>(null);
-  const selectedWedding = ref<Wedding | null>(null);
-  const isLoading = ref<boolean>(false);
-  const isAuthReady = ref<boolean>(false);
 
-  // Getters
-  const isLoggedIn = computed(() => user.value);
-  const userEmail = computed(() => user.value?.email || null);
-  const hasEditAuthority = computed(() => {
-    return true;
-    // return [Roles.ADMIN, Roles.EDITOR].includes(localUser.value?.role);
-  });
+    const { goToRoute } = useRouterHelper();
 
-  // Actions
-  function initializeAuthListener() {
-    isLoading.value = true;
-    auth.onAuthStateChanged(async (authUser) => {
-      user.value = authUser ? authUser : null;
-      if (user.value) {
-        const authService = new AuthService();
-        localUser.value = await authService.getUserById(user.value.uid);
-        if (!localUser.value) {
-            await createLocalUser(user.value);
-        }
-        loadSelectedWedding();
-        isAuthReady.value = true;
-      }
-      setTimeout(() => {
-        isLoading.value = false;
-      }, 500);
-    });
-  }
-
-  function loadSelectedWedding() {
-    const weddingData = Cookies.get('selectedWedding');
-    if (weddingData) {
-      try {
-        const parsedData = JSON.parse(weddingData);
-        selectedWedding.value = new Wedding(
-          parsedData.id,
-          parsedData.name,
-          new Date(parsedData.date),
-          parsedData.location,
-          parsedData.ownerId
-        );
-      } catch (error) {
-        console.error('Failed to parse selectedWedding from cookie:', error);
-        selectedWedding.value = null;
-      }
-    }
-  }
-
-  function saveSelectedWedding() {
-    if (selectedWedding.value) {
-      const dataToStore = {
-        id: selectedWedding.value.id,
-        name: selectedWedding.value.name,
-        date: selectedWedding.value.date.toDateString,
-        location: selectedWedding.value.location,
-        ownerId: selectedWedding.value.ownerId,
-      };
-      Cookies.set('selectedWedding', JSON.stringify(dataToStore), { expires: 7 });
-    } else {
-      Cookies.remove('selectedWedding');
-    }
-  }
-
-  watch(
-    selectedWedding,
-    () => {
-      saveSelectedWedding();
-    },
-    { deep: true }
-  );
-
-  async function getAccessToken() {
-    try {
-      return user.value ? await user.value.getIdToken() : null;
-    } catch (error: any) {
-      ErrorHandler.handleUserAuthError(user.value, error);
-    }
-  }
-
-  async function registerUser(email: string, password: string) {
-    try {
-      const userDetails = await auth.createUserWithEmailAndPassword(auth, email, password);
-      await createLocalUser(userDetails.user);
-    } catch (error: any) {
-      ErrorHandler.handleUserAuthError(user.value, error);
-    }
-  }
-
-  async function loginUser(email: string, password: string) {
-    try {
-      await auth.signInWithEmailAndPassword(auth, email, password);
-    } catch (error: any) {
-      ErrorHandler.handleUserAuthError(user.value, error);
-    }
-  }
-
-  async function loginUserGoogle() {
-    try {
-      const provider = new auth.GoogleAuthProvider();
-      await auth.signInWithPopup(auth, provider);
-    } catch (error: any) {
-      ErrorHandler.handleUserAuthError(user.value, error);
-    }
-  }
-
-  async function logoutUser() {
-    try {
-      await auth.signOut();
-      user.value = null;
-      localUser.value = null;
-      selectedWedding.value = null;
-      Cookies.remove('selectedWedding');
-    } catch (error: any) {
-      ErrorHandler.handleUserAuthError(user.value, error);
-    }
-  }
-
-  async function sendPasswordResetEmail(email: string) {
-    try {
-      await auth.sendPasswordResetEmail(auth, email);
-      SuccessHandler.showNotification('Password reset instructions sent to your email.');
-    } catch (error: any) {
-      ErrorHandler.handleUserAuthError(user.value, error);
-    }
-  }
-
-  function isMobile() {
-    return screen.width <= 770;
-  }
-
-  async function createLocalUser(userDetails: any) {
-    const testWedding: Wedding = new Wedding(
-      '6kREtT3iJIhMSLgMIitJ',
-      'TEST WEDDING',
-      new Date('2025-07-17T00:00:00.000Z'),
-      'Vegas',
-      'mkjDzyaqZtg1lpGhg0EGcHnfvS42'
-    );
-    const weddingRoles: Array<WeddingRole> = [new WeddingRole(Roles.EDITOR, testWedding)];
-    const newUser: User = new User(userDetails.uid, userDetails.email, weddingRoles);
-    const authService = new AuthService();
-    localUser.value = await authService.addUser(newUser);
-  }
-
-  return {
     // State
-    user,
-    localUser,
-    selectedWedding,
-    isLoading,
-    isAuthReady,
+    const user = ref<any>(null);
+    const localUser = ref<User | null>(null);
+    const selectedWeddingRole = ref<WeddingRole | null>(null);
+    const isLoading = ref<boolean>(false);
+    const isAuthReady = ref<boolean>(false);
+
     // Getters
-    isLoggedIn,
-    userEmail,
-    hasEditAuthority,
+    const isLoggedIn = computed(() => user.value && localUser.value);
+    const userEmail = computed(() => user.value?.email || null);
+    const hasEditAuthority = computed(() => {
+        const role = selectedWeddingRole.value?.role;
+        return role && [Roles.ADMIN.toString(), Roles.EDITOR.toString()].includes(role);
+    });
+    const selectedWedding = computed(() => selectedWeddingRole.value?.wedding);
+    const selectedRole = computed(() => selectedWeddingRole.value?.role);
+
     // Actions
-    initializeAuthListener,
-    loadSelectedWedding,
-    saveSelectedWedding,
-    getAccessToken,
-    registerUser,
-    loginUser,
-    loginUserGoogle,
-    logoutUser,
-    sendPasswordResetEmail,
-    isMobile,
-    createLocalUser,
-  };
+    function initializeAuthListener() {
+        isLoading.value = true;
+        auth.onAuthStateChanged(async (authUser) => {
+            user.value = authUser ? authUser : null;
+            isAuthReady.value = true;
+            if (user.value) {
+                const authService = new AuthService();
+                localUser.value = await authService.getUserById(user.value.uid);
+                if (!localUser.value) {
+                    await createLocalUser(user.value);
+                }
+                await checkForInviteToken();
+                loadSelectedWeddingRole();
+            }
+            setTimeout(() => {
+                isLoading.value = false;
+            }, 500);
+        });
+    }
+
+    function loadSelectedWeddingRole() {
+        const weddingData = Cookies.get('selectedWeddingRole');
+        if (weddingData) {
+            try {
+                const parsedData = JSON.parse(weddingData);
+                const wedding = new Wedding(
+                    parsedData.id,
+                    parsedData.name,
+                    new Date(parsedData.date),
+                    parsedData.location,
+                    parsedData.ownerId
+                );
+                selectedWeddingRole.value = new WeddingRole(
+                    parsedData.role,
+                    wedding
+                );
+            } catch (error) {
+                console.error('Failed to parse selectedWeddingRole from cookie:', error);
+                selectedWeddingRole.value = null;
+            }
+        }
+    }
+
+    function saveSelectedWeddingRole() {
+        if (selectedWeddingRole.value) {
+            const dataToStore = {
+                id: selectedWeddingRole.value.wedding.id,
+                name: selectedWeddingRole.value.wedding.name,
+                date: selectedWeddingRole.value.wedding.date.toDateString,
+                location: selectedWeddingRole.value.wedding.location,
+                ownerId: selectedWeddingRole.value.wedding.ownerId,
+                role: selectedWeddingRole.value.role
+            };
+            Cookies.set('selectedWeddingRole', JSON.stringify(dataToStore), { expires: 7 });
+        } else {
+            Cookies.remove('selectedWeddingRole');
+        }
+    }
+
+    watch(
+        selectedWeddingRole,
+        () => {
+            saveSelectedWeddingRole();
+        },
+        { deep: true }
+    );
+
+    async function getAccessToken() {
+        try {
+            return user.value ? await user.value.getIdToken() : null;
+        } catch (error: any) {
+            ErrorHandler.handleUserAuthError(user.value, error);
+        }
+    }
+
+    async function registerUser(email: string, password: string) {
+        try {
+            const userDetails = await auth.createUserWithEmailAndPassword(auth, email, password);
+            await createLocalUser(userDetails.user);
+        } catch (error: any) {
+            ErrorHandler.handleUserAuthError(user.value, error);
+        }
+    }
+
+    async function loginUser(email: string, password: string) {
+        try {
+            await auth.signInWithEmailAndPassword(auth, email, password);
+        } catch (error: any) {
+            ErrorHandler.handleUserAuthError(user.value, error);
+        }
+    }
+
+    async function loginUserGoogle() {
+        try {
+            const provider = new auth.GoogleAuthProvider();
+            await auth.signInWithPopup(auth, provider);
+        } catch (error: any) {
+            ErrorHandler.handleUserAuthError(user.value, error);
+        }
+    }
+
+    async function logoutUser() {
+        try {
+            await auth.signOut();
+            goToRoute('login');
+            user.value = null;
+            localUser.value = null;
+            selectedWeddingRole.value = null;
+            Cookies.remove('selectedWedding');
+        } catch (error: any) {
+            ErrorHandler.handleUserAuthError(user.value, error);
+        }
+    }
+
+    async function sendPasswordResetEmail(email: string) {
+        try {
+            await auth.sendPasswordResetEmail(auth, email);
+            SuccessHandler.showNotification('Password reset instructions sent to your email.');
+        } catch (error: any) {
+            ErrorHandler.handleUserAuthError(user.value, error);
+        }
+    }
+
+    function isMobile() {
+        return screen.width <= 770;
+    }
+
+    async function createLocalUser(userDetails: any) {
+        const newUser: User = new User(userDetails.uid, userDetails.email, []);
+        const authService = new AuthService();
+        localUser.value = await authService.addUser(newUser);
+    }
+
+    async function checkForInviteToken() {
+        const token = localStorage.getItem('inviteToken');
+        if (token) {
+            const inviteToken : InviteToken = new InviteToken(token);
+            localStorage.removeItem('inviteToken');
+            const authService = new AuthService();
+            await authService.processInvite(inviteToken);
+        }
+    }
+
+    return {
+        // State
+        user,
+        localUser,
+        selectedWeddingRole,
+        isLoading,
+        isAuthReady,
+        // Getters
+        isLoggedIn,
+        userEmail,
+        hasEditAuthority,
+        selectedRole,
+        selectedWedding,
+        // Actions
+        initializeAuthListener,
+        loadSelectedWeddingRole,
+        saveSelectedWeddingRole,
+        getAccessToken,
+        registerUser,
+        loginUser,
+        loginUserGoogle,
+        logoutUser,
+        sendPasswordResetEmail,
+        isMobile,
+        createLocalUser,
+    };
 });

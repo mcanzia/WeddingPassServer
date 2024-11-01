@@ -12,6 +12,7 @@ import { AuthController } from '../controllers/AuthController';
 import { UserDao } from '../dao/UserDao';
 import { WeddingController } from '../controllers/WeddingController';
 import { WeddingDao } from '../dao/WeddingDao';
+import { AuthService } from '../services/AuthService';
 
 const container = new Container();
 
@@ -19,6 +20,7 @@ container.bind<PassController>(TYPES.PassController).to(PassController);
 container.bind<PassDao>(TYPES.PassDao).to(PassDao);
 container.bind<GuestController>(TYPES.GuestController).to(GuestController);
 container.bind<AuthController>(TYPES.AuthController).to(AuthController);
+container.bind<AuthService>(TYPES.AuthService).to(AuthService);
 container.bind<UserDao>(TYPES.UserDao).to(UserDao);
 container.bind<GuestService>(TYPES.GuestService).to(GuestService);
 container.bind<GuestDao>(TYPES.GuestDao).to(GuestDao);
