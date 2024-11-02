@@ -1,0 +1,14 @@
+version: '3.8'
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: weddingpass-server
+    env_file:
+      - .env.server.production
+    volumes:
+      - ./logs/server/:/app/logs/server/
+    ports:
+      - "7500:7500"
+    restart: unless-stopped

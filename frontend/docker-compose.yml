@@ -1,0 +1,16 @@
+version: '3.8'
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: weddingpass-front
+    volumes:
+      - ./certs/soumya-michael.io.crt:/etc/ssl/certs/soumya-michael.com.crt
+      - ./certs/soumya-michael.io.key:/etc/ssl/private/soumya-michael.com.key
+      - ./certs/cloudflare.crt:/etc/ssl/certs/cloudflare.crt
+      - ./cloudflare.txt:/etc/nginx/cloudflare
+    ports:
+      - "80:3000"
+      - "443:3000"
+    restart: unless-stopped

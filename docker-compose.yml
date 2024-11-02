@@ -1,0 +1,39 @@
+version: '3.8'
+services:
+  app:
+    container_name: weddingpass-front
+    image: index.docker.io/mcanziani1/weddingpass-front:latest
+    networks:
+      - local_net
+    depends_on:
+      - api
+    ports:
+      - "3000:80"
+  api:
+    container_name: weddingpass-back
+    image: index.docker.io/mcanziani1/weddingpass-server:latest
+    env_file:
+      - .env.server.production
+    volumes:
+      - /var/log/weddingpass/all.log:/app/logs/server/all.log
+      - /var/log/weddingpass/error.log:/app/logs/server/error.log
+    networks: 
+      - local_net
+    ports:
+      - "7500:7500"
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./certs/soumya-michael.io.crt:/etc/ssl/certs/soumya-michael.com.crt
+      - ./certs/soumya-michael.io.key:/etc/ssl/private/soumya-michael.com.key
+      - ./certs/cloudflare.crt:/etc/ssl/certs/cloudflare.crt
+      - ./cloudflare-ips.conf:/etc/nginx/cloudflare-ips.conf
+    networks:
+      - local_net
+networks:
+  local_net:
+    driver: bridge
