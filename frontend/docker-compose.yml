@@ -6,8 +6,8 @@ services:
       dockerfile: Dockerfile
     container_name: weddingpass-front
     volumes:
-      - ./certs/soumya-michael.io.crt:/etc/ssl/certs/soumya-michael.com.crt
-      - ./certs/soumya-michael.io.key:/etc/ssl/private/soumya-michael.com.key
+      - ./certs/soumya-michael.com.crt:/etc/ssl/certs/soumya-michael.com.crt
+      - ./certs/soumya-michael.com.key:/etc/ssl/private/soumya-michael.com.key
       - ./certs/cloudflare.crt:/etc/ssl/certs/cloudflare.crt
       - ./cloudflare.txt:/etc/nginx/cloudflare
     ports:

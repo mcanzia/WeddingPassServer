@@ -28,8 +28,8 @@ services:
       - "443:443"
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf
-      - ./certs/soumya-michael.io.crt:/etc/ssl/certs/soumya-michael.com.crt
-      - ./certs/soumya-michael.io.key:/etc/ssl/private/soumya-michael.com.key
+      - ./certs/soumya-michael.com.crt:/etc/ssl/certs/soumya-michael.com.crt
+      - ./certs/soumya-michael.com.key:/etc/ssl/private/soumya-michael.com.key
       - ./certs/cloudflare.crt:/etc/ssl/certs/cloudflare.crt
       - ./cloudflare-ips.conf:/etc/nginx/cloudflare-ips.conf
     networks:
