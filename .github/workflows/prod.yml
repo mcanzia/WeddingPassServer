@@ -52,8 +52,10 @@ jobs:
           file: frontend/Dockerfile
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/weddingpass-front:latest
-        env:
-          VITE_FIREBASE_CONFIG: ${{ secrets.FIREBASE_CONFIG }}
+          build-args: |
+            VITE_SERVER_API_URL=${{ vars.VITE_SERVER_API_URL }}
+            VITE_FRONTEND_PORT=${{ vars.VITE_FRONTEND_PORT }}
+            VITE_FIREBASE_CONFIG=${{ secrets.VITE_FIREBASE_CONFIG }}
       - name: Set up SSH
         run: |
           mkdir -p ~/.ssh
