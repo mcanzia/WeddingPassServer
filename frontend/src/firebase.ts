@@ -8,7 +8,7 @@ import { getStorage } from 'firebase/storage';
 
 let firebaseConfig = {};
 if (import.meta.env.VITE_FIREBASE_CONFIG) {
-  firebaseConfig = JSON.parse(import.meta.env.VITE_FIREBASE_CONFIG);
+  firebaseConfig = import.meta.env.VITE_FIREBASE_CONFIG;
 } else {
   firebaseConfig = {
     apiKey: "AIzaSyARukHSiFHh6Kg3iLSJaxeaY78yrtraoy8",
