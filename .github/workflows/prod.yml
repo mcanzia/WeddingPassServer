@@ -53,7 +53,7 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/weddingpass-front:latest
         env:
-          FIREBASE_CONFIG: ${{ secrets.FIREBASE_CONFIG }}
+          VITE_FIREBASE_CONFIG: ${{ secrets.FIREBASE_CONFIG }}
       - name: Set up SSH
         run: |
           mkdir -p ~/.ssh

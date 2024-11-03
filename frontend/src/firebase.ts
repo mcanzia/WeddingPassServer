@@ -7,8 +7,8 @@ import { getFirestore, doc, getDoc, Firestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 
 let firebaseConfig = {};
-if (process.env.VITE_FIREBASE_CONFIG) {
-  firebaseConfig = JSON.parse(process.env.VITE_FIREBASE_CONFIG);
+if (import.meta.env.VITE_FIREBASE_CONFIG) {
+  firebaseConfig = JSON.parse(import.meta.env.VITE_FIREBASE_CONFIG);
 } else {
   firebaseConfig = {
     apiKey: "AIzaSyARukHSiFHh6Kg3iLSJaxeaY78yrtraoy8",

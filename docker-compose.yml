@@ -3,8 +3,6 @@ services:
   app:
     container_name: weddingpass-front
     image: index.docker.io/mcanziani1/weddingpass-front:latest
-    env_file:
-      - .env.front.production
     networks:
       - local_net
     depends_on:
