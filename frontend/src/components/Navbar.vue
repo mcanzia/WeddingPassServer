@@ -3,7 +3,7 @@
     <div class="flex h-16 w-screen items-center px-4">
       <nav class="flex justify-between w-screen space-x-4 lg:space-x-6">
         <div :class="cn('flex items-center space-x-4 lg:space-x-6', $attrs.class ?? '')">
-          <a @click="selectedWedding ? goToRouteSecured('home') : goToRoute('landing')" class="text-sm font-medium transition-colors hover:text-primary cursor-pointer">
+          <a @click="selectedWedding ? goToRouteSecured('guests') : goToRoute('landing')" class="text-sm font-medium transition-colors hover:text-primary cursor-pointer">
             <img src="@/assets/logo.svg" alt="Home Image" class="w-11 h-8" />
           </a>
           <a @click="goToRouteSecured('guests')" v-if="selectedWedding" class="text-sm font-medium text-muted-foreground transition-colors hover:text-primary cursor-pointer">
