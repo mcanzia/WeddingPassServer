@@ -85,7 +85,7 @@ export class RequestUtil {
         }
     
         if (response.status === 204) {
-            return;
+            return null;
         }
         return await response.json();
     }
