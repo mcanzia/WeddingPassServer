@@ -177,6 +177,13 @@ export const useUserStore = defineStore('userStore', () => {
         }
     }
 
+    async function refetchLocalUser() {
+        if (user.value && user.value.uid) {
+            const authService = new AuthService();
+            localUser.value = await authService.getUserById(user.value.uid);
+        }
+    }
+
     return {
         // State
         user,
@@ -202,5 +209,6 @@ export const useUserStore = defineStore('userStore', () => {
         sendPasswordResetEmail,
         isMobile,
         createLocalUser,
+        refetchLocalUser
     };
 });

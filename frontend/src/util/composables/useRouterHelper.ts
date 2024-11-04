@@ -11,6 +11,10 @@ export function useRouterHelper() {
     router.push({ name: route, params: params, query: query });
   }
 
+  function replaceRoute(route: string, params?: Record<string, any>, query?: Record<string, any>) {
+    router.replace({ name: route, params: params, query: query });
+  }
+
   function goToRouteSecured(route: string, extraParams?: Record<string, any>, query?: Record<string, any>) {
     if (selectedWedding.value) {
       router.push({ name: route, params: { ...extraParams, weddingId: selectedWedding.value.id }, query: query });
@@ -29,6 +33,7 @@ export function useRouterHelper() {
 
   return {
     goToRoute,
+    replaceRoute,
     goToRouteSecured,
     replaceRouteSecured,
   }

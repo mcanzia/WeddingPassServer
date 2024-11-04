@@ -282,7 +282,8 @@ async function deleteGuests() {
         const guestsToDelete = data.value.filter((row, idx) => Object.keys(rowSelection.value).includes(idx.toString()));
         await guestService.batchDeleteGuests(guestsToDelete);
         setMessage('Deleted user.', NotificationType.SUCCESS);
-        await guestService.getAllGuests();
+        data.value = await guestService.getAllGuests();
+        rowSelection.value = {};
     } else {
         ErrorHandler.handleAuthorizationError();
     }
