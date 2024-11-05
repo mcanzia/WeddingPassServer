@@ -38,7 +38,6 @@ export const useUserStore = defineStore('userStore', () => {
         isLoading.value = true;
         auth.onAuthStateChanged(async (authUser) => {
             user.value = authUser ? authUser : null;
-            isAuthReady.value = true;
             if (user.value) {
                 const authService = new AuthService();
                 localUser.value = await authService.getUserById(user.value.uid);
@@ -50,6 +49,7 @@ export const useUserStore = defineStore('userStore', () => {
             }
             setTimeout(() => {
                 isLoading.value = false;
+                isAuthReady.value = true;
             }, 500);
         });
     }
@@ -174,6 +174,11 @@ export const useUserStore = defineStore('userStore', () => {
             localStorage.removeItem('inviteToken');
             const authService = new AuthService();
             await authService.processInvite(inviteToken);
+            await refetchLocalUser();
+            window.location.reload();
+            setTimeout(() => {
+                SuccessHandler.showNotification('Successfully added invited to wedding.');
+            }, 500);  
         }
     }
 

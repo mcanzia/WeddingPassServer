@@ -23,6 +23,8 @@ const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
     max: 200 // limit each IP to 100 requests per 15 minutes
 });
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ limit: '10mb', extended: true }));
 app.use(limiter);
 
 // User Authorization

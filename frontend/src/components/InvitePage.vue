@@ -42,13 +42,10 @@ onMounted(async () => {
 
     const inviteToken: InviteToken = new InviteToken(token);
 
-    console.log('INVITE PAGE');
-
     if (isLoggedIn.value) {
         await processInvite(inviteToken);
     } else {
         localStorage.setItem('inviteToken', token);
-        console.log('SET LOCAL STORE', localStorage.getItem('inviteToken'));
         goToRoute('login');
     }
 });
