@@ -16,6 +16,7 @@ import { auth } from "@/firebase";
 import Login from "@/components/Login.vue";
 import { storeToRefs } from "pinia";
 import InvitePage from "@/components/InvitePage.vue";
+import SurveyBuilder from "@/components/surveys/SurveyBuilder.vue";
 
 const routes = [
    {
@@ -103,6 +104,15 @@ const routes = [
       props: true,
       meta: {
          allowedRoles: [Roles.ADMIN, Roles.EDITOR, Roles.READONLY]
+      }
+   },
+   {
+      path: '/:weddingId/surveys',
+      name: 'surveys',
+      component: SurveyBuilder,
+      props: true,
+      meta: {
+         allowedRoles: [Roles.ADMIN, Roles.EDITOR]
       }
    },
    {

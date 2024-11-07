@@ -17,6 +17,10 @@
             cursor-pointer">
             Guests Upload
           </a>
+          <a @click="goToRouteSecured('surveys')" v-if="selectedWedding && hasEditAuthority" class=" text-sm font-medium hidden md:flex text-muted-foreground transition-colors hover:text-primary
+            cursor-pointer">
+            Surveys
+          </a>
         </div>
 
         <IconDropdown icon="person-circle-outline" :extra-text="userEmail" classes="hidden md:flex">

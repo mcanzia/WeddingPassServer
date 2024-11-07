@@ -17,7 +17,8 @@
     "baseUrl": ".",
     "types": [
       "vite",
-      "vite/client"
+      "vite/client",
+      "vue"
     ],
     "paths": {
       "@/*": [
@@ -37,8 +38,9 @@
     "src/**/*.vue",
     "src/**/**/*.vue",
     "types/*.d.ts",
+    "types/**/*.d.ts",
     "tests/**/*.ts",
-    "tests/**/*.tsx"
+    "tests/**/*.tsx",
   ],
   "exclude": [
     "node_modules"
