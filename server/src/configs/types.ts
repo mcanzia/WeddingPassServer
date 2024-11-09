@@ -11,6 +11,8 @@ export const TYPES = {
     GuestDao: Symbol.for("GuestDao"),
     EventController: Symbol.for("EventController"),
     EventDao: Symbol.for("EventDao"),
+    SurveyController: Symbol.for("SurveyController"),
+    SurveyDao: Symbol.for("SurveyDao"),
     WeddingController: Symbol.for("WeddingController"),
     WeddingDao: Symbol.for("WeddingDao")
 };
