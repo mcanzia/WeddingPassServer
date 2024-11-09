@@ -1,15 +1,16 @@
 <template>
-    <div class="grid gap-2">
+    <div>
         <SurveyComponentWrapper v-if="builderMode" @remove="removeComponent" v-model:component-label="componentDetails.label">
-            <div class="w-1/2">
-                <Component :is="displayComponent" v-bind="componentProps" />
+            <div class="w-full">
+                <Component :is="displayComponent" v-model="modelValueComputed" v-bind="componentProps" />
             </div>
         </SurveyComponentWrapper>
-        <div class="flex flex-col gap-2 w-1/2" v-else>
+        <div class="flex flex-col gap-2 w-full" v-else>
             <Label>{{ componentDetails.label }}</Label>
             <Component :is="displayComponent" v-model="modelValueComputed" v-bind="componentProps"/>
         </div>
     </div>
+
 </template>
 
 <script setup lang="ts">

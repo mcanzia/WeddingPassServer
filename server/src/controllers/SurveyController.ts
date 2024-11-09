@@ -38,29 +38,16 @@ export class SurveyController {
         }
     }
 
-    async createSurvey(request : Request, response : Response, next : NextFunction) {
+    async saveSurvey(request : Request, response : Response, next : NextFunction) {
         try {
             Logger.info(`Creating new survey`);
             const { weddingId } = request.params;
             const survey: Survey = request.body;
-            await this.surveyDao.createSurvey(weddingId, survey);
-            Logger.info(`Successfully added survey for ${survey.title}`);
-            response.status(204).send();
+            const updatedSurvey : Survey = await this.surveyDao.saveSurvey(weddingId, survey);
+            Logger.info(`Successfully updated survey for ${survey.title}`);
+            response.status(200).json(updatedSurvey);
         } catch (error) {
-            Logger.error("Error adding survey", error);
-            response.status((error as CustomError).statusCode).send((error as CustomError).message);
-        }
-    }
-
-    async updateSurvey(request: Request, response: Response, next: NextFunction) {
-        try {
-            Logger.info(`Updating survey: ${JSON.stringify(request.body)}`);
-            const { weddingId, surveyId } = request.params;
-            const updateSurveyDetails : Survey = request.body;
-            await this.surveyDao.updateSurvey(weddingId, surveyId, updateSurveyDetails);
-            response.status(204).send();
-        } catch (error) {
-            Logger.error("Error updating survey", error);
+            Logger.error("Error updated survey", error);
             response.status((error as CustomError).statusCode).send((error as CustomError).message);
         }
     }
@@ -77,5 +64,5 @@ export class SurveyController {
             response.status((error as CustomError).statusCode).send((error as CustomError).message);
         }
     }
-    
+
 }

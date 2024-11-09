@@ -26,22 +26,12 @@ export class SurveyController {
         }
     }
 
-    async addSurvey(userAuthToken: any, weddingRole: WeddingRole, survey: Survey) {
+    async saveSurvey(userAuthToken: any, weddingRole: WeddingRole, survey: Survey) {
         try {
             const requestUrl = `${RequestUtil.getAPIUrl()}/api/weddings/${weddingRole.wedding.id}/surveys`;
             return await RequestUtil.apiRequest(requestUrl,  RequestUtil.POSTRequestParams(userAuthToken, survey, weddingRole.role));
         } catch (error: any) {
             ErrorHandler.handleAddError<Survey>(userAuthToken, ObjectType.SURVEY, survey, error);
-            throw error;
-        }
-    }
-
-    async updateSurvey(userAuthToken: any, weddingRole: WeddingRole, survey: Survey) {
-        try {
-            const requestUrl = `${RequestUtil.getAPIUrl()}/api/weddings/${weddingRole.wedding.id}/surveys/${survey.id}`;
-            return await RequestUtil.apiRequest(requestUrl, RequestUtil.PUTRequestParams(userAuthToken, survey, weddingRole.role));
-        } catch (error: any) {
-            ErrorHandler.handleUpdateError(ObjectType.SURVEY);
             throw error;
         }
     }

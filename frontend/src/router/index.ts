@@ -11,12 +11,11 @@ import GuestUpload from "@/components/guest-list/GuestUpload.vue";
 import WeddingList from "@/components/weddings/WeddingList.vue";
 import { Roles } from "@/models/Roles";
 import { useUserStore } from "@/stores/UserStore";
-import { ErrorHandler } from "@/util/error/ErrorHandler";
-import { auth } from "@/firebase";
 import Login from "@/components/Login.vue";
 import { storeToRefs } from "pinia";
 import InvitePage from "@/components/InvitePage.vue";
 import SurveyBuilder from "@/components/surveys/SurveyBuilder.vue";
+import SurveyList from "@/components/surveys/SurveyList.vue";
 
 const routes = [
    {
@@ -109,6 +108,15 @@ const routes = [
    {
       path: '/:weddingId/surveys',
       name: 'surveys',
+      component: SurveyList,
+      props: true,
+      meta: {
+         allowedRoles: [Roles.ADMIN, Roles.EDITOR]
+      }
+   },
+   {
+      path: '/:weddingId/:surveyId',
+      name: 'edit-survey',
       component: SurveyBuilder,
       props: true,
       meta: {

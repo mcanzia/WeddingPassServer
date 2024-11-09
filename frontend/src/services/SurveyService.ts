@@ -36,21 +36,11 @@ export class SurveyService {
         }
     }
 
-    async addSurvey(surveyToAdd: Survey) {
+    async saveSurvey(survey: Survey) {
         try {
             const userAccessToken = await this.userStore.getAccessToken();
-            await this.surveyController.addSurvey(userAccessToken, this.weddingRole, surveyToAdd);
-            return;
-        } catch (error) {
-            throw error;
-        }
-    }
-
-    async updateSurvey(survey : Survey) {
-        try {
-            const userAccessToken = await this.userStore.getAccessToken();
-            await this.surveyController.updateSurvey(userAccessToken, this.weddingRole, survey);
-            return;
+            const updatedSurvey = await this.surveyController.saveSurvey(userAccessToken, this.weddingRole, survey);
+            return updatedSurvey;
         } catch (error) {
             throw error;
         }
@@ -65,5 +55,5 @@ export class SurveyService {
             throw error;
         }
     }
-    
+
 }

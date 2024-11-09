@@ -10,8 +10,7 @@ const surveyController = container.get<SurveyController>(TYPES.SurveyController)
 
 router.get('/', authorizeRoles([Roles.EDITOR, Roles.ADMIN, Roles.READONLY]), (req, res, next) => surveyController.getSurveys(req, res, next));
 router.get('/id/:surveyId', authorizeRoles([Roles.EDITOR, Roles.ADMIN, Roles.READONLY]), (req, res, next) => surveyController.getSurveybyId(req, res, next));
-router.post('/', authorizeRoles([Roles.EDITOR, Roles.ADMIN]), (req, res, next) => surveyController.createSurvey(req, res, next));
-router.put('/:surveyId', authorizeRoles([Roles.EDITOR, Roles.ADMIN]), (req, res, next) => surveyController.updateSurvey(req, res, next));
+router.post('/', authorizeRoles([Roles.EDITOR, Roles.ADMIN]), (req, res, next) => surveyController.saveSurvey(req, res, next));
 router.delete('/', authorizeRoles([Roles.EDITOR, Roles.ADMIN]), (req, res, next) => surveyController.deleteSurvey(req, res, next));
 
 export default router;
