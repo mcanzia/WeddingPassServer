@@ -1,12 +1,19 @@
 <template>
-    <Card class="mx-auto">
+    <Card class="mx-auto max-h-120">
         <CardHeader>
-            <CardTitle class="text-2xl">
-                Survey Builder
-            </CardTitle>
-            <CardDescription>
-                Build your survey below
-            </CardDescription>
+            <div class="inline-flex justify-between">
+                <div>
+                    <CardTitle class="text-2xl">
+                        Survey Builder
+                    </CardTitle>
+                    <CardDescription>
+                        Build your survey below
+                    </CardDescription>
+                </div>
+                <div>
+                    <Toggle class="border-solid" @click="togglePreviewMode">Preview</Toggle>
+                </div>
+            </div>
         </CardHeader>
         <CardContent>
             <div class="grid gap-4">
@@ -33,7 +40,7 @@
                         </Select>
                         <Button @click="insertComponent">Add</Button>
                     </div>
-                    <div>
+                    <div v-if="showOptionsInput">
                         <Label for="options-text-area">Options Input</Label>
                         <Textarea v-model="componentDropdownOptions" id="options-text-area" />
                     </div>
@@ -73,15 +80,16 @@ import { SurveyService } from '@/services/SurveyService';
 import { SurveyComponent } from '@/models/SurveyComponent';
 import { SurveyComponentTypes } from '@/models/SurveyComponentTypes';
 import { useSurveyStore } from '@/stores/SurveyStore';
-import { Textarea } from '@/components/ui/textarea'
+import { Textarea } from '@/components/ui/textarea';
+import { Toggle } from '@/components/ui/toggle';
 
 const { goToRouteSecured } = useRouterHelper();
 const notificationStore = useNotificationStore();
 const { setMessage } = notificationStore;
 const userStore = useUserStore();
 const { hasEditAuthority } = storeToRefs(userStore);
-const {survey} = storeToRefs(useSurveyStore());
-const {insertSurveyDisplayComponent} = useSurveyStore();
+const { survey, previewMode } = storeToRefs(useSurveyStore());
+const { insertSurveyDisplayComponent, hasOptionsProp } = useSurveyStore();
 
 const selectedComponentType = ref<string>();
 const componentDropdownOptions = ref<string>();
@@ -97,6 +105,10 @@ const componentOptions = computed(() => {
     }
 
     return options;
+});
+
+const showOptionsInput = computed(() => {
+    return selectedComponentType.value && hasOptionsProp(selectedComponentType.value);
 });
 
 async function saveSurvey() {
@@ -116,10 +128,14 @@ function close() {
 }
 
 function insertComponent() {
-    const selectedComponent : SurveyComponent | undefined = componentOptions.value.find(option => selectedComponentType.value === option.type);
+    const selectedComponent: SurveyComponent | undefined = componentOptions.value.find(option => selectedComponentType.value === option.type);
     if (selectedComponent) {
         insertSurveyDisplayComponent(selectedComponent, componentDropdownOptions.value);
     }
+}
+
+function togglePreviewMode() {
+    previewMode.value = !previewMode.value;
 }
 
 </script>

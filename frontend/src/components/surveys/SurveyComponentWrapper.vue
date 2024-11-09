@@ -5,35 +5,45 @@
             <IconButton icon="caret-down" />
         </div>
         <div class="grid gap-2 col-span-4">
-            <input v-model="componentLabel" placeholder="Enter Field Title Here"
+            <input v-model="componentLabelComputed" placeholder="Enter Field Title Here"
                 class="bg-inherit border-0 outline-transparent" />
             <slot></slot>
         </div>
         <div class="col-span-1 flex items-center justify-center">
-            <IconButton icon="close" />
+            <IconButton @click="remove" icon="close" />
         </div>
     </div>
+    <Separator />
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import IconButton from '@/components/common/IconButton.vue';
+import { Separator } from '@/components/ui/separator';
 
-defineProps({
-    builderMode: {
-        type: Boolean,
+const emit = defineEmits(['remove', 'update:componentLabel']);
+
+const props = defineProps({
+    componentLabel: {
+        type: String,
         required: false,
-        default: () => false
+        default: () => ''
     },
-    componentDetails: {
-        type: Object,
-        required: false,
-        default: () => { }
-    }
-
+    
 });
 
-const componentLabel = ref('');
+const componentLabelComputed = computed({
+    get() {
+        return props.componentLabel;
+    },
+    set(val) {
+        emit('update:componentLabel', val);
+    }
+})
+
+function remove() {
+    emit('remove');
+}
 
 
 </script>

@@ -5,9 +5,11 @@ export class SurveyDisplayComponent {
 
     surveyComponent: SurveyComponent
     displayComponent: any
+    hasOptions: boolean
 
-    constructor(surveyComponent: SurveyComponent, displayComponent: any) {
+    constructor(surveyComponent: SurveyComponent, displayComponent: any, hasOptions: boolean) {
         this.surveyComponent = surveyComponent;
         this.displayComponent = displayComponent;
+        this.hasOptions = hasOptions;
     }
 }
