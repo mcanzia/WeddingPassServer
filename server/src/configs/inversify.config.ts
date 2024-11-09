@@ -13,6 +13,8 @@ import { UserDao } from '../dao/UserDao';
 import { WeddingController } from '../controllers/WeddingController';
 import { WeddingDao } from '../dao/WeddingDao';
 import { AuthService } from '../services/AuthService';
+import { SurveyController } from '../controllers/SurveyController';
+import { SurveyDao } from '../dao/SurveyDao';
 
 const container = new Container();
 
@@ -26,6 +28,8 @@ container.bind<GuestService>(TYPES.GuestService).to(GuestService);
 container.bind<GuestDao>(TYPES.GuestDao).to(GuestDao);
 container.bind<EventController>(TYPES.EventController).to(EventController);
 container.bind<EventDao>(TYPES.EventDao).to(EventDao);
+container.bind<SurveyController>(TYPES.SurveyController).to(SurveyController);
+container.bind<SurveyDao>(TYPES.SurveyDao).to(SurveyDao);
 container.bind<WeddingController>(TYPES.WeddingController).to(WeddingController);
 container.bind<WeddingDao>(TYPES.WeddingDao).to(WeddingDao);
 
