@@ -91,7 +91,7 @@ export const useSurveyStore = defineStore('surveyStore', () => {
         const surveyService = new SurveyService();
         survey.value = await surveyService.getSurveyById(surveyId);
         if (survey.value && survey.value.surveyComponents) {
-            survey.value.surveyComponents = survey.value.surveyComponents.sort((a,b) => a.order - b.order);
+            survey.value.surveyComponents = survey.value.surveyComponents.sort((a,b ) => a.order! - b.order!);
             setSurveyDisplayComponents();
         }
     }
