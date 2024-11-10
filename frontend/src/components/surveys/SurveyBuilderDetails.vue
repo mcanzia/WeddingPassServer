@@ -42,15 +42,15 @@
                     </div>
                     <div v-if="showOptionsInput">
                         <Label for="options-text-area">Options Input</Label>
-                        <Textarea v-model="componentDropdownOptions!" id="options-text-area" />
+                        <Textarea v-model="componentDropdownOptionsComputed" id="options-text-area" />
                     </div>
                     <div v-if="showPredefinedValueInput">
                         <Label for="predefined-input-value">Set Custom Value for Field</Label>
-                        <Input v-model="predefinedValue!" id="predefined-input-value" />
+                        <Input v-model="predefinedValueComputed" id="predefined-input-value" />
                     </div>
                     <div v-if="showGuestDetailsDropdown">
                         <Label for="guest-details-dropdown">Choose Guest Field</Label>
-                        <SingleSelectDropdown v-model="predefinedValue!" :select-options="formattedGuestDetailKeys" id="guest-details-dropdown" />
+                        <SingleSelectDropdown v-model="predefinedValueComputed" :select-options="formattedGuestDetailKeys" id="guest-details-dropdown" />
                     </div>
                 </div>
                 <div class="flex flex-col gap-2">
@@ -109,6 +109,29 @@ const componentOptions = computed(() => {
 
     return options;
 });
+
+const componentDropdownOptionsComputed = computed({
+  get() {
+    if (componentDropdownOptions.value) {
+        return componentDropdownOptions.value;
+    }
+  },
+  set(newValue: string) {
+        componentDropdownOptions.value = newValue;
+  }
+});
+
+const predefinedValueComputed = computed({
+  get() {
+    if (predefinedValue.value) {
+        return predefinedValue.value;
+    }
+  },
+  set(newValue: string) {
+    predefinedValue.value = newValue;
+  }
+});
+
 
 const showOptionsInput = computed(() => {
     return selectedComponentType.value && hasOptionsProp(selectedComponentType.value);
