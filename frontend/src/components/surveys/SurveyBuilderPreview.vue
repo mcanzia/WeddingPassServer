@@ -1,20 +1,20 @@
 <template>
     <Card class="mx-auto max-h-[85vh]">
         <CardHeader>
-            <CardTitle class="text-2xl font-['Bungee_Tint']">
+            <CardTitle class="text-2xl font-['Faculty_Glyphic']">
                 {{ surveyTitleComputed }}
             </CardTitle>
-            <Separator />
         </CardHeader>
         <CardContent class="flex flex-col gap-4 max-h-[70vh]">
+            <Separator />
             <ScrollArea class="h-screen">
-                <div ref="parent" class="grid grid-cols-2 gap-5">
+                <div ref="parent" class="grid grid-cols-2 gap-5 font-['Faculty_Glyphic']">
                     <BaseSurveyComponent v-for="display in displayComponents" :key="display.id"
                         :modelValue="display.value"
                         :builder-mode="!previewMode" :componentDetails="display" 
                         @remove="remove" @openAddChild="handleOpenAddChild"
                         @update:modelValue="handleValueUpdate"
-                        :class="`${previewMode ? 'my-5' : 'my-2'}`" />
+                        :class="`${previewMode ? 'my-0' : 'my-2'}`" />
                 </div>
             </ScrollArea>
         </CardContent>
@@ -73,7 +73,7 @@ function handleValueUpdate(componentId: string, value: any) {
 </script>
 
 <style scoped>
-
+@import url('https://fonts.googleapis.com/css2?family=Faculty+Glyphic&family=Geist:wght@100..900&display=swap');
 .drop-zone {
     opacity: 90%;
     border: solid 2px white;

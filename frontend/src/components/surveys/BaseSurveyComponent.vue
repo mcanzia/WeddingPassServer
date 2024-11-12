@@ -15,18 +15,19 @@
       </SurveyComponentWrapper>
   
       <div class="flex flex-col gap-2 w-full" v-else>
-        <Label>{{ componentDetails.label }}</Label>
-        <Component :is="displayComponentComputed" v-model="modelValueComputed" v-bind="componentProps" />
+        <Label class="font-bold">{{ componentDetails.label }}</Label>
+        <Component :is="displayComponentComputed" v-model="modelValueComputed" v-bind="componentProps" class="font-thin" />
       </div>
   
       <div v-if="componentDetails.surveyTriggers && componentDetails.surveyTriggers.length" class="ml-4">
-        <div v-for="trigger in componentDetails.surveyTriggers" :key="trigger.child.id">
+        <div v-for="trigger in componentDetails.surveyTriggers" :key="trigger.child.id" class="mt-3">
           <BaseSurveyComponent
             v-if="builderMode || (!builderMode && componentDetails.value === trigger.triggerField)"
             :key="trigger.child.id"
             :componentDetails="trigger.child"
             :builderMode="builderMode"
             :triggerField="trigger.triggerField"
+            :parentId="props.componentDetails.id"
             @remove="removeComponent"
             @openAddChild="openAddChild"
             @update:modelValue="emitModelValue"
@@ -57,6 +58,11 @@ const props = defineProps({
         required: true,
     },
     triggerField: {
+        type: String,
+        required: false,
+        default: () => null
+    },
+    parentId: {
         type: String,
         required: false,
         default: () => null
@@ -102,8 +108,15 @@ const displayComponentComputed = computed(() => {
     return findSurveyDisplayComponent(props.componentDetails.type);
 });
 
-function removeComponent(componentId : string) {
-    emit('remove', componentId, props.componentDetails.id);
+function removeComponent(componentId : string, parentId? : string) {
+    if (parentId) {
+        emit('remove', componentId, parentId);
+    } else if (props.parentId) {
+        emit('remove', componentId, props.parentId);
+    } else {
+        emit('remove', componentId, null);
+    }
+    
 }
 
 function openAddChild(componentId : string) {
