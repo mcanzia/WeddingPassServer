@@ -1,7 +1,7 @@
 <template>
     <Select v-model="modelValueComputed">
         <SelectTrigger>
-            <SelectValue />
+            <SelectValue :placeholder="placeholder"/>
         </SelectTrigger>
         <SelectContent>
             <SelectGroup>
@@ -34,6 +34,11 @@ const props = defineProps({
         type: String,
         required: false,
         default: () => null
+    },
+    placeholder: {
+        type: String,
+        required: false,
+        default: () => ''
     }
 });
 

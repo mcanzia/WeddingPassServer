@@ -1,7 +1,7 @@
 <template>
     <Card class="mx-auto max-h-[85vh]">
         <CardHeader>
-            <CardTitle class="text-2xl">
+            <CardTitle class="text-2xl font-['Bungee_Tint']">
                 {{ surveyTitleComputed }}
             </CardTitle>
             <Separator />
@@ -9,10 +9,11 @@
         <CardContent class="flex flex-col gap-4 max-h-[70vh]">
             <ScrollArea class="h-screen">
                 <div ref="parent" class="grid grid-cols-2 gap-5">
-                    <BaseSurveyComponent v-for="display in displayComponents" :key="display.surveyComponent.id"
-                        :display-component="display.displayComponent" v-model="display.surveyComponent.value"
-                        :builder-mode="!previewMode" :has-options="display.hasOptions"
-                        :componentDetails="display.surveyComponent" @remove="remove"
+                    <BaseSurveyComponent v-for="display in displayComponents" :key="display.id"
+                        :modelValue="display.value"
+                        :builder-mode="!previewMode" :componentDetails="display" 
+                        @remove="remove" @openAddChild="handleOpenAddChild"
+                        @update:modelValue="handleValueUpdate"
                         :class="`${previewMode ? 'my-5' : 'my-2'}`" />
                 </div>
             </ScrollArea>
@@ -29,12 +30,12 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import BaseSurveyComponent from '@/components/surveys/BaseSurveyComponent.vue';
 import { computed } from 'vue';
 import { useDragAndDrop } from "@formkit/drag-and-drop/vue";
-import { SurveyDisplayComponent } from '@/models/SurveyDisplayComponent';
+import { SurveyComponent } from '@/models/SurveyComponent';
 
-const { survey, surveyDisplayComponents, previewMode, savedStatus } = storeToRefs(useSurveyStore());
-const { removeSurveyComponent, updateComponentsOrder } = useSurveyStore();
+const { survey, previewMode, savedStatus, parentFieldId } = storeToRefs(useSurveyStore());
+const { removeSurveyComponent, updateComponentsOrder, openAddChild, updateComponentValue } = useSurveyStore();
 // @ts-ignore
-const [parent, displayComponents] = useDragAndDrop(surveyDisplayComponents, 
+const [parent, displayComponents] = useDragAndDrop(survey.value?.surveyComponents, 
 {
     dragDropEffect: 'move', 
     dragHandle: ".kanban-handle",
@@ -43,7 +44,7 @@ const [parent, displayComponents] = useDragAndDrop(surveyDisplayComponents,
 }
 ) as [
   HTMLElement,
-  SurveyDisplayComponent[]
+  SurveyComponent[]
 ];
 
 const surveyTitleComputed = computed(() => {
@@ -52,14 +53,27 @@ const surveyTitleComputed = computed(() => {
     }
 });
 
-function remove(componentId: string) {
-    removeSurveyComponent(componentId);
-    savedStatus.value = false;
+function remove(componentId: string, parentId: string) {
+    if (survey.value && survey.value.surveyComponents) {
+        removeSurveyComponent(survey.value.surveyComponents, componentId, parentId);
+        savedStatus.value = false;
+    }
+}
+
+function handleOpenAddChild(componentId: string) {
+    openAddChild(componentId);
+}
+
+function handleValueUpdate(componentId: string, value: any) {
+    if (previewMode.value && survey.value && survey.value.surveyComponents) {
+        updateComponentValue(survey.value.surveyComponents, componentId, value);
+    }
 }
 
 </script>
 
 <style scoped>
+
 .drop-zone {
     opacity: 90%;
     border: solid 2px white;

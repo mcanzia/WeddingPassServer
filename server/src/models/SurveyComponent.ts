@@ -1,3 +1,5 @@
+import { SurveyTrigger } from "./SurveyTrigger";
+
 export class SurveyComponent {
 
     id: string;
@@ -7,8 +9,11 @@ export class SurveyComponent {
     order: number;
     value: any;
     options: Array<string>;
+    surveyTriggers: Array<SurveyTrigger>
+    editableInfo: Boolean;
+    infoLookupField: string;
 
-    constructor(id: string, label: string, type: string, friendlyName: string, order: number, value: any, options: Array<string>, ) {
+    constructor(id: string, label: string, type: string, friendlyName: string, order: number, value: any, options: Array<string>, surveyTriggers: Array<SurveyTrigger>, editableInfo: Boolean, infoLookupField: string ) {
         this.id = id;
         this.label = label;
         this.type = type;
@@ -16,6 +21,9 @@ export class SurveyComponent {
         this.order = order;
         this.value = value;
         this.options = options;
+        this.surveyTriggers = surveyTriggers;
+        this.editableInfo = editableInfo;
+        this.infoLookupField = infoLookupField;
     }
 
     toObject?() {
@@ -26,7 +34,10 @@ export class SurveyComponent {
             friendlyName: this.friendlyName,
             order: this.order,
             value: this.value,
-            options: this.options
+            options: this.options,
+            surveyTriggers: this.surveyTriggers,
+            editableInfo: this.editableInfo,
+            infoLookupField: this.infoLookupField
         };
     }
 }

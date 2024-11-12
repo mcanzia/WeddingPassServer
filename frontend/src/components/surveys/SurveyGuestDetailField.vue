@@ -1,12 +1,11 @@
 <template>
-    <SurveyInfoField v-model="displayValue"></SurveyInfoField>
+    <SurveyInfoField v-model="modelValueComputed" :editableInfo="editableInfo"></SurveyInfoField>
 </template>
 
 <script setup lang="ts">
 import SurveyInfoField from '@/components/surveys/SurveyInfoField.vue';
 import { Guest } from '@/models/Guest';
-import { onMounted, ref } from 'vue';
-import { camelCase } from 'lodash';
+import { computed, onMounted, ref } from 'vue';
 
 const props = defineProps({
     modelValue: {
@@ -17,19 +16,34 @@ const props = defineProps({
     guest: {
         type: Guest,
         required: false
+    },
+    infoLookupField: {
+        type: String,
+        required: false,
+        default: () => null
+    },
+    editableInfo: {
+        type: Boolean,
+        required: false,
+        default: () => false
     }
 });
 
-const displayValue = ref<string>();
+const emit = defineEmits(['update:modelValue']);
 
-onMounted(() => {
-    if (props.guest) {
-        const fieldLookup : string = `${camelCase(props.modelValue)}`;
-        displayValue.value = (props.guest as Record<string, any>)[fieldLookup];
-
+const modelValueComputed = computed({
+    get() {
+        if (props.guest && !props.modelValue) {
+        return (props.guest as Record<string, any>)[props.infoLookupField];
+    } else if (props.modelValue) {
+        return props.modelValue;
     } else {
-        displayValue.value = props.modelValue;
+        return props.infoLookupField;
     }
-});
+    },
+    set(val) {
+        emit('update:modelValue', val);
+    }
+})
 
 </script>

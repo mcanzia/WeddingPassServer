@@ -21,6 +21,18 @@
                     <Label for="survey-name">Survey Name</Label>
                     <Input id="survey-name" v-model="surveyTitleComputed" type="text" required />
                 </div>
+                <div v-if="parentFieldId">
+                    <div class="grid gap-2">
+                        <Badge class="font-bold bg-yellow-200 justify-self-center" disabled>
+                            <span>Add Child Mode</span>
+                            <ion-icon name="close" @click="closeAddChildMode" class="ml-2 size-5 cursor-pointer" />
+                        </Badge>
+                    </div>
+                    <div class="grid gap-2">
+                        <Label for="parent-trigger-field">Parent Trigger Field</Label>
+                        <SingleSelectDropdown v-model="parentTriggerFieldComputed" :select-options="parentSelectOptions" id="guest-details-dropdown" />
+                    </div>
+                </div>
                 <div class="grid gap-2">
                     <Label for="survey-component-selection">Survey Component</Label>
                     <div id="survey-component-selection" class="inline-flex gap-3">
@@ -50,7 +62,11 @@
                     </div>
                     <div v-if="showGuestDetailsDropdown">
                         <Label for="guest-details-dropdown">Choose Guest Field</Label>
-                        <SingleSelectDropdown v-model="predefinedValueComputed" :select-options="formattedGuestDetailKeys" id="guest-details-dropdown" />
+                        <SingleSelectDropdown v-model="infoLookupFieldComputed" :select-options="formattedGuestDetailKeys" id="guest-details-dropdown" />
+                    </div>
+                    <div v-if="showEditableInfoToggle" class="flex items-center space-x-2 mt-2">
+                        <Label for="editable-info-toggle">Editable?</Label>
+                        <Switch :checked="editableInfo" @update:checked="toggleEditableInfo" id="editable-info-toggle" />
                     </div>
                 </div>
                 <div class="flex flex-col gap-2">
@@ -81,6 +97,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
 import { ref, computed, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useRouterHelper } from '@/util/composables/useRouterHelper';
@@ -89,11 +106,12 @@ import { SurveyComponentTypes } from '@/models/SurveyComponentTypes';
 import { useSurveyStore } from '@/stores/SurveyStore';
 import { Textarea } from '@/components/ui/textarea';
 import { Toggle } from '@/components/ui/toggle';
+import { Switch } from '@/components/ui/switch';
 import SingleSelectDropdown from '@/components/common/SingleSelectDropdown.vue';
 
 const { goToRouteSecured } = useRouterHelper();
-const { survey, previewMode, componentDropdownOptions, predefinedValue, savedStatus, formattedGuestDetailKeys } = storeToRefs(useSurveyStore());
-const { insertSurveyDisplayComponent, hasOptionsProp, hasPredefinedValue, saveSurvey } = useSurveyStore();
+const { survey, previewMode, parentFieldId, componentDropdownOptions, predefinedValue, infoLookupField, editableInfo, savedStatus, formattedGuestDetailKeys, parentTriggerField, parentSelectOptions } = storeToRefs(useSurveyStore());
+const { insertSurveyDisplayComponent, hasOptionsProp, hasPredefinedValue, hasDetailDropdown, hasEditableInfoToggle, saveSurvey, togglePreviewMode } = useSurveyStore();
 
 const selectedComponentType = ref<string>();
 
@@ -132,6 +150,27 @@ const predefinedValueComputed = computed({
   }
 });
 
+const infoLookupFieldComputed = computed({
+  get() {
+    if (infoLookupField.value) {
+        return infoLookupField.value;
+    }
+  },
+  set(newValue: string) {
+    infoLookupField.value = newValue;
+  }
+});
+
+const parentTriggerFieldComputed = computed({
+    get() {
+        if (parentTriggerField.value) {
+            return parentTriggerField.value;
+        }
+    },
+    set(val) {
+        parentTriggerField.value = val;
+    }
+});
 
 const showOptionsInput = computed(() => {
     return selectedComponentType.value && hasOptionsProp(selectedComponentType.value);
@@ -142,7 +181,11 @@ const showPredefinedValueInput = computed(() => {
 });
 
 const showGuestDetailsDropdown = computed(() => {
-    return selectedComponentType.value && selectedComponentType.value === 'GUEST_DETAIL_FIELD';
+    return selectedComponentType.value && hasDetailDropdown(selectedComponentType.value);
+});
+
+const showEditableInfoToggle = computed(() => {
+    return selectedComponentType.value && hasEditableInfoToggle(selectedComponentType.value);
 });
 
 const surveyTitleComputed = computed({
@@ -165,22 +208,28 @@ function insertComponent() {
     const selectedComponent: SurveyComponent | undefined = componentOptions.value.find(option => selectedComponentType.value === option.type);
     if (selectedComponent) {
         insertSurveyDisplayComponent(selectedComponent);
+        savedStatus.value = false;
     }
-    savedStatus.value = false;
-}
-
-function togglePreviewMode() {
-    previewMode.value = !previewMode.value;
 }
 
 function clearInputs() {
     componentDropdownOptions.value = null;
     predefinedValue.value = null;
+    editableInfo.value = false;
 }
 
 function close() {
     clearInputs();
     goToRouteSecured('surveys');
+}
+
+function toggleEditableInfo(value : boolean) {
+    editableInfo.value = value;
+}
+
+function closeAddChildMode() {
+    parentFieldId.value = null;
+    parentTriggerField.value = null;
 }
 
 </script>
