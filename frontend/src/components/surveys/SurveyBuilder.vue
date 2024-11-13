@@ -1,7 +1,7 @@
 <template>
     <div class="grid grid-cols-6 mt-5 mx-5 gap-5" v-if="survey">
         <SurveyBuilderDetails class="w-full col-span-2" />
-        <SurveyBuilderPreview class="w-full col-span-4" />
+        <SurveyBuilderPreview class="w-full col-span-2" />
     </div>
 
 </template>

@@ -14,12 +14,12 @@
         </div>
       </SurveyComponentWrapper>
   
-      <div class="flex flex-col gap-2 w-full" v-else>
-        <Label class="font-bold">{{ componentDetails.label }}</Label>
-        <Component :is="displayComponentComputed" v-model="modelValueComputed" v-bind="componentProps" class="font-thin" />
+      <div class="flex flex-col gap-2 w-full px-4" v-else>
+        <Label class="font-bold text-lg">{{ componentDetails.label }}</Label>
+        <Component :is="displayComponentComputed" v-model="modelValueComputed" v-bind="componentProps" />
       </div>
   
-      <div v-if="componentDetails.surveyTriggers && componentDetails.surveyTriggers.length" class="ml-4">
+      <div v-if="componentDetails.surveyTriggers && componentDetails.surveyTriggers.length">
         <div v-for="trigger in componentDetails.surveyTriggers" :key="trigger.child.id" class="mt-3">
           <BaseSurveyComponent
             v-if="builderMode || (!builderMode && componentDetails.value === trigger.triggerField)"

@@ -1,5 +1,5 @@
 <template>
-    <Card class="mx-auto max-h-[85vh]">
+    <Card :class="`mx-auto max-h-[85vh]`">
         <CardHeader>
             <CardTitle class="text-2xl font-['Faculty_Glyphic']">
                 {{ surveyTitleComputed }}
@@ -8,7 +8,7 @@
         <CardContent class="flex flex-col gap-4 max-h-[70vh]">
             <Separator />
             <ScrollArea class="h-screen">
-                <div ref="parent" class="grid grid-cols-2 gap-5 font-['Faculty_Glyphic']">
+                <div ref="parent" class="grid gap-5 font-['Faculty_Glyphic']">
                     <BaseSurveyComponent v-for="display in displayComponents" :key="display.id"
                         :modelValue="display.value"
                         :builder-mode="!previewMode" :componentDetails="display" 
@@ -77,5 +77,8 @@ function handleValueUpdate(componentId: string, value: any) {
 .drop-zone {
     opacity: 90%;
     border: solid 2px white;
+}
+.maybe-survey-settings {
+    /*bg-[#FCF4EB] text-zinc-950*/
 }
 </style>
