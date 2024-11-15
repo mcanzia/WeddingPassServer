@@ -86,7 +86,6 @@
               <TableHead
                 v-for="header in headerGroup.headers"
                 :key="header.id"
-                class="text-center"
               >
                 <FlexRender
                   v-if="!header.isPlaceholder"

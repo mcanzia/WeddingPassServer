@@ -13,9 +13,10 @@ export class Guest {
     attendingEvents?: Array<WeddingEvent>;
     arrival?: Transportation;
     departure?: Transportation;
-    drinks?: Drinks
+    drinks?: Drinks;
+    serialNumber?: string;
 
-    constructor(id: string, weddingId: string, name: string, email: string, phone: string, events: Array<WeddingEvent>, attendingEvents: Array<WeddingEvent>, arrival?: Transportation, departure?: Transportation, drinks?: Drinks) {
+    constructor(id: string, weddingId: string, name: string, email: string, phone: string, events: Array<WeddingEvent>, attendingEvents: Array<WeddingEvent>, arrival?: Transportation, departure?: Transportation, drinks?: Drinks, serialNumber?: string) {
         this.id = id;
         this.weddingId = weddingId;
         this.name = name;
@@ -26,6 +27,7 @@ export class Guest {
         this.arrival = arrival;
         this.departure = departure;
         this.drinks = drinks;
+        this.serialNumber = serialNumber;
     }
 
     toObject?() {
@@ -39,7 +41,8 @@ export class Guest {
             attendingEvents: this.attendingEvents?.map(event => event.toObject ? event.toObject() : event),
             arrival: this.arrival?.toObject ? this.arrival.toObject() : this.arrival,
             departure: this.departure?.toObject ? this.departure.toObject() : this.departure,
-            drinks: this.drinks?.toObject ? this.drinks.toObject() : this.drinks
+            drinks: this.drinks?.toObject ? this.drinks.toObject() : this.drinks,
+            serialNumber: this.serialNumber
         };
     }
 

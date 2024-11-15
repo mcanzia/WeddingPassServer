@@ -3,7 +3,7 @@ import { Transportation } from "@/models/Transportation";
 import { Drinks } from "@/models/Drinks";
 
 export class Guest {
-    
+
     id?: string;
     weddingId: string;
     name: string;
@@ -13,9 +13,10 @@ export class Guest {
     attendingEvents?: WeddingEvent[];
     arrival?: Transportation;
     departure?: Transportation;
-    drinks?: Drinks
+    drinks?: Drinks;
+    serialNumber?: string;
 
-    constructor (id: string, weddingId: string, name: string, email: string, phone: string, events: WeddingEvent[], attendingEvents: WeddingEvent[], arrival: Transportation, departure: Transportation, drinks?: Drinks){
+    constructor(id: string, weddingId: string, name: string, email: string, phone: string, events: WeddingEvent[], attendingEvents: WeddingEvent[], arrival: Transportation, departure: Transportation, drinks?: Drinks, serialNumber?: string) {
         this.id = id;
         this.weddingId = weddingId;
         this.name = name;
@@ -26,6 +27,7 @@ export class Guest {
         this.arrival = arrival;
         this.departure = departure;
         this.drinks = drinks;
+        this.serialNumber = serialNumber;
     }
 
     static detailKeys = ['name', 'email', 'phone', 'events', 'attendingEvents'] as const;
