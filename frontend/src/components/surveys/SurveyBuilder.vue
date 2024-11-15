@@ -1,10 +1,9 @@
 <template>
-    <div class="grid grid-cols-6 mt-5 mx-5 gap-5" v-if="survey">
-        <SurveyBuilderDetails class="w-full col-span-2" />
-        <SurveyBuilderPreview class="w-full col-span-2" />
+    <div class="grid grid-cols-1 md:grid-cols-6 mt-5 mx-5 gap-5" v-if="survey">
+      <SurveyBuilderDetails class="w-full md:col-span-2" />
+      <SurveyBuilderPreview class="w-full md:col-span-2" />
     </div>
-
-</template>
+  </template>
 
 <script setup lang="ts">
 import SurveyBuilderDetails from '@/components/surveys/SurveyBuilderDetails.vue';
