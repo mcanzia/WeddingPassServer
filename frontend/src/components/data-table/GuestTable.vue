@@ -20,7 +20,10 @@
                 <ChevronDown class="ml-2 h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
+            <DropdownMenuContent
+              align="end"
+              class="h-60 overflow-y-scroll"
+            >
               <DropdownMenuCheckboxItem
                 v-for="column in table.getAllColumns().filter((column) => column.getCanHide())"
                 :key="column.id"

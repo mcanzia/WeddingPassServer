@@ -30,5 +30,5 @@ export class Guest {
         this.serialNumber = serialNumber;
     }
 
-    static detailKeys = ['name', 'email', 'phone', 'events', 'attendingEvents'] as const;
+    static detailKeys = ['name', 'email', 'phone', 'events', 'attendingEvents', 'arrival:type', 'arrival:flightTime', 'arrival:trainTime', 'departure:type', 'departure:flightTime', 'departure:trainTime'] as const;
 }

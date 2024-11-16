@@ -83,24 +83,11 @@ export function useColumnDefinition() {
                         case TransportationType.TRAIN:
                             arrivalType = TransportationType.TRAIN.toUpperCase();
                             break;
-                        case TransportationType.BUS: {
-                            arrivalType = TransportationType.BUS.toUpperCase();
-                            break;
-                        }
                         default: {
-                            arrivalType = '';
+                            arrivalType = 'N/A';
                         }
                     }
                     return h('div', arrivalType);
-                },
-            },
-            {
-                accessorKey: 'arrivalFlightNumber',
-                header: ({ column }) => {
-                    return setHeaderDetails(column, 'Arrival Flight Number');
-                },
-                cell: ({ row }) => {
-                    return getTransportationField(row.original.arrival, 'flightNumber');
                 },
             },
 
@@ -113,16 +100,6 @@ export function useColumnDefinition() {
                     return getTransportationField(row.original.arrival, 'flightTime');
                 },
             },
-
-            {
-                accessorKey: 'arrivalTrainNumber',
-                header: ({ column }) => {
-                    return setHeaderDetails(column, 'Arrival Train Number');
-                },
-                cell: ({ row }) => {
-                    return getTransportationField(row.original.arrival, 'trainNumber');
-                },
-            },
             {
                 accessorKey: 'arrivalTrainTime',
                 header: ({ column }) => {
@@ -130,31 +107,6 @@ export function useColumnDefinition() {
                 },
                 cell: ({ row }) => {
                     return getTransportationField(row.original.arrival, 'trainTime');
-                },
-            },
-            {
-                accessorKey: 'arrivalTrainStation',
-                header: ({ column }) => {
-                    return setHeaderDetails(column, 'Arrival Train Station');
-                }, cell: ({ row }) => {
-                    return getTransportationField(row.original.arrival, 'trainStation');
-                },
-            },
-            {
-                accessorKey: 'arrivalBusTime',
-                header: ({ column }) => {
-                    return setHeaderDetails(column, 'Arrival Bus Time');
-                }, cell: ({ row }) => {
-                    return getTransportationField(row.original.arrival, 'busTime');
-                },
-            },
-            {
-                accessorKey: 'arrivalBusPickupPoint',
-                header: ({ column }) => {
-                    return setHeaderDetails(column, 'Arrival Bus Pickup Point');
-                },
-                cell: ({ row }) => {
-                    return getTransportationField(row.original.arrival, 'busPickupPoint');
                 },
             },
             {
@@ -175,24 +127,11 @@ export function useColumnDefinition() {
                         case TransportationType.TRAIN:
                             departureType = TransportationType.TRAIN.toUpperCase();
                             break;
-                        case TransportationType.BUS: {
-                            departureType = TransportationType.BUS.toUpperCase();
-                            break;
-                        }
                         default: {
-                            departureType = '';
+                            departureType = 'N/A';
                         }
                     }
                     return h('div', departureType);
-                },
-            },
-            {
-                accessorKey: 'departureFlightNumber',
-                header: ({ column }) => {
-                    return setHeaderDetails(column, 'Departure Flight Number');
-                },
-                cell: ({ row }) => {
-                    return getTransportationField(row.original.departure, 'flightNumber');
                 },
             },
 
@@ -205,16 +144,6 @@ export function useColumnDefinition() {
                     return getTransportationField(row.original.departure, 'flightTime');
                 },
             },
-
-            {
-                accessorKey: 'departureTrainNumber',
-                header: ({ column }) => {
-                    return setHeaderDetails(column, 'Departure Train Number');
-                },
-                cell: ({ row }) => {
-                    return getTransportationField(row.original.departure, 'trainNumber');
-                },
-            },
             {
                 accessorKey: 'departureTrainTime',
                 header: ({ column }) => {
@@ -222,31 +151,6 @@ export function useColumnDefinition() {
                 },
                 cell: ({ row }) => {
                     return getTransportationField(row.original.departure, 'trainTime');
-                },
-            },
-            {
-                accessorKey: 'departureTrainStation',
-                header: ({ column }) => {
-                    return setHeaderDetails(column, 'Departure Train Station');
-                }, cell: ({ row }) => {
-                    return getTransportationField(row.original.departure, 'trainStation');
-                },
-            },
-            {
-                accessorKey: 'departureBusTime',
-                header: ({ column }) => {
-                    return setHeaderDetails(column, 'Departure Bus Time');
-                }, cell: ({ row }) => {
-                    return getTransportationField(row.original.departure, 'busTime');
-                },
-            },
-            {
-                accessorKey: 'departureBusPickupPoint',
-                header: ({ column }) => {
-                    return setHeaderDetails(column, 'Departure Bus Pickup Point');
-                },
-                cell: ({ row }) => {
-                    return getTransportationField(row.original.departure, 'busPickupPoint');
                 },
             },
 

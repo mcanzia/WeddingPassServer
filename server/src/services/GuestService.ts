@@ -83,6 +83,7 @@ export class GuestService {
         guest.name = (data['Name'] || '').trim();
         guest.email = (data['Email'] || '').trim();
         guest.phone = (data['Phone'] || '').trim();
+        guest.serialNumber = (data['Serial Number'] || '').trim();
 
         // Events
         guest.events = this.parseGuestEvents(data, weddingEvents);

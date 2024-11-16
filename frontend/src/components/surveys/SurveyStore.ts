@@ -57,9 +57,13 @@ export const useSurveyStore = defineStore('surveyStore', () => {
     const previewMode = ref<boolean>(false);
     const savedStatus = ref<boolean>(true);
 
-    const formattedGuestDetailKeys = computed(() => {
-        return Guest.detailKeys.map(key => startCase(key));
-    });
+    const formattedGuestDetailKeys = computed(() =>
+        Guest.detailKeys.map(key =>
+            key.includes(':')
+                ? key.split(':').map(part => startCase(part.trim())).join(': ')
+                : startCase(key)
+        )
+    );
 
     const parentSelectOptions = computed(() => {
         if (parentFieldId.value && survey.value && survey.value.surveyComponents) {
@@ -85,7 +89,11 @@ export const useSurveyStore = defineStore('surveyStore', () => {
             newSurveyComponent.value = predefinedValue.value;
         }
         if (infoLookupField.value) {
-            const fieldLookup: string = `${camelCase(infoLookupField.value)}`;
+            const fieldLookup = infoLookupField.value
+                .split(':')
+                .map(part => camelCase(part.trim()))
+                .join(':');
+
             newSurveyComponent.infoLookupField = fieldLookup;
         }
         if (survey.value) {
