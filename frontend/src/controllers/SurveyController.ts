@@ -5,10 +5,20 @@ import { ObjectType } from "@/models/ObjectType";
 import { WeddingRole } from "@/models/WeddingRole";
 
 export class SurveyController {
-    
+
     async getAllSurveys(userAuthToken: any, weddingRole: WeddingRole) {
         try {
             const requestUrl = `${RequestUtil.getAPIUrl()}/api/weddings/${weddingRole.wedding.id}/surveys`;
+            return await RequestUtil.apiRequest(requestUrl, RequestUtil.GETRequestParams(userAuthToken, weddingRole.role));
+        } catch (error: any) {
+            ErrorHandler.handleGetAllError<Survey>(userAuthToken, ObjectType.SURVEY, error);
+            throw error;
+        }
+    }
+
+    async getPublishedSurveys(userAuthToken: any, weddingRole: WeddingRole) {
+        try {
+            const requestUrl = `${RequestUtil.getAPIUrl()}/api/weddings/${weddingRole.wedding.id}/surveys/published`;
             return await RequestUtil.apiRequest(requestUrl, RequestUtil.GETRequestParams(userAuthToken, weddingRole.role));
         } catch (error: any) {
             ErrorHandler.handleGetAllError<Survey>(userAuthToken, ObjectType.SURVEY, error);
@@ -29,7 +39,7 @@ export class SurveyController {
     async saveSurvey(userAuthToken: any, weddingRole: WeddingRole, survey: Survey) {
         try {
             const requestUrl = `${RequestUtil.getAPIUrl()}/api/weddings/${weddingRole.wedding.id}/surveys`;
-            return await RequestUtil.apiRequest(requestUrl,  RequestUtil.POSTRequestParams(userAuthToken, survey, weddingRole.role));
+            return await RequestUtil.apiRequest(requestUrl, RequestUtil.POSTRequestParams(userAuthToken, survey, weddingRole.role));
         } catch (error: any) {
             ErrorHandler.handleAddError<Survey>(userAuthToken, ObjectType.SURVEY, survey, error);
             throw error;

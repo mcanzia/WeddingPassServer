@@ -1,7 +1,7 @@
 import { initializeApp } from 'firebase/app';
 import {
-  Auth, getAuth, GoogleAuthProvider,
-  createUserWithEmailAndPassword, signInWithEmailAndPassword, signInWithPopup, sendPasswordResetEmail
+  Auth, getAuth, GoogleAuthProvider, RecaptchaVerifier, signInWithPhoneNumber, PhoneAuthProvider,
+  createUserWithEmailAndPassword, signInWithEmailAndPassword, signInWithPopup, sendPasswordResetEmail, signInWithCredential
 } from 'firebase/auth';
 import { getFirestore, doc, getDoc, Firestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
@@ -28,6 +28,10 @@ interface AuthFunctions extends Auth {
   signInWithPopup: any;
   GoogleAuthProvider: any;
   sendPasswordResetEmail: any;
+  RecaptchaVerifier: any;
+  signInWithPhoneNumber: any;
+  PhoneAuthProvider: any;
+  signInWithCredential: any;
 }
 
 let auth = getAuth(firebaseApp) as AuthFunctions;
@@ -36,6 +40,11 @@ auth.signInWithEmailAndPassword = signInWithEmailAndPassword;
 auth.signInWithPopup = signInWithPopup;
 auth.GoogleAuthProvider = GoogleAuthProvider;
 auth.sendPasswordResetEmail = sendPasswordResetEmail;
+auth.RecaptchaVerifier = RecaptchaVerifier;
+auth.signInWithPhoneNumber = signInWithPhoneNumber;
+auth.PhoneAuthProvider = PhoneAuthProvider;
+auth.signInWithCredential = signInWithCredential;
+
 
 let db = getFirestore(firebaseApp);
 

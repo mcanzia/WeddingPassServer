@@ -36,7 +36,7 @@ export class AuthController {
             throw error;
         }
     }
-    
+
     async setUserRole(userAuthToken: any, userId: string, role: WeddingRole) {
         try {
             const requestUrl = `${RequestUtil.getAPIUrl()}/api/auth/roles/${userId}`;
@@ -93,6 +93,16 @@ export class AuthController {
             return await RequestUtil.apiRequest(requestUrl, RequestUtil.POSTRequestParams(userAuthToken, token));
         } catch (error: any) {
             ErrorHandler.handleProcessInviteLinkError();
+            throw error;
+        }
+    }
+
+    async addUserToWedding(userAuthToken: any, newWeddingRole: WeddingRole) {
+        try {
+            const requestUrl = `${RequestUtil.getAPIUrl()}/api/auth/roles`;
+            return await RequestUtil.apiRequest(requestUrl, RequestUtil.POSTRequestParams(userAuthToken, newWeddingRole));
+        } catch (error: any) {
+            ErrorHandler.handleUpdateError(ObjectType.USER);
             throw error;
         }
     }

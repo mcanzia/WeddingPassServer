@@ -7,10 +7,9 @@ import { inject, injectable } from "inversify";
 import { EventDao } from "../dao/EventDao";
 import { TYPES } from "../configs/types";
 import { WeddingEvent } from "../models/WeddingEvent";
-import { isValueObject } from "../util/typescript/RichTextType";
 import { GuestDao } from "../dao/GuestDao";
 import { UploadValidation } from "../models/UploadValidation";
-import { DUPLICATE_GUEST, EMAIL_BAD_FORMAT, EMAIL_MISSING, EMAIL_TOO_LONG, MISSING_EVENT, NAME_MISSING, NAME_TOO_LONG, PHONE_TOO_LONG } from "../util/upload/ValidationErrors";
+import { DUPLICATE_GUEST, EMAIL_BAD_FORMAT, EMAIL_MISSING, EMAIL_TOO_LONG, MISSING_EVENT, NAME_MISSING, NAME_TOO_LONG, PARTY_NUMBER_MISSING, PHONE_TOO_LONG } from "../util/upload/ValidationErrors";
 import validator from 'validator';
 import { Flight } from "../models/Flight";
 import { TransportationType } from "../models/TransportationType";
@@ -84,6 +83,8 @@ export class GuestService {
         guest.email = (data['Email'] || '').trim();
         guest.phone = (data['Phone'] || '').trim();
         guest.serialNumber = (data['Serial Number'] || '').trim();
+        guest.groupNumber = Number(data['Party Number'] || -1);
+        guest.dietaryRestrictions = (data['Dietary Restrictions'] || '').trim();
 
         // Events
         guest.events = this.parseGuestEvents(data, weddingEvents);
@@ -135,7 +136,7 @@ export class GuestService {
             }
         }
 
-        const fieldsMapping: { [key: string]: string } = this.getTransportationFieldsMapping(transportation, prefix);
+        const fieldsMapping: { [key: string]: string } = this.getTransportationFieldsMapping(transportation);
 
         for (const [dataField, propName] of Object.entries(fieldsMapping)) {
             const value = data[`${prefix}.${dataField}`];
@@ -147,7 +148,7 @@ export class GuestService {
         return transportation;
     }
 
-    private getTransportationFieldsMapping(transportation: Transportation, prefix: string): { [key: string]: string } {
+    private getTransportationFieldsMapping(transportation: Transportation): { [key: string]: string } {
         if (transportation.type === TransportationType.FLIGHT) {
             return {
                 'Flight.Num': 'flightNumber',
@@ -189,6 +190,10 @@ export class GuestService {
     private validateGuest(guest: Guest, currentGuestNames: string[]): string | null {
         if (validator.isEmpty(guest.name)) {
             return NAME_MISSING;
+        }
+
+        if (guest.groupNumber === -1) {
+            return PARTY_NUMBER_MISSING;
         }
 
         if (!guest.events || guest.events.length === 0) {

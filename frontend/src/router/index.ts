@@ -5,7 +5,6 @@ import AddWedding from "@/components/weddings/AddWedding.vue";
 import EditWedding from "@/components/weddings/EditWedding.vue";
 import EditGuest from "@/components/guest-list/EditGuest.vue";
 import InviteUser from "@/components/InviteUser.vue";
-import Home from "@/components/Home.vue";
 import EventAttendance from "@/components/events/EventAttendance.vue";
 import GuestUpload from "@/components/guest-list/GuestUpload.vue";
 import WeddingList from "@/components/weddings/WeddingList.vue";
@@ -16,6 +15,12 @@ import { storeToRefs } from "pinia";
 import InvitePage from "@/components/InvitePage.vue";
 import SurveyBuilder from "@/components/surveys/SurveyBuilder.vue";
 import SurveyList from "@/components/surveys/SurveyList.vue";
+import HomeRouter from "@/components/HomeRouter.vue";
+import GuestLogin from "@/components/guests/GuestLogin.vue";
+import VerifyGuest from "@/components/guests/VerifyGuest.vue";
+import GuestSurvey from "@/components/surveys/GuestSurvey.vue";
+import SurveyAdmin from "@/components/surveys/SurveyAdmin.vue";
+import AssignedSurveys from "@/components/surveys/AssignedSurveys.vue";
 
 const routes = [
    {
@@ -108,7 +113,7 @@ const routes = [
    {
       path: '/:weddingId/surveys',
       name: 'surveys',
-      component: SurveyList,
+      component: SurveyAdmin,
       props: true,
       meta: {
          allowedRoles: [Roles.ADMIN, Roles.EDITOR]
@@ -126,7 +131,7 @@ const routes = [
    {
       path: '/:weddingId/',
       name: 'home',
-      component: Home,
+      component: HomeRouter,
    },
    {
       path: '/login',
@@ -134,10 +139,28 @@ const routes = [
       component: Login,
    },
    {
+      path: '/guest-login',
+      name: 'guest-login',
+      component: GuestLogin,
+   },
+   {
+      path: '/verify-guest',
+      name: 'verify-guest',
+      component: VerifyGuest,
+      meta: {
+         allowedRoles: [Roles.GUEST]
+      }
+   },
+   {
       path: '/invite',
       name: 'invite',
       component: InvitePage,
-   }
+   },
+   {
+      path: '/:weddingId/guest-surveys',
+      name: 'guest-surveys',
+      component: AssignedSurveys,
+   },
 
 ]
 
@@ -164,35 +187,41 @@ router.beforeEach((to, from, next) => {
 
    function proceedWithNavigation() {
       const isAuthenticated = !!user.value;
+      const isGuest = localStorage.getItem('guest');
       // let userRole = userStore.localUser?.weddingRoles;
-      if(to.name !== 'login' && to.name !== 'invite' && !isAuthenticated) {
-         next({ name: 'login'});
+      const exemptedRoutes = ['login', 'invite', 'guest-login'];
+      if (!isAuthenticated && !exemptedRoutes.includes(String(to.name))) {
+         if (isGuest) {
+            next({ name: 'guest-login' });
+         } else {
+            next({ name: 'login' });
+         }
       } else if (to.name === 'login' && isAuthenticated) {
          next({ name: 'landing' });
       } else {
          next();
       }
 
-   //    const requiresAuth = to.matched.some((record) => record.meta.allowedRoles);
+      //    const requiresAuth = to.matched.some((record) => record.meta.allowedRoles);
 
-   //    if (requiresAuth) {
-   //       if (!user) {
-   //          next("/");
-   //       } else {
-   //          const allowedRoles = to.matched.flatMap((record) => record.meta.allowedRoles || []);
-   //          const hasAccess = allowedRoles.includes(userRole);
+      //    if (requiresAuth) {
+      //       if (!user) {
+      //          next("/");
+      //       } else {
+      //          const allowedRoles = to.matched.flatMap((record) => record.meta.allowedRoles || []);
+      //          const hasAccess = allowedRoles.includes(userRole);
 
-   //          if (hasAccess) {
-   //             next();
-   //          } else {
-   //             ErrorHandler.handleAuthorizationError();
-   //             next("/");
-   //          }
-   //       }
-   //    } else {
-   //       next();
-   //    }
-   // }
+      //          if (hasAccess) {
+      //             next();
+      //          } else {
+      //             ErrorHandler.handleAuthorizationError();
+      //             next("/");
+      //          }
+      //       }
+      //    } else {
+      //       next();
+      //    }
+      // }
    }
 });
 

@@ -170,6 +170,74 @@ export class GuestDao {
         }
     }
 
+    async getGuestsByEmail(weddingId: string, email: string): Promise<Array<Guest>> {
+        try {
+            const sanitizedEmail = validator.escape(email.trim()).toLowerCase();
+            if (!validator.isEmail(sanitizedEmail)) {
+                throw new CustomError('Invalid email address format.', 400);
+            }
+
+            const querySnapshot: QuerySnapshot<DocumentData> = await this.guestsCollection
+                .where('weddingId', '==', weddingId)
+                .where('email', '==', sanitizedEmail)
+                .get();
+
+            if (querySnapshot.empty) {
+                return [];
+            }
+
+            const guests: Array<Guest> = [];
+
+            const events: Map<string, WeddingEvent> = await this.fetchAllEvents(weddingId);
+
+            querySnapshot.forEach((doc: QueryDocumentSnapshot<DocumentData>) => {
+                const guestData = doc.data();
+                guestData.id = doc.id;
+                guestData.events = guestData.events.map((eventId: string) => events.get(eventId));
+                guests.push(guestData as Guest);
+            });
+
+            return guests;
+        } catch (error: any) {
+            throw new DatabaseError("Could not retrieve guests by email from database: " + error.message);
+        }
+    }
+
+    async getGuestsByPhone(weddingId: string, phone: string): Promise<Array<Guest>> {
+        try {
+            const sanitizedPhone = validator.escape(phone.trim());
+            if (!validator.isMobilePhone(sanitizedPhone, 'any', { strictMode: false })) {
+                throw new CustomError('Invalid phone number format.', 400);
+            }
+
+            const querySnapshot: QuerySnapshot<DocumentData> = await this.guestsCollection
+                .where('weddingId', '==', weddingId)
+                .where('phone', '==', sanitizedPhone)
+                .get();
+
+            if (querySnapshot.empty) {
+                return [];
+            }
+
+            const guests: Array<Guest> = [];
+
+            const events: Map<string, WeddingEvent> = await this.fetchAllEvents(weddingId);
+
+            querySnapshot.forEach((doc: QueryDocumentSnapshot<DocumentData>) => {
+                const guestData = doc.data();
+                guestData.id = doc.id;
+                guestData.events = guestData.events.map((eventId: string) => events.get(eventId));
+                guests.push(guestData as Guest);
+            });
+
+            return guests;
+        } catch (error: any) {
+            throw new DatabaseError("Could not retrieve guests by phone from database: " + error.message);
+        }
+    }
+
+
+
     async getGuestBySerialNumber(weddingId: string, serialNumber: string): Promise<Guest> {
         try {
             const querySnapshot: QuerySnapshot<DocumentData> = await this.guestsCollection

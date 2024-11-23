@@ -6,13 +6,14 @@ import jwt from 'jsonwebtoken';
 import { InviteToken } from "../models/InviteToken";
 import { UserDao } from "../dao/UserDao";
 import { TYPES } from "../configs/types";
+import { Roles } from "../models/Roles";
 
 @injectable()
 export class AuthService {
 
-    constructor(@inject(TYPES.UserDao) private userDao: UserDao) {}
+    constructor(@inject(TYPES.UserDao) private userDao: UserDao) { }
 
-    static async validateAuthToken(bearer : any) {
+    static async validateAuthToken(bearer: any) {
         if (!bearer || !bearer.startsWith("Bearer ")) {
             throw new AuthorizationError("Error occurred while attempting to authorize user.");
         }
@@ -28,36 +29,42 @@ export class AuthService {
         }
     }
 
-    async generateInviteLink(weddingRole : WeddingRole) {
+    async generateInviteLink(weddingRole: WeddingRole) {
         try {
-            const payload = {
-                weddingRole,
-                exp: Math.floor(Date.now() / 1000) + (60 * 60 * 24),
-              };
-            
-              const secretKey : jwt.Secret | undefined = process.env.JWT_SECRET_KEY;
-              if (secretKey) {
+            const payload =
+                weddingRole.role === Roles.GUEST ?
+                    {
+                        weddingRole
+                    } :
+                    {
+                        weddingRole,
+                        exp: Math.floor(Date.now() / 1000) + (60 * 60 * 24),
+                    };
+
+            const secretKey: jwt.Secret | undefined = process.env.JWT_SECRET_KEY;
+            if (secretKey) {
                 const token = jwt.sign(payload, secretKey);
                 return new InviteToken(token);
-              }
-            
-              throw new CustomError('JWT secret cannot be found');
+            }
+
+            throw new CustomError('JWT secret cannot be found');
         } catch (error) {
             throw error;
         }
     }
 
-    async processInviteLink(token : string, userId: string) {
+    async processInviteLink(token: string) {
         try {
-              const secretKey : jwt.Secret | undefined = process.env.JWT_SECRET_KEY;
-              if (secretKey) {
-                const payload : any = jwt.verify(token, secretKey);
-                const {weddingRole} = payload;
-                await this.userDao.addUserToWedding(userId, weddingRole);
-              } else {
+            const secretKey: jwt.Secret | undefined = process.env.JWT_SECRET_KEY;
+            if (secretKey) {
+                const payload: any = jwt.verify(token, secretKey);
+                const { weddingRole } = payload;
+                return weddingRole;
+                // await this.userDao.addUserToWedding(userId, weddingRole);
+            } else {
                 throw new CustomError('JWT secret cannot be found');
-              }
-              
+            }
+
         } catch (error) {
             throw error;
         }

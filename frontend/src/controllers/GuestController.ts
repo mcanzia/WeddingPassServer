@@ -5,7 +5,7 @@ import { ObjectType } from "@/models/ObjectType";
 import { WeddingRole } from "@/models/WeddingRole";
 
 export class GuestController {
-    
+
     async getAllGuests(userAuthToken: any, weddingRole: WeddingRole) {
         try {
             const requestUrl = `${RequestUtil.getAPIUrl()}/api/weddings/${weddingRole.wedding.id}/guests`;
@@ -36,10 +36,30 @@ export class GuestController {
         }
     }
 
+    async getGuestsByPhone(userAuthToken: any, weddingRole: WeddingRole, guestPhone: string) {
+        try {
+            const requestUrl = `${RequestUtil.getAPIUrl()}/api/weddings/${weddingRole.wedding.id}/guests/phone/${guestPhone}`;
+            return await RequestUtil.apiRequest(requestUrl, RequestUtil.GETRequestParams(userAuthToken, weddingRole.role));
+        } catch (error: any) {
+            ErrorHandler.handleGetByIdError();
+            throw error;
+        }
+    }
+
+    async getGuestsByEmail(userAuthToken: any, weddingRole: WeddingRole, guestEmail: string) {
+        try {
+            const requestUrl = `${RequestUtil.getAPIUrl()}/api/weddings/${weddingRole.wedding.id}/guests/email/${guestEmail}`;
+            return await RequestUtil.apiRequest(requestUrl, RequestUtil.GETRequestParams(userAuthToken, weddingRole.role));
+        } catch (error: any) {
+            ErrorHandler.handleGetByIdError();
+            throw error;
+        }
+    }
+
     async addGuest(userAuthToken: any, weddingRole: WeddingRole, guest: Guest) {
         try {
             const requestUrl = `${RequestUtil.getAPIUrl()}/api/weddings/${weddingRole.wedding.id}/guests`;
-            return await RequestUtil.apiRequest(requestUrl,  RequestUtil.POSTRequestParams(userAuthToken, guest, weddingRole.role));
+            return await RequestUtil.apiRequest(requestUrl, RequestUtil.POSTRequestParams(userAuthToken, guest, weddingRole.role));
         } catch (error: any) {
             ErrorHandler.handleAddError<Guest>(userAuthToken, ObjectType.GUEST, guest, error);
             throw error;

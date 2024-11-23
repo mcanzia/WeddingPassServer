@@ -6,3 +6,4 @@ export const EMAIL_BAD_FORMAT = "Email field has incorrect format (test@example.
 export const PHONE_TOO_LONG = "Phone field must be less than 50 characters.";
 export const DUPLICATE_GUEST = "A guest with this name already exists.";
 export const MISSING_EVENT = "A guest must be invited to at least one event.";
+export const PARTY_NUMBER_MISSING = "Party Number field is empty";

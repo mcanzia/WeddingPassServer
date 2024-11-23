@@ -13,14 +13,14 @@
 </template>
 
 <script setup>
-import Navbar from '@/components/Navbar.vue';
-import Loader from '@/components/Loader.vue';
-import { Toaster } from '@/components/ui/toast';
-import { useToast } from '@/components/ui/toast/use-toast';
-import { useUserStore } from '@/stores/UserStore';
-import { useNotificationStore } from '@/stores/NotificationStore';
-import { onMounted, watch } from 'vue';
-import { storeToRefs } from 'pinia';
+import Navbar from "@/components/Navbar.vue";
+import Loader from "@/components/Loader.vue";
+import { Toaster } from "@/components/ui/toast";
+import { useToast } from "@/components/ui/toast/use-toast";
+import { useUserStore } from "@/stores/UserStore";
+import { useNotificationStore } from "@/stores/NotificationStore";
+import { onMounted, watch } from "vue";
+import { storeToRefs } from "pinia";
 
 const userStore = useUserStore();
 const { isLoading, isLoggedIn } = storeToRefs(userStore);
@@ -33,15 +33,15 @@ const { resetError, resetSuccess } = notificationStore;
 const { toast } = useToast();
 
 onMounted(() => {
-  document.documentElement.classList.add('dark');
+  document.documentElement.classList.add("dark");
 });
 
 watch(errorMessage, (val) => {
   if (val) {
     toast({
-      title: 'Error',
+      title: "Error",
       description: val.message,
-      variant: 'destructive',
+      variant: "destructive",
     });
     resetError();
   }
@@ -50,9 +50,9 @@ watch(errorMessage, (val) => {
 watch(successMessage, (val) => {
   if (val) {
     toast({
-      title: 'Success',
+      title: "Success",
       description: val.message,
-      variant: 'success',
+      variant: "success",
     });
     resetSuccess();
   }

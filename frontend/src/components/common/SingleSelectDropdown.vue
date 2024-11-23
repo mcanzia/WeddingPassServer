@@ -4,7 +4,7 @@
       <SelectTrigger>
         <SelectValue :placeholder="placeholder" />
       </SelectTrigger>
-      <SelectContent class="h-60 overflow-y-scroll">
+      <SelectContent class="max-h-60 overflow-y-scroll">
         <SelectGroup>
           <SelectItem
             v-for="option in selectOptions"

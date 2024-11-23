@@ -5,9 +5,9 @@ import { useUserStore } from '@/stores/UserStore';
 
 export class SurveyService {
 
-    private surveyController : SurveyController;
-    private userStore : any;
-    private weddingRole : WeddingRole;
+    private surveyController: SurveyController;
+    private userStore: any;
+    private weddingRole: WeddingRole;
 
     constructor() {
         this.surveyController = new SurveyController();
@@ -26,7 +26,18 @@ export class SurveyService {
         }
     }
 
-    async getSurveyById(surveyId : string) {
+    async getPublishedSurveys() {
+        try {
+            const userAccessToken = await this.userStore.getAccessToken();
+            const response = await this.surveyController.getPublishedSurveys(userAccessToken, this.weddingRole);
+            const publishedSurveys = response ? response : [];
+            return publishedSurveys;
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    async getSurveyById(surveyId: string) {
         try {
             const userAccessToken = await this.userStore.getAccessToken();
             const survey = await this.surveyController.getSurveyById(userAccessToken, this.weddingRole, surveyId);

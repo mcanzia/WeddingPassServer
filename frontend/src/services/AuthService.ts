@@ -6,9 +6,9 @@ import { useUserStore } from '@/stores/UserStore';
 
 export class AuthService {
 
-    private authController : AuthController;
-    private userStore : any;
-    private weddingRole : WeddingRole;
+    private authController: AuthController;
+    private userStore: any;
+    private weddingRole: WeddingRole;
 
     constructor() {
         this.authController = new AuthController();
@@ -27,7 +27,7 @@ export class AuthService {
         }
     }
 
-    async getUserById(uid : string) {
+    async getUserById(uid: string) {
         try {
             const userAccessToken = await this.userStore.getAccessToken();
             const user = await this.authController.getUserById(userAccessToken, uid);
@@ -37,7 +37,7 @@ export class AuthService {
         }
     }
 
-    async getUserRoles(userId : string) {
+    async getUserRoles(userId: string) {
         try {
             const userAccessToken = await this.userStore.getAccessToken();
             const roles = await this.authController.getUserRoles(userAccessToken, userId);
@@ -46,8 +46,8 @@ export class AuthService {
             throw error;
         }
     }
-    
-    async setUserRole(userId : string, role: WeddingRole) {
+
+    async setUserRole(userId: string, role: WeddingRole) {
         try {
             const userAccessToken = await this.userStore.getAccessToken();
             await this.authController.setUserRole(userAccessToken, userId, role);
@@ -67,7 +67,7 @@ export class AuthService {
         }
     }
 
-    async updateUser(user : User) {
+    async updateUser(user: User) {
         try {
             const userAccessToken = await this.userStore.getAccessToken();
             await this.authController.updateUser(userAccessToken, user);
@@ -100,7 +100,17 @@ export class AuthService {
     async processInvite(token: InviteToken) {
         try {
             const userAccessToken = await this.userStore.getAccessToken();
-            await this.authController.processInvite(userAccessToken, token);
+            const weddingRole = await this.authController.processInvite(userAccessToken, token);
+            return weddingRole;
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    async addUserToWedding(weddingRole: WeddingRole) {
+        try {
+            const userAccessToken = await this.userStore.getAccessToken();
+            await this.authController.addUserToWedding(userAccessToken, weddingRole);
             return;
         } catch (error) {
             throw error;

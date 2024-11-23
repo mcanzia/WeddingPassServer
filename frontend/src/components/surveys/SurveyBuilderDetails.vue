@@ -23,6 +23,15 @@
     </CardHeader>
     <CardContent>
       <div class="grid gap-4">
+        <div
+            class="flex items-center space-x-2 mt-2"
+          >
+          <Switch
+              v-model:checked="surveyPublishedComputed"
+              id="published-toggle"
+            />
+            <Label for="published-toggle">{{ publishedToggleText }}</Label>
+          </div>
         <div class="grid gap-2">
           <Label for="survey-name">Survey Name</Label>
           <Input
@@ -106,6 +115,13 @@
               id="guest-details-dropdown"
             />
           </div>
+          <div>
+            <TimePicker
+              with-seconds
+              with-period
+              with-labels
+            />
+          </div>
           <div
             v-if="showEditableInfoToggle"
             class="flex items-center space-x-2 mt-2"
@@ -166,6 +182,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Toggle } from "@/components/ui/toggle";
 import { Switch } from "@/components/ui/switch";
 import SingleSelectDropdown from "@/components/common/SingleSelectDropdown.vue";
+import TimePicker from "@/components/ui/time-picker/time-picker.vue";
 
 const { goToRouteSecured } = useRouterHelper();
 const {
@@ -288,6 +305,22 @@ const surveyTitleComputed = computed({
     }
   },
 });
+
+const surveyPublishedComputed = computed({
+  get() {
+    return survey.value!.published;
+  },
+  set(val) {
+    if (survey.value) {
+      survey.value.published = val;
+      savedStatus.value = false;
+    }
+  },
+});
+
+const publishedToggleText = computed(() => {
+  return survey.value && survey.value.published ? 'Published' : 'In Development'
+})
 
 const savedStatusClassesComputed = computed(() => {
   return `italic text-md ${!savedStatus.value ? "text-red-700 font-bold" : ""}`;

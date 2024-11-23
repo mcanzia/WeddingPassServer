@@ -90,7 +90,7 @@ export class UserDao {
                 userData.weddingRoles = userData.weddingRoles.map((weddingRole: any) => {
                     const foundWedding = weddings.get(weddingRole.wedding);
                     if (weddingRole && foundWedding) {
-                        const userWeddingRole = new WeddingRole(weddingRole.role, foundWedding);
+                        const userWeddingRole = new WeddingRole(weddingRole.role, foundWedding, weddingRole.guestId);
                         return userWeddingRole;
                     }
                 });
@@ -118,7 +118,7 @@ export class UserDao {
                 userData.weddingRoles = userData.weddingRoles.map((weddingRole: any) => {
                     const foundWedding = weddings.get(weddingRole.wedding);
                     if (weddingRole && foundWedding) {
-                        const userWeddingRole = new WeddingRole(weddingRole.role, foundWedding);
+                        const userWeddingRole = new WeddingRole(weddingRole.role, foundWedding, weddingRole.guestId);
                         return userWeddingRole;
                     }
                 });
@@ -137,12 +137,12 @@ export class UserDao {
 
             const fetchedWeddingsMap = await this.fetchWeddingsByIds(weddingIds);
 
-            const validatedWeddingRoles : Array<Object> = [];
+            const validatedWeddingRoles: Array<Object> = [];
 
             user.weddingRoles.forEach(weddingRole => {
                 const fetchedWedding = fetchedWeddingsMap.get(weddingRole.wedding.id);
                 if (fetchedWedding) {
-                    validatedWeddingRoles.push({ role: weddingRole.role, wedding: fetchedWedding.id });
+                    validatedWeddingRoles.push({ role: weddingRole.role, wedding: fetchedWedding.id, guestId: weddingRole.guestId });
                 }
             });
 
@@ -151,7 +151,9 @@ export class UserDao {
             }
             const newUserRef = this.usersCollection.doc(user.id);
 
-            user.email = validator.escape(user.email.trim());
+            if (user.email) {
+                user.email = validator.escape(user.email.trim());
+            }
 
             const newUser = user.toObject ? { ...user.toObject(), weddingRoles: validatedWeddingRoles } : { ...user, weddingRoles: validatedWeddingRoles };
 
@@ -172,8 +174,8 @@ export class UserDao {
 
             const updatedData = {
                 ...updatedUser,
-                email: validator.escape(updatedUser.email.trim()),
-                weddingRoles: updatedUser.weddingRoles.map(weddingRole => { return { role: weddingRole.role, wedding: weddingRole.wedding.id } }),
+                email: validator.escape(updatedUser.email?.trim()),
+                weddingRoles: updatedUser.weddingRoles.map(weddingRole => { return { role: weddingRole.role, wedding: weddingRole.wedding.id, guestId: weddingRole.guestId } }),
             };
 
             await userRef.update(updatedData);
@@ -202,9 +204,9 @@ export class UserDao {
             }
 
             const currentWeddingRoles = userData.weddingRoles;
-            let filteredWeddingRoles = currentWeddingRoles.filter((weddingRole : any) => weddingRole.wedding !== newWeddingRole.wedding.id);
+            let filteredWeddingRoles = currentWeddingRoles.filter((weddingRole: any) => weddingRole.wedding !== newWeddingRole.wedding.id);
 
-            filteredWeddingRoles.push({role: newWeddingRole.role, wedding: newWeddingRole.wedding.id});
+            filteredWeddingRoles.push({ role: newWeddingRole.role, wedding: newWeddingRole.wedding.id, guestId: newWeddingRole.guestId });
 
             const updatedData = {
                 ...userData,
