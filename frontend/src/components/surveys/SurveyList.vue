@@ -1,13 +1,12 @@
 <template>
   <div class="mx-4 mt-4">
-    <div class="inline-flex gap-4">
+    <div class="inline-flex gap-4" v-if="adminMode">
       <Search
         class="mb-4"
         placeholder="Search for survey..."
         v-model="searchQuery"
       />
       <Button
-        v-if="adminMode"
         @click="goToEditSurvey(null)"
       >Create Survey</Button>
     </div>
@@ -15,6 +14,7 @@
       <SurveyCard
         class="cursor-pointer"
         v-for="survey in filteredSurveys"
+        :admin-mode="adminMode"
         :survey="survey"
         :key="survey.id"
         @click="goToEditSurvey(survey)"
@@ -23,10 +23,10 @@
     <div v-if="surveyResponses.length">
       <SurveyCard
         class="cursor-pointer"
-        v-for="survey in filteredSurveys"
-        :survey="survey"
-        :key="survey.id"
-        @click="goToEditSurvey(survey)"
+        v-for="surveyResponse in surveyResponses"
+        :survey="surveyResponse"
+        :key="surveyResponse.responseId"
+        @click="goToCompleteSurvey(surveyResponse)"
       />
     </div>
   </div>
@@ -43,10 +43,18 @@ import SurveyCard from "@/components/surveys/SurveyCard.vue";
 import { Survey } from "@/models/Survey";
 import { useSurveyStore } from "@/components/surveys/SurveyStore";
 import { SurveyResponse } from "@/models/SurveyResponse";
+import { useSurveyResponseStore } from '@/components/surveys/SurveyResponseStore';
+import { useUserStore } from "@/stores/UserStore";
+import { useSurveyTypeGuard } from "@/components/surveys/useSurveyTypeGuard";
 
 const surveyStore = useSurveyStore();
 const { survey } = storeToRefs(surveyStore);
 const { saveSurvey } = surveyStore;
+const surveyResponseStore = useSurveyResponseStore();
+const { surveyResponse } = storeToRefs(surveyResponseStore);
+const { saveSurveyResponse } = surveyResponseStore;
+const userStore = useUserStore();
+const {loggedInGuest} = storeToRefs(userStore);
 
 const props = defineProps({
   adminMode: {
@@ -67,6 +75,7 @@ const props = defineProps({
 });
 
 const { goToRoute, goToRouteSecured } = useRouterHelper();
+const {isSurvey, isSurveyResponse} = useSurveyTypeGuard();
 const searchQuery = ref("");
 const debouncedSearchQuery = ref("");
 
@@ -93,6 +102,8 @@ watch(searchQuery, (newValue) => {
 
 async function goToEditSurvey(surveyToEdit: Survey | null) {
   if (!props.adminMode) {
+    // const newSurvey : Survey = new Survey(surveyToEdit?.id!, surveyToEdit?.weddingId!, surveyToEdit?.title!, surveyToEdit?.surveyComponents!, surveyToEdit?.published!);
+    goToCompleteSurvey(surveyToEdit!);
     return;
   }
   if (!surveyToEdit) {
@@ -105,6 +116,25 @@ async function goToEditSurvey(surveyToEdit: Survey | null) {
     goToRouteSecured("edit-survey", { surveyId: survey.value.id });
   } else {
     goToRouteSecured("edit-survey", { surveyId: surveyToEdit.id });
+  }
+}
+
+async function goToCompleteSurvey(surveyResponseToEdit: Survey | SurveyResponse) {
+  if (isSurvey(surveyResponseToEdit)) {
+    console.log('surveyResponse', surveyResponseToEdit);
+    surveyResponse.value = {
+      surveyId: surveyResponseToEdit.id!,
+      weddingId: surveyResponseToEdit.weddingId!,
+      guestId: loggedInGuest.value,
+      responses: surveyResponseToEdit.surveyComponents,
+      updatedAt: new Date(),
+      submitted: false,
+      title: surveyResponseToEdit.title,
+    } as SurveyResponse;
+    await saveSurveyResponse();
+    goToRouteSecured("survey-response", { surveyId: surveyResponse.value.surveyId, surveyResponseId: surveyResponse.value.responseId });
+  } else {
+    goToRouteSecured("survey-response", { surveyId: surveyResponseToEdit.surveyId, surveyResponseId: surveyResponseToEdit.responseId });
   }
 }
 </script>

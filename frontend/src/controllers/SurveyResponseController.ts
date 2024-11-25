@@ -21,6 +21,16 @@ export class SurveyResponseController {
         }
     }
 
+    async getAllSurveyResponsesForGuest(userAuthToken: any, weddingRole: WeddingRole, guestId: string) {
+        try {
+            const requestUrl = `${this.getSurveyBaseUrl(weddingRole)}/response/${guestId}`;
+            return await RequestUtil.apiRequest(requestUrl, RequestUtil.GETRequestParams(userAuthToken, weddingRole.role));
+        } catch (error: any) {
+            ErrorHandler.handleGetAllError<Survey>(userAuthToken, ObjectType.SURVEY, error);
+            throw error;
+        }
+    }
+
     async getSurveyResponseById(userAuthToken: any, weddingRole: WeddingRole, surveyId: string, surveyResponseId: string) {
         try {
             const requestUrl = `${this.getSurveyBaseUrl(weddingRole)}/${surveyId}/response/id/${surveyResponseId}`;

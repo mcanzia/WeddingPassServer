@@ -21,6 +21,8 @@ import { startCase } from "lodash";
 import { camelCase } from "lodash";
 import SurveyGuestDetailField from "@/components/surveys/SurveyGuestDetailField.vue";
 import { SurveyTrigger } from "@/models/SurveyTrigger";
+import { SurveyResponse } from "@/models/SurveyResponse";
+import { useSurveyFieldLookup } from "@/components/surveys/useSurveyFieldLookup";
 type ComponentMap = Map<string, Component>;
 
 const surveyComponentMap: ComponentMap = new Map<string, Component>([
@@ -47,7 +49,6 @@ export const useSurveyStore = defineStore('surveyStore', () => {
     const { hasEditAuthority } = storeToRefs(useUserStore());
     // state
     const survey = ref<Survey>();
-    const surveyDisplayComponents = ref<SurveyDisplayComponent[]>([]);
     const componentDropdownOptions = ref<string | null>();
     const predefinedValue = ref<string | null>();
     const infoLookupField = ref<string | null>();
@@ -56,14 +57,6 @@ export const useSurveyStore = defineStore('surveyStore', () => {
     const parentTriggerField = ref<string | null>();
     const previewMode = ref<boolean>(false);
     const savedStatus = ref<boolean>(true);
-
-    const formattedGuestDetailKeys = computed(() =>
-        Guest.detailKeys.map(key =>
-            key.includes(':')
-                ? key.split(':').map(part => startCase(part.trim())).join(': ')
-                : startCase(key)
-        )
-    );
 
     const parentSelectOptions = computed(() => {
         if (parentFieldId.value && survey.value && survey.value.surveyComponents) {
@@ -86,7 +79,7 @@ export const useSurveyStore = defineStore('surveyStore', () => {
                 .map((value) => value.trim().toUpperCase());
         }
         if (predefinedValue.value) {
-            newSurveyComponent.value = predefinedValue.value;
+            newSurveyComponent.componentValue = predefinedValue.value;
         }
         if (infoLookupField.value) {
             const fieldLookup = infoLookupField.value
@@ -184,7 +177,7 @@ export const useSurveyStore = defineStore('surveyStore', () => {
     ): boolean {
         for (const component of components) {
             if (component.id === componentId) {
-                component.value = value;
+                component.componentValue = value;
                 clearChildValues(component);
                 return true;
             }
@@ -208,7 +201,7 @@ export const useSurveyStore = defineStore('surveyStore', () => {
         if (component.surveyTriggers) {
             for (const trigger of component.surveyTriggers) {
                 const childComponent = trigger.child;
-                childComponent.value = null;
+                childComponent.componentValue = null;
                 clearChildValues(childComponent);
             }
         }
@@ -274,7 +267,6 @@ export const useSurveyStore = defineStore('surveyStore', () => {
 
     return {
         survey,
-        surveyDisplayComponents,
         previewMode,
         parentFieldId,
         parentTriggerField,
@@ -283,7 +275,6 @@ export const useSurveyStore = defineStore('surveyStore', () => {
         infoLookupField,
         editableInfo,
         savedStatus,
-        formattedGuestDetailKeys,
         parentSelectOptions,
         insertSurveyDisplayComponent,
         removeSurveyComponent,

@@ -8,7 +8,7 @@
                 <Separator />
             </CardHeader>
             <CardContent>
-                <span>Status: {{ surveyStatus }}</span>
+                <span v-if="surveyStatusComputed">Status: {{ surveyStatusComputed }}</span>
             </CardContent>
         </Card>
     </div>
@@ -20,14 +20,26 @@ import { Separator } from '@/components/ui/separator'
 import { Survey } from '@/models/Survey';
 import CardContent from '../ui/card/CardContent.vue';
 import { computed } from 'vue';
+import { SurveyResponse } from '@/models/SurveyResponse';
+import { useSurveyTypeGuard } from '@/components/surveys/useSurveyTypeGuard';
 
 const props = defineProps<{
-    survey: Survey;
+  adminMode?: boolean;
+  survey: Survey | SurveyResponse;
 }>();
 
+const {isSurvey, isSurveyResponse} = useSurveyTypeGuard();
 
-const surveyStatus = computed(() => {
-    return props.survey && props.survey.published ? 'Published' : 'In Development'
+
+const surveyStatusComputed = computed(() => {
+    if (props.adminMode && isSurvey(props.survey)) {
+        return props.survey.published ? 'Published' : 'In Development';
+    } else if (!props.adminMode && isSurveyResponse(props.survey)) {
+        return props.survey.submitted ? 'Submitted' : 'In Progress';
+    } else {
+        return 'New';
+    }
+    
 })
 
 </script>

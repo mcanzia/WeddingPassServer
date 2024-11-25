@@ -34,6 +34,7 @@ export const useUserStore = defineStore('userStore', () => {
     });
     const selectedWedding = computed(() => selectedWeddingRole.value?.wedding);
     const selectedRole = computed(() => selectedWeddingRole.value?.role);
+    const loggedInGuest = computed(() => selectedWeddingRole.value?.guestId!);
 
     // Actions
     function initializeAuthListener() {
@@ -50,8 +51,6 @@ export const useUserStore = defineStore('userStore', () => {
             setTimeout(() => {
                 isLoading.value = false;
                 isAuthReady.value = true;
-                console.log('IS READY', isAuthReady.value, isLoggedIn.value);
-
             }, 500);
         });
     }
@@ -272,7 +271,8 @@ export const useUserStore = defineStore('userStore', () => {
                 date: selectedWeddingRole.value.wedding.date?.toDateString,
                 location: selectedWeddingRole.value.wedding.location,
                 ownerId: selectedWeddingRole.value.wedding.ownerId,
-                role: selectedWeddingRole.value.role
+                role: selectedWeddingRole.value.role,
+                guestId: selectedWeddingRole.value.guestId
             };
             Cookies.set('selectedWeddingRole', JSON.stringify(dataToStore), { expires: 7 });
         } else {
@@ -303,6 +303,7 @@ export const useUserStore = defineStore('userStore', () => {
         hasEditAuthority,
         selectedRole,
         selectedWedding,
+        loggedInGuest,
         // Actions
         initializeAuthListener,
         loadSelectedWeddingRole,

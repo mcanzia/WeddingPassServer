@@ -28,6 +28,17 @@ export class SurveyResponseService {
         }
     }
 
+    async getAllSurveyResponsesForGuest(guestId: string) {
+        try {
+            const userAccessToken = await this.userStore.getAccessToken();
+            const response = await this.surveyResponseController.getAllSurveyResponsesForGuest(userAccessToken, this.weddingRole, guestId);
+            const allSurveyResponses = response ? response : [];
+            return allSurveyResponses;
+        } catch (error) {
+            throw error;
+        }
+    }
+
     async getSurveyResponseById(surveyId: string, surveyResponseId: string) {
         try {
             const userAccessToken = await this.userStore.getAccessToken();

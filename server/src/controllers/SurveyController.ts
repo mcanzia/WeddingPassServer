@@ -98,6 +98,22 @@ export class SurveyController {
         }
     }
 
+    async getAllSurveyResponsesForGuest(request: Request, response: Response, next: NextFunction) {
+        try {
+            const { weddingId, guestId } = request.params;
+
+            Logger.info(`Retrieving all survey responses for guest ${guestId}`);
+
+            const surveyResponses: Array<SurveyResponse> = await this.surveyDao.getAllSurveyResponsesForGuest(weddingId, guestId);
+
+            Logger.info(`Number of survey responses retrieved successfully: ${surveyResponses.length}`);
+            response.status(200).json(surveyResponses);
+        } catch (error) {
+            Logger.error(`Error retrieving survey responses for guest ${request.params.guestId}`);
+            response.status((error as CustomError).statusCode).send((error as CustomError).message);
+        }
+    }
+
     async getSurveyResponseById(request: Request, response: Response, next: NextFunction) {
         try {
             const { weddingId, surveyId, surveyResponseId } = request.params;

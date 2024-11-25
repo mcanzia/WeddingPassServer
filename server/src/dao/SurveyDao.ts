@@ -154,17 +154,56 @@ export class SurveyDao {
                 const surveyResponse = new SurveyResponse(
                     doc.id,
                     responseData.surveyId,
+                    responseData.weddingId,
                     responseData.guestId,
                     responseData.responses,
                     responseData.updatedAt.toDate(),
-                    responseData.submitted
+                    responseData.submitted,
+                    responseData.title
                 );
                 surveyResponses.push(surveyResponse);
             });
 
             return surveyResponses;
         } catch (error) {
-            throw new Error(`Error retrieving survey responses: ${error}`);
+            throw new DatabaseError(`Error retrieving survey responses: ${error}`);
+        }
+    }
+
+    async getAllSurveyResponsesForGuest(weddingId: string, guestId: string): Promise<Array<SurveyResponse>> {
+        try {
+            const querySnapshot = await db
+                .collectionGroup('surveyResponses')
+                .where('guestId', '==', guestId)
+                .where('weddingId', '==', weddingId)
+                .get();
+
+            if (querySnapshot.empty) {
+                return [];
+            }
+
+            const surveyResponses: Array<SurveyResponse> = [];
+
+            querySnapshot.forEach((doc) => {
+                const responseData = doc.data();
+                const surveyId = doc.ref.parent.parent?.id;
+                const surveyResponse = new SurveyResponse(
+                    doc.id,
+                    surveyId!,
+                    responseData.weddingId,
+                    responseData.guestId,
+                    responseData.responses,
+                    (responseData.updatedAt as Timestamp).toDate(),
+                    responseData.submitted,
+                    responseData.title
+                );
+                surveyResponses.push(surveyResponse);
+            });
+
+            return surveyResponses;
+        } catch (error: any) {
+            console.error('ERROR', error);
+            throw new DatabaseError(`Could not retrieve survey responses for guest: ${error.message}`);
         }
     }
 
@@ -202,10 +241,12 @@ export class SurveyDao {
             const surveyResponse = new SurveyResponse(
                 surveyResponseDoc.id,
                 responseData.surveyId,
+                responseData.weddingId,
                 responseData.guestId,
                 responseData.responses,
                 (responseData.updatedAt as Timestamp).toDate(),
-                responseData.submitted
+                responseData.submitted,
+                responseData.title
             );
 
             return surveyResponse;
@@ -250,10 +291,12 @@ export class SurveyDao {
             const surveyResponse = new SurveyResponse(
                 surveyResponseDoc.id,
                 responseData.surveyId,
+                responseData.weddingId,
                 responseData.guestId,
                 responseData.responses,
                 (responseData.updatedAt as Timestamp).toDate(),
-                responseData.submitted
+                responseData.submitted,
+                responseData.title
             );
 
             return surveyResponse;
@@ -299,12 +342,17 @@ export class SurveyDao {
             surveyResponse.updatedAt = new Date();
 
             const responseData = {
+                responseId: surveyResponse.responseId,
+                surveyId: surveyResponse.surveyId,
+                weddingId: surveyResponse.weddingId,
+                title: surveyResponse.title,
+                submitted: surveyResponse.submitted,
                 guestId: surveyResponse.guestId,
                 responses: surveyResponse.responses,
                 updatedAt: surveyResponse.updatedAt,
             };
 
-            await surveyResponseDocRef.set(responseData);
+            await surveyResponseDocRef.set(responseData, { merge: true });
 
             return surveyResponse;
         } catch (error: any) {

@@ -15,7 +15,7 @@
           <BaseSurveyComponent
             v-for="display in displayComponents"
             :key="display.id"
-            :modelValue="display.value"
+            :modelValue="display.componentValue"
             :builder-mode="!previewMode"
             :componentDetails="display"
             @remove="remove"
@@ -49,7 +49,7 @@ const {
 } = useSurveyStore();
 // @ts-ignore
 const [parent, displayComponents] = useDragAndDrop(
-  survey.value?.surveyComponents,
+  survey.value?.surveyComponents!,
   {
     dragDropEffect: "move",
     dragHandle: ".kanban-handle",

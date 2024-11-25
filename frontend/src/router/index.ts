@@ -21,6 +21,9 @@ import VerifyGuest from "@/components/guests/VerifyGuest.vue";
 import GuestSurvey from "@/components/surveys/GuestSurvey.vue";
 import SurveyAdmin from "@/components/surveys/SurveyAdmin.vue";
 import AssignedSurveys from "@/components/surveys/AssignedSurveys.vue";
+import SurveyResponder from "@/components/surveys/SurveyResponder.vue";
+import QAndA from "@/components/guests/QAndA.vue";
+import ThingsToDo from "@/components/guests/ThingsToDo.vue";
 
 const routes = [
    {
@@ -161,6 +164,33 @@ const routes = [
       name: 'guest-surveys',
       component: AssignedSurveys,
    },
+   {
+      path: '/:weddingId/:surveyId/survey-response/:surveyResponseId',
+      name: 'survey-response',
+      component: SurveyResponder,
+      props: true,
+      meta: {
+         allowedRoles: [Roles.GUEST]
+      }
+   },
+   {
+      path: '/:weddingId/q-and-a',
+      name: 'q-and-a',
+      component: QAndA,
+      props: true,
+      meta: {
+         allowedRoles: [Roles.GUEST]
+      }
+   },
+   {
+      path: '/:weddingId/things-to-do',
+      name: 'things-to-do',
+      component: ThingsToDo,
+      props: true,
+      meta: {
+         allowedRoles: [Roles.GUEST]
+      }
+   }
 
 ]
 

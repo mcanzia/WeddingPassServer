@@ -183,6 +183,7 @@ import { Toggle } from "@/components/ui/toggle";
 import { Switch } from "@/components/ui/switch";
 import SingleSelectDropdown from "@/components/common/SingleSelectDropdown.vue";
 import TimePicker from "@/components/ui/time-picker/time-picker.vue";
+import { useSurveyFieldLookup } from "@/components/surveys/useSurveyFieldLookup";
 
 const { goToRouteSecured } = useRouterHelper();
 const {
@@ -194,7 +195,6 @@ const {
   infoLookupField,
   editableInfo,
   savedStatus,
-  formattedGuestDetailKeys,
   parentTriggerField,
   parentSelectOptions,
 } = storeToRefs(useSurveyStore());
@@ -207,6 +207,8 @@ const {
   saveSurvey,
   togglePreviewMode,
 } = useSurveyStore();
+const { formattedGuestDetailKeys } = useSurveyFieldLookup();
+
 
 const selectedComponentType = ref<string>();
 

@@ -38,8 +38,9 @@
         class="mt-3"
       >
         <BaseSurveyComponent
-          v-if="builderMode || (!builderMode && componentDetails.value === trigger.triggerField)"
+          v-if="builderMode || (!builderMode && componentDetails.componentValue === trigger.triggerField)"
           :key="trigger.child.id"
+          :guest="guest"
           :componentDetails="trigger.child"
           :builderMode="builderMode"
           :triggerField="trigger.triggerField"
@@ -57,10 +58,11 @@
 import { Label } from "@/components/ui/label";
 import SurveyComponentWrapper from "@/components/surveys/SurveyComponentWrapper.vue";
 import { SurveyComponent } from "@/models/SurveyComponent";
-import { computed, PropType } from "vue";
+import { computed, onMounted, PropType } from "vue";
 import BaseSurveyComponent from "@/components/surveys/BaseSurveyComponent.vue";
 import { useSurveyStore } from "@/components/surveys/SurveyStore";
 import { Guest } from "@/models/Guest";
+import { useSurveyFieldLookup } from "@/components/surveys/useSurveyFieldLookup";
 
 const emit = defineEmits(["remove", "openAddChild", "update:modelValue"]);
 
@@ -93,20 +95,22 @@ const props = defineProps({
 const surveyStore = useSurveyStore();
 const { hasOptionsProp, hasAddChildButton, findSurveyDisplayComponent } =
   surveyStore;
+const {lookupGuestField} = useSurveyFieldLookup();
+
+onMounted(() => {
+  if (
+      props.guest &&
+      !props.componentDetails.componentValue &&
+      props.componentDetails.infoLookupField
+    ) {
+      const fieldValue = lookupGuestField(props.guest, props.componentDetails.infoLookupField);
+      modelValueComputed.value = fieldValue;
+    }
+});
 
 const modelValueComputed = computed({
   get() {
-    if (
-      props.guest &&
-      !props.componentDetails.value &&
-      props.componentDetails.infoLookupField
-    ) {
-      return (props.guest as Record<string, any>)[
-        props.componentDetails.infoLookupField
-      ];
-    } else {
-      return props.componentDetails.value;
-    }
+      return props.componentDetails.componentValue;
   },
   set(val) {
     emit("update:modelValue", props.componentDetails.id, val);

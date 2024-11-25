@@ -7,19 +7,19 @@ export class SurveyComponent {
     type: string;
     friendlyName: string;
     order: number;
-    value: any;
+    componentValue: any;
     options: Array<string>;
     surveyTriggers: Array<SurveyTrigger>
     editableInfo: Boolean;
     infoLookupField: string;
 
-    constructor(id: string, label: string, type: string, friendlyName: string, order: number, value: any, options: Array<string>, surveyTriggers: Array<SurveyTrigger>, editableInfo: Boolean, infoLookupField: string ) {
+    constructor(id: string, label: string, type: string, friendlyName: string, order: number, componentValue: any, options: Array<string>, surveyTriggers: Array<SurveyTrigger>, editableInfo: Boolean, infoLookupField: string) {
         this.id = id;
         this.label = label;
         this.type = type;
         this.friendlyName = friendlyName;
         this.order = order;
-        this.value = value;
+        this.componentValue = componentValue;
         this.options = options;
         this.surveyTriggers = surveyTriggers;
         this.editableInfo = editableInfo;
@@ -33,7 +33,7 @@ export class SurveyComponent {
             type: this.type,
             friendlyName: this.friendlyName,
             order: this.order,
-            value: this.value,
+            componentValue: this.componentValue,
             options: this.options,
             surveyTriggers: this.surveyTriggers,
             editableInfo: this.editableInfo,

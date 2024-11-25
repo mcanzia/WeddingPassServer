@@ -169,6 +169,18 @@ const navbarRoutes = computed(() => {
       path: "home",
       roles: [Roles.GUEST],
     },
+    {
+      name: "Q&A",
+      secured: true,
+      path: "q-and-a",
+      roles: [Roles.GUEST],
+    },
+    {
+      name: "Things To Do",
+      secured: true,
+      path: "things-to-do",
+      roles: [Roles.GUEST],
+    },
   ];
 });
 
