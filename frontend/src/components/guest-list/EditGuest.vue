@@ -25,7 +25,8 @@
                     </div>
                     <div class="grid gap-2">
                         <Label for="phone">Phone</Label>
-                        <Input id="phone" type="phone" v-model="editUserForm.phone" required />
+                        <PhoneInput v-model="editUserForm.phone" required initial-country="IN"
+                            :preferred-countries="['IN', 'US', 'IT', 'GB', 'JP', 'CA']" />
                     </div>
                     <div class="grid gap-2">
                         <Label for="events">Events</Label>
@@ -63,13 +64,14 @@ import { NotificationType } from '@/models/NotificationType';
 import { useUserStore } from '@/stores/UserStore';
 import { ErrorHandler } from '@/util/error/ErrorHandler';
 import { storeToRefs } from 'pinia';
-import {useRouterHelper} from '@/util/composables/useRouterHelper';
+import { useRouterHelper } from '@/util/composables/useRouterHelper';
+import PhoneInput from '@/components/common/PhoneInput.vue';
 
 const props = defineProps<{
     guestId: string;
 }>();
 
-const {goToRouteSecured} = useRouterHelper();
+const { goToRouteSecured } = useRouterHelper();
 const notificationStore = useNotificationStore();
 const { setMessage } = notificationStore;
 const userStore = useUserStore();
@@ -92,6 +94,7 @@ onMounted(async () => {
     editUserForm.value.groupNumber = editGuest.groupNumber;
     editUserForm.value.email = editGuest.email;
     editUserForm.value.phone = editGuest.phone;
+    editUserForm.value.groupNumber = editGuest.groupNumber;
     editUserForm.value.attendingEvents = editGuest.attendingEvents;
     editUserForm.value.events = editGuest.events.map((event: { id: any; }) => event.id);
 });
@@ -105,8 +108,9 @@ const editUserForm = ref<{
     groupNumber: number;
     email: string;
     phone: string;
+    groupNumber: number;
     events: string[];
-    attendingEvents: WeddingEvent[]
+    attendingEvents: WeddingEvent[];
 }>({
     id: '',
     weddingId: '',
@@ -114,6 +118,7 @@ const editUserForm = ref<{
     groupNumber: 0,
     email: '',
     phone: '',
+    groupNumber: 0,
     events: [],
     attendingEvents: []
 });

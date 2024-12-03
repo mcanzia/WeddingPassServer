@@ -1,5 +1,3 @@
-import { AuthService } from "../services/AuthService";
-
 export const TYPES = {
     AuthController: Symbol.for("AuthController"),
     AuthService: Symbol.for("AuthService"),
@@ -14,5 +12,7 @@ export const TYPES = {
     SurveyController: Symbol.for("SurveyController"),
     SurveyDao: Symbol.for("SurveyDao"),
     WeddingController: Symbol.for("WeddingController"),
-    WeddingDao: Symbol.for("WeddingDao")
+    WeddingDao: Symbol.for("WeddingDao"),
+    PendingGuestController: Symbol.for("PendingGuestController"),
+    PendingGuestDao: Symbol.for("PendingGuestDao")
 };

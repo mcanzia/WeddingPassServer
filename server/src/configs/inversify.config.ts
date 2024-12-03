@@ -15,6 +15,8 @@ import { WeddingDao } from '../dao/WeddingDao';
 import { AuthService } from '../services/AuthService';
 import { SurveyController } from '../controllers/SurveyController';
 import { SurveyDao } from '../dao/SurveyDao';
+import { PendingGuestDao } from '../dao/PendingGuestDao';
+import { PendingGuestController } from '../controllers/PendingGuestController';
 
 const container = new Container();
 
@@ -32,5 +34,7 @@ container.bind<SurveyController>(TYPES.SurveyController).to(SurveyController);
 container.bind<SurveyDao>(TYPES.SurveyDao).to(SurveyDao);
 container.bind<WeddingController>(TYPES.WeddingController).to(WeddingController);
 container.bind<WeddingDao>(TYPES.WeddingDao).to(WeddingDao);
+container.bind<PendingGuestController>(TYPES.PendingGuestController).to(PendingGuestController)
+container.bind<PendingGuestDao>(TYPES.PendingGuestDao).to(PendingGuestDao);
 
 export { container };

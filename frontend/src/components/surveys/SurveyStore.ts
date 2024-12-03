@@ -2,7 +2,6 @@ import { Survey } from "@/models/Survey";
 import { SurveyComponent } from "@/models/SurveyComponent";
 import { defineStore, storeToRefs } from "pinia";
 import { Component, computed, markRaw, nextTick, ref } from "vue";
-import { SurveyDisplayComponent } from "@/models/SurveyDisplayComponent";
 import { v4 as uuid } from 'uuid';
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -16,8 +15,9 @@ import { SurveyService } from "@/services/SurveyService";
 import { NotificationType } from "@/models/NotificationType";
 import { ErrorHandler } from "@/util/error/ErrorHandler";
 import SurveyInfoField from "@/components/surveys/SurveyInfoField.vue";
+import PhoneInput from "@/components/common/PhoneInput.vue";
+import DateTimeInput from "@/components/common/DateTimeInput.vue";
 import { Guest } from "@/models/Guest";
-import { startCase } from "lodash";
 import { camelCase } from "lodash";
 import SurveyGuestDetailField from "@/components/surveys/SurveyGuestDetailField.vue";
 import { SurveyTrigger } from "@/models/SurveyTrigger";
@@ -28,6 +28,8 @@ type ComponentMap = Map<string, Component>;
 const surveyComponentMap: ComponentMap = new Map<string, Component>([
     ['TEXT', markRaw(Input) as Component],
     ['LARGE_TEXT', markRaw(Textarea) as Component],
+    ['PHONE_FIELD', markRaw(PhoneInput) as Component],
+    ['DATE_TIME_FIELD', markRaw(DateTimeInput) as Component],
     ['INFO_FIELD', markRaw(SurveyInfoField) as Component],
     ['GUEST_DETAIL_FIELD', markRaw(SurveyGuestDetailField) as Component],
     ['SINGLE_SELECT', markRaw(SingleSelectDropdown) as Component],

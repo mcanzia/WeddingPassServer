@@ -10,7 +10,9 @@ const authController = container.get<AuthController>(TYPES.AuthController);
 
 router.get('/roles/:userId', (req, res, next) => authController.getUserRoles(req, res, next));
 router.get('/', (req, res, next) => authController.getUsers(req, res, next));
-router.get('/:userId', (req, res, next) => authController.getUserById(req, res, next));
+router.get('/id/:userId', (req, res, next) => authController.getUserById(req, res, next));
+router.get('/phone/:userPhone', (req, res, next) => authController.getUserByPhone(req, res, next));
+router.get('/email/:userEmail', (req, res, next) => authController.getUserByEmail(req, res, next));
 router.post('/', (req, res, next) => authController.createUser(req, res, next));
 router.post('/:weddingId/invite', authorizeRoles([Roles.EDITOR, Roles.ADMIN]), (req, res, next) => authController.generateInviteLink(req, res, next));
 router.post('/process-invite', (req, res, next) => authController.processInvite(req, res, next));

@@ -1,8 +1,5 @@
 <template>
-  <Card
-    class="mx-auto max-h-120"
-    v-if="survey"
-  >
+  <Card class="mx-auto max-h-120" v-if="survey">
     <CardHeader>
       <div class="inline-flex justify-between">
         <div>
@@ -14,10 +11,7 @@
           </CardDescription>
         </div>
         <div>
-          <Toggle
-            class="border-solid"
-            @click="togglePreviewMode"
-          >Preview</Toggle>
+          <Toggle class="border-solid" @click="togglePreviewMode">Preview</Toggle>
         </div>
       </div>
     </CardHeader>
@@ -43,57 +37,32 @@
         </div>
         <div class="grid gap-2">
           <Label for="survey-name">Survey Name</Label>
-          <Input
-            id="survey-name"
-            v-model="surveyTitleComputed"
-            type="text"
-            required
-          />
+          <Input id="survey-name" v-model="surveyTitleComputed" type="text" required />
         </div>
         <div v-if="parentFieldId">
           <div class="grid gap-2">
-            <Badge
-              class="font-bold bg-yellow-200 justify-self-center"
-              disabled
-            >
+            <Badge class="font-bold bg-yellow-200 justify-self-center" disabled>
               <span>Add Child Mode</span>
-              <ion-icon
-                name="close"
-                @click="closeAddChildMode"
-                class="ml-2 size-5 cursor-pointer"
-              />
+              <ion-icon name="close" @click="closeAddChildMode" class="ml-2 size-5 cursor-pointer" />
             </Badge>
           </div>
           <div class="grid gap-2">
             <Label for="parent-trigger-field">Parent Trigger Field</Label>
-            <SingleSelectDropdown
-              v-model="parentTriggerFieldComputed"
-              :select-options="parentSelectOptions"
-              id="guest-details-dropdown"
-            />
+            <SingleSelectDropdown v-model="parentTriggerFieldComputed" :select-options="parentSelectOptions"
+              id="guest-details-dropdown" />
           </div>
         </div>
         <div class="grid gap-2">
           <Label for="survey-component-selection">Survey Component</Label>
-          <div
-            id="survey-component-selection"
-            class="inline-flex gap-3"
-          >
-            <Select
-              v-model="selectedComponentType"
-              @update:model-value="clearInputs"
-            >
+          <div id="survey-component-selection" class="inline-flex gap-3">
+            <Select v-model="selectedComponentType" @update:model-value="clearInputs">
               <SelectTrigger>
                 <SelectValue placeholder="Select a component type" />
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
                   <SelectLabel>Component Types</SelectLabel>
-                  <SelectItem
-                    v-for="option in componentOptions"
-                    :key="option.type"
-                    :value="option.type"
-                  >
+                  <SelectItem v-for="option in componentOptions" :key="option.type" :value="option.type">
                     {{ option.friendlyName }}
                   </SelectItem>
                 </SelectGroup>
@@ -103,53 +72,26 @@
           </div>
           <div v-if="showOptionsInput">
             <Label for="options-text-area">Options Input</Label>
-            <Textarea
-              v-model="componentDropdownOptionsComputed"
-              id="options-text-area"
-            />
+            <Textarea v-model="componentDropdownOptionsComputed" id="options-text-area" />
           </div>
           <div v-if="showPredefinedValueInput">
             <Label for="predefined-input-value">Set Custom Value for Field</Label>
-            <Input
-              v-model="predefinedValueComputed"
-              id="predefined-input-value"
-            />
+            <Input v-model="predefinedValueComputed" id="predefined-input-value" />
           </div>
           <div>
             <Label for="guest-details-dropdown">Guest Field Lookup</Label>
-            <SingleSelectDropdown
-              v-model="infoLookupFieldComputed"
-              :select-options="formattedGuestDetailKeys"
-              clearable
-              id="guest-details-dropdown"
-            />
+            <SingleSelectDropdown v-model="infoLookupFieldComputed" :select-options="formattedGuestDetailKeys" clearable
+              id="guest-details-dropdown" />
           </div>
-          <div>
-            <TimePicker
-              with-seconds
-              with-period
-              with-labels
-            />
-          </div>
-          <div
-            v-if="showEditableInfoToggle"
-            class="flex items-center space-x-2 mt-2"
-          >
+          <div v-if="showEditableInfoToggle" class="flex items-center space-x-2 mt-2">
             <Label for="editable-info-toggle">Editable?</Label>
-            <Switch
-              :checked="editableInfo"
-              @update:checked="toggleEditableInfo"
-              id="editable-info-toggle"
-            />
+            <Switch :checked="editableInfo" @update:checked="toggleEditableInfo" id="editable-info-toggle" />
           </div>
         </div>
         <div class="flex flex-col gap-2">
           <div class="inline-flex gap-4 justify-end">
             <Button @click="saveSurvey">Save</Button>
-            <Button
-              @click="close"
-              variant="outline"
-            >Close</Button>
+            <Button @click="close" variant="outline">Close</Button>
           </div>
           <div class="inline-flex justify-end">
             <span :class="savedStatusClassesComputed">{{ savedStatus ? 'Saved' : 'Not Saved' }}</span>
@@ -191,7 +133,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Toggle } from "@/components/ui/toggle";
 import { Switch } from "@/components/ui/switch";
 import SingleSelectDropdown from "@/components/common/SingleSelectDropdown.vue";
-import TimePicker from "@/components/ui/time-picker/time-picker.vue";
 import { useSurveyFieldLookup } from "@/components/surveys/useSurveyFieldLookup";
 
 const { goToRouteSecured } = useRouterHelper();

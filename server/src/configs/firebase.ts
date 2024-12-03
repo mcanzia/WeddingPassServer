@@ -16,4 +16,5 @@ if (process.env.NODE_ENV === 'test') {
 }
 
 export const db = admin.firestore();
+export const auth = admin.auth();
 export const firebaseAdmin = admin;

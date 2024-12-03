@@ -8,6 +8,9 @@ import validator from 'validator';
 import { Wedding } from '../models/Wedding';
 import { User } from '../models/User';
 import { WeddingRole } from '../models/WeddingRole';
+import { PendingGuest } from '../models/PendingGuest';
+import { Guest } from '../models/Guest';
+import { Roles } from '../models/Roles';
 
 @injectable()
 export class UserDao {
@@ -118,10 +121,94 @@ export class UserDao {
                 userData.weddingRoles = userData.weddingRoles.map((weddingRole: any) => {
                     const foundWedding = weddings.get(weddingRole.wedding);
                     if (weddingRole && foundWedding) {
-                        const userWeddingRole = new WeddingRole(weddingRole.role, foundWedding, weddingRole.guestId);
+                        const userWeddingRole = new WeddingRole(
+                            weddingRole.role,
+                            foundWedding,
+                            weddingRole.guestId
+                        );
                         return userWeddingRole;
                     }
-                });
+                    return null;
+                }).filter(Boolean);
+
+                userData.id = userDoc.id;
+            }
+
+            return userData as User;
+        } catch (error) {
+            throw new DatabaseError("Could not retrieve user from database: " + error);
+        }
+    }
+
+    async getUserByPhone(userPhone: string): Promise<User | null> {
+        try {
+            const querySnapshot = await this.usersCollection
+                .where('phone', '==', userPhone)
+                .limit(1)
+                .get();
+
+            if (querySnapshot.empty) {
+                return null;
+            }
+
+            const userDoc = querySnapshot.docs[0];
+
+            const weddings: Map<string, Wedding> = await this.fetchAllWeddings();
+
+            const userData = userDoc.data();
+            if (userData) {
+                userData.weddingRoles = userData.weddingRoles.map((weddingRole: any) => {
+                    const foundWedding = weddings.get(weddingRole.wedding);
+                    if (weddingRole && foundWedding) {
+                        const userWeddingRole = new WeddingRole(
+                            weddingRole.role,
+                            foundWedding,
+                            weddingRole.guestId
+                        );
+                        return userWeddingRole;
+                    }
+                    return null;
+                }).filter(Boolean);
+
+                userData.id = userDoc.id;
+            }
+
+            return userData as User;
+        } catch (error) {
+            throw new DatabaseError("Could not retrieve user from database: " + error);
+        }
+    }
+
+    async getUserByEmail(userEmail: string): Promise<User | null> {
+        try {
+            const querySnapshot = await this.usersCollection
+                .where('email', '==', userEmail)
+                .limit(1)
+                .get();
+
+            if (querySnapshot.empty) {
+                return null;
+            }
+
+            const userDoc = querySnapshot.docs[0];
+
+            const weddings: Map<string, Wedding> = await this.fetchAllWeddings();
+
+            const userData = userDoc.data();
+            if (userData) {
+                userData.weddingRoles = userData.weddingRoles.map((weddingRole: any) => {
+                    const foundWedding = weddings.get(weddingRole.wedding);
+                    if (weddingRole && foundWedding) {
+                        const userWeddingRole = new WeddingRole(
+                            weddingRole.role,
+                            foundWedding,
+                            weddingRole.guestId
+                        );
+                        return userWeddingRole;
+                    }
+                    return null;
+                }).filter(Boolean);
+
                 userData.id = userDoc.id;
             }
 
@@ -233,5 +320,38 @@ export class UserDao {
         } catch (error) {
             throw new DatabaseError("Could not delete user from database: " + error);
         }
+    }
+
+    async linkGuestAccount(weddingId: string, pendingGuest: PendingGuest, guest: Guest) {
+        try {
+            const userId = pendingGuest.userId;
+            const existingUser: User | null = await this.getUserById(userId);
+
+            if (!existingUser) {
+                throw new Error('Can not find existing user account.');
+            }
+
+            const newWeddingRole = {
+                role: Roles.GUEST,
+                guestId: guest.id,
+                wedding: {
+                    id: weddingId
+                } as Wedding
+            } as WeddingRole
+
+            const updatedUser = {
+                ...existingUser,
+                phone: pendingGuest.phone,
+                email: pendingGuest.email,
+                weddingRoles: [...existingUser.weddingRoles, newWeddingRole]
+            } as User;
+
+            await this.updateUser(userId, updatedUser);
+
+        } catch (error: any) {
+            throw new DatabaseError(error.message);
+        }
+
+
     }
 }

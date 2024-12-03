@@ -11,6 +11,8 @@ import { Wedding } from '@/models/Wedding';
 import Cookies from 'js-cookie';
 import { InviteToken } from '@/models/InviteToken';
 import { Roles } from '@/models/Roles';
+import { PendingGuest } from '@/models/PendingGuest';
+import { PendingGuestService } from '@/services/PendingGuestService';
 
 export const useUserStore = defineStore('userStore', () => {
 
@@ -120,7 +122,14 @@ export const useUserStore = defineStore('userStore', () => {
                     confirmationResult.value.verificationId,
                     otp
                 );
-                await auth.signInWithCredential(auth, credential);
+                const result = await auth.signInWithCredential(auth, credential);
+                const isNewUser = result._tokenResponse.isNewUser;
+                const inviteToken = localStorage.getItem('inviteToken');
+                if (isNewUser) {
+                    if (!inviteToken) {
+                        throw new Error('No invite token found. Please ask for invite link to be added to a wedding.');
+                    }
+                }
                 // showOtp.value = false;
             } else {
                 throw new Error('No confirmation result available');
@@ -158,7 +167,7 @@ export const useUserStore = defineStore('userStore', () => {
 
     async function createLocalUser(userDetails: any) {
         try {
-            const newUser = new User(userDetails.uid, userDetails.email, []);
+            const newUser = new User(userDetails.uid, userDetails.email, userDetails.phone, []);
             const authService = new AuthService();
             localUser.value = await authService.addUser(newUser);
         } catch (error: any) {
@@ -168,7 +177,7 @@ export const useUserStore = defineStore('userStore', () => {
 
     async function checkForInviteToken() {
         const token = localStorage.getItem('inviteToken');
-        const isGuest = localStorage.getItem('guest');
+        const isGuest = localStorage.getItem('guestPhone');
         if (token && localUser.value) {
             try {
                 const inviteToken: InviteToken = new InviteToken(token);
@@ -182,7 +191,7 @@ export const useUserStore = defineStore('userStore', () => {
                 );
 
                 if (!existingWeddingRole) {
-                    if (isGuest) {
+                    if (!!isGuest) {
                         selectedWeddingRole.value = userWeddingRole;
                         goToRoute('verify-guest');
                     } else {
@@ -200,7 +209,7 @@ export const useUserStore = defineStore('userStore', () => {
         }
     }
 
-    async function updateUserDetails(userWeddingRole?: WeddingRole, updatedEmail?: string) {
+    async function updateUserDetails(userWeddingRole?: WeddingRole, updatedEmail?: string, updatedPhone?: string) {
         if (localUser.value) {
             try {
                 const weddingRole = userWeddingRole || selectedWeddingRole.value;
@@ -218,6 +227,11 @@ export const useUserStore = defineStore('userStore', () => {
                         localUser.value.email = updatedEmail;
                     }
 
+                    // Update phone if provided
+                    if (updatedPhone) {
+                        localUser.value.phone = updatedPhone;
+                    }
+
                     const authService = new AuthService();
                     await authService.updateUser(localUser.value);
                 }
@@ -226,6 +240,11 @@ export const useUserStore = defineStore('userStore', () => {
                 ErrorHandler.handleUserAuthError(user.value, error);
             }
         }
+    }
+
+    async function addPendingGuest(pendingGuest: PendingGuest) {
+        const pendingGuestService = new PendingGuestService();
+        await pendingGuestService.savePendingGuest(pendingGuest);
     }
 
     async function refetchLocalUser() {
@@ -319,6 +338,7 @@ export const useUserStore = defineStore('userStore', () => {
         isMobile,
         createLocalUser,
         refetchLocalUser,
-        updateUserDetails
+        updateUserDetails,
+        addPendingGuest
     };
 });

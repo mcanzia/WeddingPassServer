@@ -13,9 +13,7 @@
               class="w-16  h-11"
             />
           </a>
-          <a
-            v-for="route in filteredNavbarRoutes"
-            :key="route"
+          <a v-for="route in filteredNavbarRoutes" :key="route"
             @click="route.secured ? goToRouteSecured(route.path) : goToRoute(route.path)"
             class="text-sm font-medium text-primary transition-colors  hover:underline hover:font-bold cursor-pointer hidden md:flex"
           >
@@ -23,16 +21,8 @@
           </a>
         </div>
 
-        <IconDropdown
-          icon="person-circle-outline"
-          :extra-text="userEmail"
-          classes="hidden md:flex"
-        >
-          <DropdownMenuItem
-            class="capitalize"
-            v-if="selectedWedding"
-            @click="goToRoute('weddings')"
-          >
+        <IconDropdown icon="person-circle-outline" :extra-text="userEmail" classes="hidden md:flex">
+          <DropdownMenuItem class="capitalize" v-if="selectedWedding" @click="goToRoute('weddings')">
             <a class="text-sm font-medium text-muted-foreground transition-colors hover:text-primary cursor-pointer">
               <span>
                 <ion-icon name="sparkles-outline"></ion-icon>
@@ -40,24 +30,14 @@
               </span>
             </a>
           </DropdownMenuItem>
-          <DropdownMenuItem
-            class="capitalize"
-            @click="logout"
-          >
+          <DropdownMenuItem class="capitalize" @click="logout">
             <a class="text-sm font-medium text-muted-foreground transition-colors hover:text-primary cursor-pointer">
               Logout
             </a>
           </DropdownMenuItem>
         </IconDropdown>
-        <IconDropdown
-          icon="menu"
-          classes="block md:hidden"
-        >
-          <DropdownMenuItem
-            class="capitalize"
-            v-if="selectedWedding"
-            @click="goToRoute('weddings')"
-          >
+        <IconDropdown icon="menu" classes="block md:hidden">
+          <DropdownMenuItem class="capitalize" v-if="selectedWedding" @click="goToRoute('weddings')">
             <a class="text-sm font-medium text-muted-foreground transition-colors hover:text-primary cursor-pointer">
               <span>
                 <ion-icon name="sparkles-outline"></ion-icon>
@@ -65,20 +45,13 @@
               </span>
             </a>
           </DropdownMenuItem>
-          <DropdownMenuItem
-            v-for="route in filteredNavbarRoutes"
-            :key="route"
-            class="capitalize"
-            @click="route.secured ? goToRouteSecured(route.path) : goToRoute(route.path)"
-          >
+          <DropdownMenuItem v-for="route in filteredNavbarRoutes" :key="route" class="capitalize"
+            @click="route.secured ? goToRouteSecured(route.path) : goToRoute(route.path)">
             <a class="text-sm font-medium text-muted-foreground transition-colors hover:text-primary cursor-pointer">
               {{ route.name }}
             </a>
           </DropdownMenuItem>
-          <DropdownMenuItem
-            class="capitalize"
-            @click="logout"
-          >
+          <DropdownMenuItem class="capitalize" @click="logout">
             <a class="text-sm font-medium text-muted-foreground transition-colors hover:text-primary cursor-pointer">
               Logout
             </a>
@@ -143,6 +116,12 @@ const navbarRoutes = computed(() => {
       name: "Surveys",
       secured: true,
       path: "surveys",
+      roles: [Roles.ADMIN, Roles.EDITOR],
+    },
+    {
+      name: "Pending Guests",
+      secured: true,
+      path: "pending-guests",
       roles: [Roles.ADMIN, Roles.EDITOR],
     },
     {

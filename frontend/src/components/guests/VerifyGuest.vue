@@ -6,35 +6,30 @@
           Verify Guest Details
         </CardTitle>
         <CardDescription>
-          Please verify the below details
+          {{ verifyGuestLabelComputed }}
         </CardDescription>
       </CardHeader>
       <CardContent>
         <div class="grid gap-4">
-          <div class="grid gap-2">
+          <div class="grid gap-2" v-if="guestNames.length">
             <Label for="verify-guest-selection">Are you one of the below guests?</Label>
-            <single-select-dropdown
-              id="verify-guest-selection"
-              v-model="selectedGuest"
-              :select-options="guestNames"
-              clearable
-              @update:model-value="setGuestEmail"
-            />
+            <single-select-dropdown id="verify-guest-selection" v-model="selectedGuest" :select-options="guestNames"
+              clearable @update:model-value="setGuestEmail" />
           </div>
-          <div class="grid gap-2">
+          <div class="grid gap-2" v-if="!guestNames.length">
+            <Label for="guest-name">{{ nameLabelComputed }}</Label>
+            <Input id="guest-name" type="text" v-model="guestName!" required />
+          </div>
+          <div class="grid gap-2" v-if="!guestNames.length || selectedGuest">
             <Label for="guest-email">{{ emailLabelComputed }}</Label>
-            <Input
-              id="guest-email"
-              type="text"
-              v-model="guestEmail"
-              required
-            />
+            <Input id="guest-email" type="text" v-model="guestEmail!" required />
           </div>
-          <Button
-            type="submit"
-            class="w-full"
-            @click="confirmGuest"
-          >
+          <div class="grid gap-2" v-if="!guestNames.length">
+            <Label for="guest-phone">{{ phoneLabelComputed }}</Label>
+            <PhoneInput disabled v-model="guestPhone!" required initial-country="IN"
+              :preferred-countries="['IN', 'US', 'IT', 'GB', 'JP', 'CA']" />
+          </div>
+          <Button type="submit" class="w-full" @click="confirmGuest">
             Confirm
           </Button>
         </div>
@@ -66,23 +61,31 @@ import { GuestService } from "@/services/GuestService";
 import { Guest } from "@/models/Guest";
 import { WeddingRole } from "@/models/WeddingRole";
 import { SuccessHandler } from "@/util/SuccessHandler";
+import { ErrorHandler } from "@/util/error/ErrorHandler";
+import PhoneInput from "@/components/common/PhoneInput.vue";
+import { usePhoneUtils } from "@/components/common/usePhoneUtils";
+import { GuestInviteStatus } from "@/models/GuestInviteStatus";
+import { PendingGuest } from "@/models/PendingGuest";
 
 const userStore = useUserStore();
-const { selectedWeddingRole } = storeToRefs(userStore);
-const { updateUserDetails } = userStore;
+const { selectedWeddingRole, localUser } = storeToRefs(userStore);
+const { updateUserDetails, addPendingGuest } = userStore;
 const notificationStore = useNotificationStore();
 const { setMessage } = notificationStore;
 const { goToRouteSecured } = useRouterHelper();
+const { maskPhone } = usePhoneUtils();
 
-const guestEmail = ref<string>("");
+const guestName = ref<string | null>();
+const guestEmail = ref<string | null>();
+const guestPhone = ref<string | null>();
 const validGuests = ref<Guest[]>([]);
 const selectedGuest = ref<string | undefined>(undefined);
 
 onMounted(async () => {
-  const phone = localStorage.getItem("guestPhone");
-  if (phone) {
+  guestPhone.value = localStorage.getItem("guestPhone");
+  if (guestPhone.value) {
     const guestService = new GuestService();
-    validGuests.value = await guestService.getGuestsByPhone(phone);
+    validGuests.value = await guestService.getGuestsByPhone(guestPhone.value);
   }
 });
 
@@ -94,10 +97,30 @@ const selectedGuestObject = computed(() => {
   return validGuests.value.find((guest) => guest.name === selectedGuest.value);
 });
 
+const nameLabelComputed = computed(() => {
+  return 'Full Guest Name';
+});
+
 const emailLabelComputed = computed(() => {
   return selectedGuest.value
     ? "Is this a valid email?"
-    : "Please enter your email";
+    : "Email Address";
+});
+
+const phoneLabelComputed = computed(() => {
+  return selectedGuest.value
+    ? "Is this a valid phone number?"
+    : "Phone Number";
+});
+
+const verifyGuestLabelComputed = computed(() => {
+  if (guestNames.value.length) {
+    return "Please verify the below details";
+  }
+  if (guestPhone.value) {
+    return `No guests found matching ${maskPhone(guestPhone.value)}. Please enter the below details and an admin will add you.`;
+  }
+  return "No guests found matching that phone number. Please enter the below details and an admin will add you.";
 });
 
 function setGuestEmail() {
@@ -114,9 +137,24 @@ async function confirmGuest() {
       ...selectedWeddingRole.value,
       guestId: selectedGuestObject.value.id,
     } as WeddingRole;
-    await updateUserDetails(selectedWeddingRole.value, guestEmail.value);
+    await updateUserDetails(selectedWeddingRole.value, guestEmail.value, guestPhone.value!);
+    localStorage.removeItem("guestPhone");
     SuccessHandler.showNotification("Welcome!");
     goToRouteSecured("home");
+  } else if (!guestNames.value.length && localUser.value) {
+    const pendingGuest = {
+      weddingId: selectedWeddingRole.value?.wedding.id,
+      userId: localUser.value.id,
+      guestName: guestName.value,
+      email: guestEmail.value,
+      phone: guestPhone.value,
+      status: GuestInviteStatus.PENDING
+    } as PendingGuest;
+    await addPendingGuest(pendingGuest);
+    SuccessHandler.showNotification("Invite Requested.");
+    localStorage.removeItem("guestPhone");
+  } else {
+    ErrorHandler.displayGenericError();
   }
 }
 </script>

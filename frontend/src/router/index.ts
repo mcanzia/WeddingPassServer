@@ -24,6 +24,7 @@ import AssignedSurveys from "@/components/surveys/AssignedSurveys.vue";
 import SurveyResponder from "@/components/surveys/SurveyResponder.vue";
 import QAndA from "@/components/guests/QAndA.vue";
 import ThingsToDo from "@/components/guests/ThingsToDo.vue";
+import PendingGuests from "@/components/pending-guests/PendingGuests.vue";
 
 const routes = [
    {
@@ -189,6 +190,15 @@ const routes = [
       props: true,
       meta: {
          allowedRoles: [Roles.GUEST]
+      }
+   },
+   {
+      path: '/:weddingId/pending-guests',
+      name: 'pending-guests',
+      component: PendingGuests,
+      props: true,
+      meta: {
+         allowedRoles: [Roles.ADMIN, Roles.EDITOR]
       }
    }
 

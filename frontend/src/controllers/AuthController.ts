@@ -19,7 +19,27 @@ export class AuthController {
 
     async getUserById(userAuthToken: any, uid: string) {
         try {
-            const requestUrl = `${RequestUtil.getAPIUrl()}/api/auth/${uid}`;
+            const requestUrl = `${RequestUtil.getAPIUrl()}/api/auth/id/${uid}`;
+            return await RequestUtil.apiRequest(requestUrl, RequestUtil.GETRequestParams(userAuthToken));
+        } catch (error: any) {
+            ErrorHandler.handleGetByIdError();
+            throw error;
+        }
+    }
+
+    async getUserByPhone(userAuthToken: any, phone: string) {
+        try {
+            const requestUrl = `${RequestUtil.getAPIUrl()}/api/auth/phone/${phone}`;
+            return await RequestUtil.apiRequest(requestUrl, RequestUtil.GETRequestParams(userAuthToken));
+        } catch (error: any) {
+            ErrorHandler.handleGetByIdError();
+            throw error;
+        }
+    }
+
+    async getUserByEmail(userAuthToken: any, email: string) {
+        try {
+            const requestUrl = `${RequestUtil.getAPIUrl()}/api/auth/email/${email}`;
             return await RequestUtil.apiRequest(requestUrl, RequestUtil.GETRequestParams(userAuthToken));
         } catch (error: any) {
             ErrorHandler.handleGetByIdError();

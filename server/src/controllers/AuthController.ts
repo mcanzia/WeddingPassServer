@@ -9,6 +9,7 @@ import { UserDao } from '../dao/UserDao';
 import { User } from '../models/User';
 import { AuthService } from '../services/AuthService';
 import { InviteToken } from '../models/InviteToken';
+import { PendingGuest } from '../models/PendingGuest';
 
 @injectable()
 export class AuthController {
@@ -70,6 +71,38 @@ export class AuthController {
             }
         } catch (error) {
             Logger.error(`Error retrieving user with ${request.params.userId}`);
+            response.status((error as CustomError).statusCode).send((error as CustomError).message);
+        }
+    }
+
+    async getUserByPhone(request: Request, response: Response, next: NextFunction) {
+        try {
+            Logger.info(`Retrieving user by phone`);
+            const userPhone: string = request.params.userPhone;
+            const user: User | null = await this.userDao.getUserByPhone(userPhone);
+            if (user) {
+                response.status(200).json(user);
+            } else {
+                response.status(204).send();
+            }
+        } catch (error) {
+            Logger.error(`Error retrieving user by phone`);
+            response.status((error as CustomError).statusCode).send((error as CustomError).message);
+        }
+    }
+
+    async getUserByEmail(request: Request, response: Response, next: NextFunction) {
+        try {
+            Logger.info(`Retrieving user with email: ${request.params.userEmail}`);
+            const userEmail: string = request.params.userEmail;
+            const user: User | null = await this.userDao.getUserByEmail(userEmail);
+            if (user) {
+                response.status(200).json(user);
+            } else {
+                response.status(204).send();
+            }
+        } catch (error) {
+            Logger.error(`Error retrieving user with email ${request.params.userEmail}`);
             response.status((error as CustomError).statusCode).send((error as CustomError).message);
         }
     }

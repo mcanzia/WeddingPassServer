@@ -6,42 +6,22 @@
           Guest Login
         </CardTitle>
         <CardDescription>
-          Enter your phone number below to login to your account
+          {{ descriptionText }}
         </CardDescription>
       </CardHeader>
       <CardContent>
         <div class="grid gap-4">
-          <div
-            class="grid gap-2"
-            v-if="!showOtp"
-          >
-            <Label for="phone">Phone</Label>
-            <Input
-              id="phone"
-              type="tel"
-              v-model="loginForm.phone"
-              required
-              ref="phoneInputRef"
-            />
+          <div class="grid gap-2" v-if="!showOtp">
+            <Label>Phone</Label>
+            <PhoneInput v-model="loginForm.phone" required initial-country="IN"
+              :preferred-countries="['IN', 'US', 'IT', 'GB', 'JP', 'CA']" />
           </div>
-          <div
-            class="grid gap-2"
-            v-else
-          >
+          <div class="grid gap-2" v-else>
             <Label for="otp">Enter One Time Password</Label>
-            <Input
-              id="otp"
-              type="number"
-              v-model="otp"
-              required
-            />
+            <Input id="otp" type="number" v-model="otp" required />
           </div>
           <div id="recaptcha-container"></div>
-          <Button
-            type="submit"
-            @click="handleSubmit"
-            class="w-full"
-          >
+          <Button type="submit" @click="handleSubmit" class="w-full">
             {{ submitText }}
           </Button>
         </div>
@@ -68,6 +48,7 @@ import { ref, computed, watch, onMounted } from "vue";
 import { useRecaptcha } from "@/components/common/useRecaptcha";
 import { useNotificationStore } from "@/stores/NotificationStore";
 import { NotificationType } from "@/models/NotificationType";
+import PhoneInput from "@/components/common/PhoneInput.vue";
 
 const userStore = useUserStore();
 const { isLoggedIn, isAuthReady, showOtp } = storeToRefs(userStore);
@@ -100,6 +81,10 @@ watch([isLoggedIn, isAuthReady], ([newIsLoggedIn, newIsAuthReady]) => {
 const submitText = computed(() => {
   return showOtp.value ? "Verify" : "Sign In";
 });
+
+const descriptionText = computed(() => {
+  return showOtp.value ? "A code has been sent to your phone number. Please verify it below." : "Enter your phone number below to login to your account";
+})
 
 function handleSubmit() {
   if (showOtp.value) {

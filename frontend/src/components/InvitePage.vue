@@ -44,11 +44,10 @@ onMounted(async () => {
   const inviteToken: InviteToken = new InviteToken(token);
 
   if (isLoggedIn.value) {
-    await processInvite(inviteToken);
+    await processInvite(inviteToken, isGuestInvite);
   } else {
     localStorage.setItem("inviteToken", token);
     if (isGuestInvite) {
-      localStorage.setItem("guest", "true");
       goToRoute("guest-login");
     } else {
       goToRoute("login");
@@ -56,13 +55,18 @@ onMounted(async () => {
   }
 });
 
-async function processInvite(token: InviteToken) {
+async function processInvite(token: InviteToken, guestInvite: boolean) {
   try {
-    await authService.processInvite(token);
-    notificationStore.setMessage(
-      "You have been added to the wedding.",
-      NotificationType.SUCCESS
-    );
+    if (guestInvite) {
+      await authService.processInvite(token);
+      goToRoute('verify-guest');
+    } else {
+      await authService.processInvite(token);
+      notificationStore.setMessage(
+        "You have been added to the wedding.",
+        NotificationType.SUCCESS
+      );
+    }
   } catch (err) {
     error.value = "Failed to process invite.";
   } finally {

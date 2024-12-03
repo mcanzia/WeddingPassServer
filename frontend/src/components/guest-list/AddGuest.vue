@@ -24,8 +24,9 @@
                         <Input id="email" type="email" v-model="newUserForm.email" required />
                     </div>
                     <div class="grid gap-2">
-                        <Label for="phone">Phone</Label>
-                        <Input id="phone" type="phone" v-model="newUserForm.phone" required />
+                        <Label>Phone</Label>
+                        <PhoneInput v-model="newUserForm.phone" required initial-country="IN"
+                            :preferred-countries="['IN', 'US', 'IT', 'GB', 'JP', 'CA']" />
                     </div>
                     <div class="grid gap-2">
                         <Label for="events">Events</Label>
@@ -64,8 +65,9 @@ import { ErrorHandler } from '@/util/error/ErrorHandler';
 import { useUserStore } from '@/stores/UserStore';
 import { storeToRefs } from 'pinia';
 import { useRouterHelper } from '@/util/composables/useRouterHelper';
+import PhoneInput from '@/components/common/PhoneInput.vue';
 
-const {goToRouteSecured} = useRouterHelper();
+const { goToRouteSecured } = useRouterHelper();
 const notificationStore = useNotificationStore();
 const { setMessage } = notificationStore;
 const userStore = useUserStore();
@@ -83,6 +85,7 @@ const newUserForm = ref({
     groupNumber: 0,
     email: '',
     phone: '',
+    groupNumber: 0,
     events: []
 });
 
@@ -94,8 +97,10 @@ async function saveGuest() {
             groupNumber: newUserForm.value.groupNumber,
             email: newUserForm.value.email,
             phone: newUserForm.value.phone,
+            groupNumber: newUserForm.value.groupNumber,
             attendingEvents: [],
-            events: newUserForm.value.events.map(eventId => weddingEvents.value.find(wedEvent => wedEvent.id === eventId) as WeddingEvent)
+            events: newUserForm.value.events.map(eventId => weddingEvents.value.find(wedEvent => wedEvent.id === eventId) as WeddingEvent),
+            weddingId: '',
         }
         const guestService = new GuestService();
         await guestService.addGuest(newGuest);
