@@ -37,6 +37,26 @@ export class AuthService {
         }
     }
 
+    async getUserByPhone(phone: string) {
+        try {
+            const userAccessToken = await this.userStore.getAccessToken();
+            const user = await this.authController.getUserByPhone(userAccessToken, phone);
+            return user;
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    async getUserByEmail(email: string) {
+        try {
+            const userAccessToken = await this.userStore.getAccessToken();
+            const user = await this.authController.getUserByEmail(userAccessToken, email);
+            return user;
+        } catch (error) {
+            throw error;
+        }
+    }
+
     async getUserRoles(userId: string) {
         try {
             const userAccessToken = await this.userStore.getAccessToken();
