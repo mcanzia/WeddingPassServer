@@ -1,15 +1,22 @@
 <template>
-  <div class="border-b w-screen">
+  <div class="border-none w-screen">
     <div class="flex h-16 w-screen items-center px-4">
       <nav class="flex justify-between w-screen space-x-4 lg:space-x-6">
         <div :class="cn('flex items-center space-x-4 lg:space-x-6', $attrs.class ?? '')">
-          <a @click="selectedWedding ? goToRouteSecured('home') : goToRoute('landing')"
-            class="text-sm font-medium transition-colors hover:text-primary cursor-pointer">
-            <img src="@/assets/logo.svg" alt="Home Image" class="w-11 h-8" />
+          <a
+            @click="selectedWedding ? goToRouteSecured('home') : goToRoute('landing')"
+            class="text-sm font-medium transition-colors hover:text-primary cursor-pointer"
+          >
+            <img
+              src="/images/black-logo.svg"
+              alt="Home Image"
+              class="w-16  h-11"
+            />
           </a>
           <a v-for="route in filteredNavbarRoutes" :key="route"
             @click="route.secured ? goToRouteSecured(route.path) : goToRoute(route.path)"
-            class="text-sm font-medium text-muted-foreground transition-colors hover:text-primary cursor-pointer hidden md:flex">
+            class="text-sm font-medium text-primary transition-colors  hover:underline hover:font-bold cursor-pointer hidden md:flex"
+          >
             {{ route.name }}
           </a>
         </div>

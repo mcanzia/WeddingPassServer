@@ -53,6 +53,18 @@ export class GuestController {
         }
     }
 
+    async fetchPartyMembers(request: Request, response: Response, next: NextFunction) {
+        try {
+            Logger.info(`Retrieving party members for guest: ${request.params.guestId}`);
+            const { weddingId, guestId } = request.params;
+            const guests: Array<Guest> = await this.guestDao.fetchPartyMembers(weddingId, guestId);
+            response.status(200).json(guests);
+        } catch (error) {
+            Logger.error(`Error retrieving party members for guest ${request.params.guestId}`);
+            response.status((error as CustomError).statusCode).send((error as CustomError).message);
+        }
+    }
+
     async getGuestsByPhone(request: Request, response: Response, next: NextFunction) {
         try {
             Logger.info(`Retrieving guests with phone: ${request.params.guestPhone}`);

@@ -36,6 +36,16 @@ export class GuestController {
         }
     }
 
+    async fetchPartyMembers(userAuthToken: any, weddingRole: WeddingRole, guestId: string) {
+        try {
+            const requestUrl = `${RequestUtil.getAPIUrl()}/api/weddings/${weddingRole.wedding.id}/guests/party/${guestId}`;
+            return await RequestUtil.apiRequest(requestUrl, RequestUtil.GETRequestParams(userAuthToken, weddingRole.role));
+        } catch (error: any) {
+            ErrorHandler.handleGetByIdError();
+            throw error;
+        }
+    }
+
     async getGuestsByPhone(userAuthToken: any, weddingRole: WeddingRole, guestPhone: string) {
         try {
             const requestUrl = `${RequestUtil.getAPIUrl()}/api/weddings/${weddingRole.wedding.id}/guests/phone/${guestPhone}`;

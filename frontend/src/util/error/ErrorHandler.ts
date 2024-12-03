@@ -10,7 +10,12 @@ export class ErrorHandler {
         console.log("Error occurred. Please try again.");
     }
 
-    static handleUserAuthError<T>(user: any, error: FirebaseError) {
+    static handleCustomError(errorMessage : string) {
+        const notificationStore = useNotificationStore();
+        notificationStore.setMessage(errorMessage, NotificationType.ERROR);
+    }
+
+    static handleUserAuthError<T>(user : any, error : FirebaseError) {
         const notificationStore = useNotificationStore();
         if (error.code === 'auth/email-already-in-use') {
             notificationStore.setMessage("This email is already in use. Please try a different one.", NotificationType.ERROR);

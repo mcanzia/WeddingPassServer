@@ -170,6 +170,34 @@ export class GuestDao {
         }
     }
 
+    async fetchPartyMembers(weddingId: string, guestId: string): Promise<Array<Guest>> {
+        try {
+
+            const querySnapshot: QuerySnapshot<DocumentData> = await this.guestsCollection
+                .where('weddingId', '==', weddingId)
+                .get();
+
+            if (querySnapshot.empty) {
+                return [];
+            }
+
+            const guests: Array<Guest> = [];
+
+            const events: Map<string, WeddingEvent> = await this.fetchAllEvents(weddingId);
+
+            querySnapshot.forEach((doc: QueryDocumentSnapshot<DocumentData>) => {
+                const guestData = doc.data();
+                guestData.id = doc.id;
+                guestData.events = guestData.events.map((eventId: string) => events.get(eventId));
+                guests.push(guestData as Guest);
+            });
+
+            return guests;
+        } catch (error: any) {
+            throw new DatabaseError("Could not retrieve guests by email from database: " + error.message);
+        }
+    }
+
     async getGuestsByEmail(weddingId: string, email: string): Promise<Array<Guest>> {
         try {
             const sanitizedEmail = validator.escape(email.trim()).toLowerCase();

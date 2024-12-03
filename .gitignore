@@ -4,3 +4,6 @@ node_modules
 .env.*
 /server/src/configs/serviceAccountKey.json
 *.log
+frontend/src/env.front.development
+server/env.server.development
+server/env.server.production

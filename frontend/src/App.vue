@@ -1,11 +1,11 @@
 <!-- App.vue -->
 <template>
-  <div class="bg-background">
+  <div class="bg-watercolor bg-cover bg-center min-h-screen">
     <Toaster />
     <div v-if="isLoading">
       <Loader />
     </div>
-    <div v-else>
+    <div class="h-full" v-else>
       <Navbar v-if="isLoggedIn" />
       <router-view />
     </div>
@@ -33,7 +33,7 @@ const { resetError, resetSuccess } = notificationStore;
 const { toast } = useToast();
 
 onMounted(() => {
-  document.documentElement.classList.add("dark");
+ // document.documentElement.classList.add("dark");
 });
 
 watch(errorMessage, (val) => {

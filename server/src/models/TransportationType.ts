@@ -1,6 +1,6 @@
 export const TransportationType = Object.freeze({
-    FLIGHT: 'flight',
-    TRAIN: 'train',
-    BUS: 'bus',
-    OTHER: 'other'
+    FLIGHT: 'FLIGHT',
+    TRAIN: 'TRAIN',
+    BUS: 'BUS',
+    OTHER: 'OTHER'
 });

@@ -16,8 +16,8 @@
                         <Input id="name" type="text" v-model="editUserForm.name" required />
                     </div>
                     <div class="grid gap-2">
-                        <Label for="guest-group-number">Party Number</Label>
-                        <Input id="guest-group-number" type="number" v-model="editUserForm.groupNumber" required />
+                        <Label for="partyNum">Party Number</Label>
+                        <Input id="partyNum" type="number" v-model="editUserForm.groupNumber" required />
                     </div>
                     <div class="grid gap-2">
                         <Label for="email">Email</Label>
@@ -91,6 +91,7 @@ onMounted(async () => {
     editUserForm.value.id = props.guestId;
     editUserForm.value.weddingId = editGuest.weddingId;
     editUserForm.value.name = editGuest.name;
+    editUserForm.value.groupNumber = editGuest.groupNumber;
     editUserForm.value.email = editGuest.email;
     editUserForm.value.phone = editGuest.phone;
     editUserForm.value.groupNumber = editGuest.groupNumber;
@@ -104,6 +105,7 @@ const editUserForm = ref<{
     id: string;
     weddingId: string;
     name: string;
+    groupNumber: number;
     email: string;
     phone: string;
     groupNumber: number;
@@ -113,6 +115,7 @@ const editUserForm = ref<{
     id: '',
     weddingId: '',
     name: '',
+    groupNumber: 0,
     email: '',
     phone: '',
     groupNumber: 0,

@@ -39,6 +39,13 @@ export function useColumnDefinition() {
                 cell: ({ row }: any) => h('div', { class: 'capitalize whitespace-nowrap text-center' }, row.getValue('name')),
             },
             {
+                accessorKey: 'groupNumber',
+                header: ({ column }) => {
+                    return setHeaderDetails(column, 'Party Number');
+                },
+                cell: ({ row }: any) => h('div', { class: 'whitespace-nowrap text-center' }, row.getValue('groupNumber')),
+            },
+            {
                 accessorKey: 'email',
                 header: ({ column }) => {
                     return setHeaderDetails(column, 'Email');
@@ -78,10 +85,10 @@ export function useColumnDefinition() {
                     }
                     switch (arrival.type) {
                         case TransportationType.FLIGHT:
-                            arrivalType = TransportationType.FLIGHT.toUpperCase();
+                            arrivalType = TransportationType.FLIGHT;
                             break;
                         case TransportationType.TRAIN:
-                            arrivalType = TransportationType.TRAIN.toUpperCase();
+                            arrivalType = TransportationType.TRAIN;
                             break;
                         default: {
                             arrivalType = 'N/A';

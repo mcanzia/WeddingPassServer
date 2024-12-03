@@ -36,11 +36,21 @@ export class GuestService {
         }
     }
 
+    async fetchPartyMembers(guestId: string) {
+        try {
+            const userAccessToken = await this.userStore.getAccessToken();
+            const guests = await this.guestController.fetchPartyMembers(userAccessToken, this.weddingRole, guestId);
+            return guests;
+        } catch (error) {
+            throw error;
+        }
+    }
+
     async getGuestsForEvent(eventId: string) {
         try {
             const userAccessToken = await this.userStore.getAccessToken();
-            const guest = await this.guestController.getGuestsForEvent(userAccessToken, this.weddingRole, eventId);
-            return guest;
+            const guests = await this.guestController.getGuestsForEvent(userAccessToken, this.weddingRole, eventId);
+            return guests;
         } catch (error) {
             throw error;
         }
@@ -125,4 +135,5 @@ export class GuestService {
             throw error;
         }
     }
+
 }
