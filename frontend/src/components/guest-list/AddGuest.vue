@@ -16,6 +16,10 @@
                         <Input id="guest-name" type="text" v-model="newUserForm.guestName" required />
                     </div>
                     <div class="grid gap-2">
+                        <Label for="partyNum">Party Number</Label>
+                        <Input id="partyNum" type="number" v-model="newUserForm.groupNumber" required />
+                    </div>
+                    <div class="grid gap-2">
                         <Label for="email">Email</Label>
                         <Input id="email" type="email" v-model="newUserForm.email" required />
                     </div>
@@ -65,7 +69,7 @@ const {goToRouteSecured} = useRouterHelper();
 const notificationStore = useNotificationStore();
 const { setMessage } = notificationStore;
 const userStore = useUserStore();
-const { hasEditAuthority } = storeToRefs(userStore);
+const { hasEditAuthority, selectedWedding } = storeToRefs(userStore);
 
 onMounted(async () => {
     const eventService = new EventService();
@@ -76,6 +80,7 @@ const weddingEvents = ref<WeddingEvent[]>([]);
 
 const newUserForm = ref({
     guestName: '',
+    groupNumber: 0,
     email: '',
     phone: '',
     events: []
@@ -84,7 +89,9 @@ const newUserForm = ref({
 async function saveGuest() {
     if (hasEditAuthority) {
         const newGuest: Guest = {
+            weddingId: selectedWedding.value?.id!,
             name: newUserForm.value.guestName,
+            groupNumber: newUserForm.value.groupNumber,
             email: newUserForm.value.email,
             phone: newUserForm.value.phone,
             attendingEvents: [],

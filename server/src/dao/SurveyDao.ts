@@ -159,7 +159,8 @@ export class SurveyDao {
                     responseData.responses,
                     responseData.updatedAt.toDate(),
                     responseData.submitted,
-                    responseData.title
+                    responseData.title,
+                    responseData.showPartyMemberSurveys
                 );
                 surveyResponses.push(surveyResponse);
             });
@@ -195,7 +196,8 @@ export class SurveyDao {
                     responseData.responses,
                     (responseData.updatedAt as Timestamp).toDate(),
                     responseData.submitted,
-                    responseData.title
+                    responseData.title,
+                    responseData.showPartyMemberSurveys
                 );
                 surveyResponses.push(surveyResponse);
             });
@@ -246,7 +248,8 @@ export class SurveyDao {
                 responseData.responses,
                 (responseData.updatedAt as Timestamp).toDate(),
                 responseData.submitted,
-                responseData.title
+                responseData.title,
+                responseData.showPartyMemberSurveys
             );
 
             return surveyResponse;
@@ -296,7 +299,8 @@ export class SurveyDao {
                 responseData.responses,
                 (responseData.updatedAt as Timestamp).toDate(),
                 responseData.submitted,
-                responseData.title
+                responseData.title,
+                responseData.showPartyMemberSurveys
             );
 
             return surveyResponse;

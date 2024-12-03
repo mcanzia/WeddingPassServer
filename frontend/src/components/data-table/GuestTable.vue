@@ -81,24 +81,25 @@
       </div>
       <div class="rounded-md border">
         <Table>
-          <TableHeader>
+          <TableHeader class="bg-orange-200">
             <TableRow
               v-for="headerGroup in table.getHeaderGroups()"
               :key="headerGroup.id"
+              class="hover:bg-orange-200 border-solid border-black"
             >
               <TableHead
                 v-for="header in headerGroup.headers"
-                :key="header.id"
-              >
+                :key="header.id"              >
                 <FlexRender
                   v-if="!header.isPlaceholder"
                   :render="header.column.columnDef.header"
                   :props="header.getContext()"
+                  class="text-primary hover:bg-orange-50"
                 />
               </TableHead>
             </TableRow>
           </TableHeader>
-          <TableBody>
+          <TableBody class="bg-orange-50">
             <template v-if="table.getRowModel().rows?.length">
               <template
                 v-for="row in table.getRowModel().rows"
@@ -112,6 +113,7 @@
                     <FlexRender
                       :render="cell.column.columnDef.cell"
                       :props="cell.getContext()"
+                      
                     />
                   </TableCell>
                 </TableRow>

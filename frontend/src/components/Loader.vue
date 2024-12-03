@@ -2,7 +2,7 @@
     <div class="flex items-center justify-center w-full h-screen">
         <div class="loader-image">
             <!-- <div id="heart"></div> -->
-            <img src="@/assets/logo.svg" alt="Loader Image" />
+            <img src="/images/color-logo.svg" alt="Loader Image" />
         </div>
     </div>
 </template>

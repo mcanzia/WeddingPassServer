@@ -31,7 +31,16 @@
               id="published-toggle"
             />
             <Label for="published-toggle">{{ publishedToggleText }}</Label>
-          </div>
+        </div>
+        <div
+            class="flex items-center space-x-2 mt-2"
+          >
+          <Switch
+              v-model:checked="showPartyMemberSurveysComputed"
+              id="party-member-toggle"
+            />
+            <Label for="party-member-toggle">{{ showPartyMemberSurveysText }}</Label>
+        </div>
         <div class="grid gap-2">
           <Label for="survey-name">Survey Name</Label>
           <Input
@@ -322,6 +331,22 @@ const surveyPublishedComputed = computed({
 
 const publishedToggleText = computed(() => {
   return survey.value && survey.value.published ? 'Published' : 'In Development'
+})
+
+const showPartyMemberSurveysComputed = computed({
+  get() {
+    return survey.value!.showPartyMemberSurveys;
+  },
+  set(val) {
+    if (survey.value) {
+      survey.value.showPartyMemberSurveys = val;
+      savedStatus.value = false;
+    }
+  },
+});
+
+const showPartyMemberSurveysText = computed(() => {
+  return 'Show Party Member Surveys';
 })
 
 const savedStatusClassesComputed = computed(() => {

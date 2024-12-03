@@ -52,7 +52,7 @@ const { survey } = storeToRefs(surveyStore);
 const { saveSurvey } = surveyStore;
 const surveyResponseStore = useSurveyResponseStore();
 const { surveyResponse } = storeToRefs(surveyResponseStore);
-const { saveSurveyResponse } = surveyResponseStore;
+const { saveSurveyResponse, initializeGuestValues } = surveyResponseStore;
 const userStore = useUserStore();
 const {loggedInGuest} = storeToRefs(userStore);
 
@@ -111,6 +111,7 @@ async function goToEditSurvey(surveyToEdit: Survey | null) {
       title: "New Survey",
       surveyComponents: [],
       published: false,
+      showPartyMemberSurveys: false
     } as Survey;
     await saveSurvey();
     goToRouteSecured("edit-survey", { surveyId: survey.value.id });
@@ -121,7 +122,8 @@ async function goToEditSurvey(surveyToEdit: Survey | null) {
 
 async function goToCompleteSurvey(surveyResponseToEdit: Survey | SurveyResponse) {
   if (isSurvey(surveyResponseToEdit)) {
-    console.log('surveyResponse', surveyResponseToEdit);
+    // Set initial guest values
+    surveyResponseToEdit.surveyComponents = await initializeGuestValues(surveyResponseToEdit.surveyComponents, loggedInGuest.value);
     surveyResponse.value = {
       surveyId: surveyResponseToEdit.id!,
       weddingId: surveyResponseToEdit.weddingId!,
@@ -130,6 +132,7 @@ async function goToCompleteSurvey(surveyResponseToEdit: Survey | SurveyResponse)
       updatedAt: new Date(),
       submitted: false,
       title: surveyResponseToEdit.title,
+      showPartyMemberSurveys: surveyResponseToEdit.showPartyMemberSurveys
     } as SurveyResponse;
     await saveSurveyResponse();
     goToRouteSecured("survey-response", { surveyId: surveyResponse.value.surveyId, surveyResponseId: surveyResponse.value.responseId });

@@ -11,11 +11,9 @@ import { ref } from "vue";
 
 export const useSurveyResponseStore = defineStore('surveyResponseStore', () => {
 
-    const notificationStore = useNotificationStore();
-    const { setMessage } = notificationStore;
-
     const surveyResponse = ref<SurveyResponse>();
     const currentGuest = ref<Guest>();
+    const partyMembers = ref<Guest[]>();
 
     async function saveSurveyResponse() {
         if (surveyResponse.value) {
@@ -32,16 +30,31 @@ export const useSurveyResponseStore = defineStore('surveyResponseStore', () => {
             const surveyResponseService = new SurveyResponseService();
             const updatedSurveyResponse = await surveyResponseService.saveSurveyResponse(surveyResponse.value.surveyId, surveyResponse.value);
             surveyResponse.value = updatedSurveyResponse;
-            setMessage('Submitted survey response.', NotificationType.SUCCESS);
         } else {
             ErrorHandler.displayGenericError();
         }
     }
 
+    async function initializeGuestValues(components: SurveyComponent[], guestId: string) {
+        const guestService = new GuestService();
+        currentGuest.value = await guestService.getGuestById(guestId);
+        if (currentGuest.value) {
+            processSurveyComponents(components, currentGuest.value);
+        } else {
+            ErrorHandler.handleCustomError('Guest not found.');
+        }
+        return components;
+    }
+
     function processSurveyComponents(components: SurveyComponent[], guest: Guest): void {
         for (const component of components) {
             if (component.infoLookupField) {
-                setGuestField(guest, component.infoLookupField, component.componentValue);
+                const fields = component.infoLookupField.split(':');
+                if (!component.componentValue) {
+                    component.componentValue = getGuestFieldValue(guest, fields);
+                } else {
+                    setGuestField(guest, fields, component.componentValue);
+                }
             }
 
             if (component.surveyTriggers && component.surveyTriggers.length > 0) {
@@ -54,9 +67,19 @@ export const useSurveyResponseStore = defineStore('surveyResponseStore', () => {
         }
     }
 
+    function getGuestFieldValue(guest: Guest, fields: string[]) {
+        let value: any = guest;
 
-    function setGuestField(guest: Guest, fieldKey: string, newValue: any): void {
-        const fields = fieldKey.split(':');
+        for (let i = 0; i < fields.length; i++) {
+            const field = fields[i];
+
+            value = value[field];
+        }
+        return value;
+    }
+
+
+    function setGuestField(guest: Guest, fields: string[], newValue: any) {
         let value: any = guest;
 
         for (let i = 0; i < fields.length - 1; i++) {
@@ -68,9 +91,9 @@ export const useSurveyResponseStore = defineStore('surveyResponseStore', () => {
 
             value = value[field];
         }
-
         const lastField = fields[fields.length - 1];
         value[lastField] = newValue;
+        return guest;
     }
 
 
@@ -79,6 +102,13 @@ export const useSurveyResponseStore = defineStore('surveyResponseStore', () => {
         surveyResponse.value = await surveyResponseService.getSurveyResponseById(surveyId, surveyResponseId);
         if (surveyResponse.value && surveyResponse.value.responses) {
             surveyResponse.value.responses = surveyResponse.value.responses.sort((a, b) => a.order! - b.order!);
+        }
+    }
+
+    async function fetchPartyMembers() {
+        if (currentGuest.value) {
+            const guestService = new GuestService();
+            partyMembers.value = await guestService.fetchPartyMembers(currentGuest.value!.id!);
         }
     }
 
@@ -91,7 +121,6 @@ export const useSurveyResponseStore = defineStore('surveyResponseStore', () => {
             if (component.id === componentId) {
                 component.componentValue = value;
                 clearChildValues(component);
-                console.log('componentValue', component.label, value);
                 return true;
             }
             if (component.surveyTriggers) {
@@ -127,7 +156,8 @@ export const useSurveyResponseStore = defineStore('surveyResponseStore', () => {
         //actions
         saveSurveyResponse,
         fetchSurveyResponse,
-        updateComponentValue
+        updateComponentValue,
+        initializeGuestValues
     }
 
 });

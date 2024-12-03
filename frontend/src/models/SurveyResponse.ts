@@ -10,8 +10,9 @@ export class SurveyResponse {
     updatedAt: Date;
     submitted: boolean;
     title: string;
+    showPartyMemberSurveys: boolean;
 
-    constructor(surveyId: string, weddingId: string, guestId: string, responses: SurveyComponent[], updatedAt: Date, submitted: boolean, title: string, responseId?: string) {
+    constructor(surveyId: string, weddingId: string, guestId: string, responses: SurveyComponent[], updatedAt: Date, submitted: boolean, title: string, showPartyMemberSurveys: boolean, responseId?: string) {
         this.responseId = responseId;
         this.surveyId = surveyId;
         this.weddingId = weddingId;
@@ -20,6 +21,7 @@ export class SurveyResponse {
         this.updatedAt = updatedAt;
         this.submitted = submitted;
         this.title = title;
+        this.showPartyMemberSurveys = showPartyMemberSurveys;
     }
 
 }

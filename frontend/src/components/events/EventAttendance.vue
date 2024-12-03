@@ -1,5 +1,5 @@
 <template>
-    <div class="bg-background px-5 py-5">
+    <div class="px-5 py-5">
         <div v-if="!loading">
             <DropdownMenu>
                 <DropdownMenuTrigger as-child>
