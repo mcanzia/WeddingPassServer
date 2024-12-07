@@ -24,7 +24,7 @@ const authService = new AuthService();
 const route = useRoute();
 const userStore = useUserStore();
 const { isLoggedIn } = storeToRefs(useUserStore());
-const { refetchLocalUser } = userStore;
+const { refetchLocalUser, checkForInviteToken } = userStore;
 const notificationStore = useNotificationStore();
 const { goToRoute, replaceRoute } = useRouterHelper();
 
@@ -41,10 +41,8 @@ onMounted(async () => {
     return;
   }
 
-  const inviteToken: InviteToken = new InviteToken(token);
-
   if (isLoggedIn.value) {
-    await processInvite(inviteToken, isGuestInvite);
+    await processInvite(token, isGuestInvite);
   } else {
     localStorage.setItem("inviteToken", token);
     if (isGuestInvite) {
@@ -55,24 +53,25 @@ onMounted(async () => {
   }
 });
 
-async function processInvite(token: InviteToken, guestInvite: boolean) {
-  try {
-    if (guestInvite) {
-      await authService.processInvite(token);
-      goToRoute('verify-guest');
-    } else {
-      await authService.processInvite(token);
-      notificationStore.setMessage(
-        "You have been added to the wedding.",
-        NotificationType.SUCCESS
-      );
-    }
-  } catch (err) {
-    error.value = "Failed to process invite.";
-  } finally {
-    isProcessing.value = false;
-    await refetchLocalUser();
-    replaceRoute("landing");
-  }
+async function processInvite(token: string, isGuest: boolean) {
+  await checkForInviteToken(token, isGuest);
+  // try {
+  //   if (isGuest) {
+  //     await authService.processInvite(token);
+  //     goToRoute('verify-guest');
+  //   } else {
+  //     const weddingrole = await authService.processInvite(token);
+  //     notificationStore.setMessage(
+  //       "You have been added to the wedding.",
+  //       NotificationType.SUCCESS
+  //     );
+  //   }
+  // } catch (err) {
+  //   error.value = "Failed to process invite.";
+  // } finally {
+  //   isProcessing.value = false;
+  //   await refetchLocalUser();
+  //   replaceRoute("landing");
+  // }
 }
 </script>

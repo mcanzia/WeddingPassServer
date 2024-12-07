@@ -262,7 +262,7 @@ export class UserDao {
             const updatedData = {
                 ...updatedUser,
                 email: validator.escape(updatedUser.email?.trim()),
-                weddingRoles: updatedUser.weddingRoles.map(weddingRole => { return { role: weddingRole.role, wedding: weddingRole.wedding.id, guestId: weddingRole.guestId } }),
+                weddingRoles: updatedUser.weddingRoles.map(weddingRole => { return { role: weddingRole.role, wedding: weddingRole.wedding.id, guestId: weddingRole.guestId || null } }),
             };
 
             await userRef.update(updatedData);
@@ -293,7 +293,7 @@ export class UserDao {
             const currentWeddingRoles = userData.weddingRoles;
             let filteredWeddingRoles = currentWeddingRoles.filter((weddingRole: any) => weddingRole.wedding !== newWeddingRole.wedding.id);
 
-            filteredWeddingRoles.push({ role: newWeddingRole.role, wedding: newWeddingRole.wedding.id, guestId: newWeddingRole.guestId });
+            filteredWeddingRoles.push({ role: newWeddingRole.role, wedding: newWeddingRole.wedding.id, guestId: newWeddingRole.guestId || null });
 
             const updatedData = {
                 ...userData,
@@ -303,7 +303,7 @@ export class UserDao {
             await userRef.update(updatedData);
 
         } catch (error) {
-            throw new DatabaseError("Could not update user details: " + error);
+            throw new DatabaseError("Could not add user to wedding: " + error);
         }
     }
 

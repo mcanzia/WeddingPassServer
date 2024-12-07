@@ -175,9 +175,9 @@ export const useUserStore = defineStore('userStore', () => {
         }
     }
 
-    async function checkForInviteToken() {
-        const token = localStorage.getItem('inviteToken');
-        const isGuest = localStorage.getItem('guestPhone');
+    async function checkForInviteToken(inviteToken: string | null = null, guestInvite: boolean | null = null) {
+        const token = inviteToken || localStorage.getItem('inviteToken');
+        const isGuest = guestInvite || localStorage.getItem('guestPhone');
         if (token && localUser.value) {
             try {
                 const inviteToken: InviteToken = new InviteToken(token);
@@ -198,10 +198,12 @@ export const useUserStore = defineStore('userStore', () => {
                         await updateUserDetails(userWeddingRole);
                         await refetchLocalUser();
                         SuccessHandler.showNotification('Successfully added invitation to wedding.');
+                        goToRoute('landing');
+                        window.location.reload();
                     }
                 } else {
                     console.log('User already exists, going home');
-                    goToRouteSecured('home');
+                    goToRoute('landing');
                 }
             } catch (error: any) {
                 ErrorHandler.handleUserAuthError(user.value, error);
@@ -339,6 +341,7 @@ export const useUserStore = defineStore('userStore', () => {
         createLocalUser,
         refetchLocalUser,
         updateUserDetails,
-        addPendingGuest
+        addPendingGuest,
+        checkForInviteToken
     };
 });
