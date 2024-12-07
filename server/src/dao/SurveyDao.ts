@@ -1,10 +1,12 @@
 import { db } from '../configs/firebase';
 import { DatabaseError, NoDataError } from '../util/error/CustomError';
-import { injectable } from 'inversify';
+import { inject, injectable } from 'inversify';
 import { Survey } from '../models/Survey';
 import { CollectionReference, DocumentData, QuerySnapshot, QueryDocumentSnapshot, Timestamp } from 'firebase-admin/firestore';
 import { SurveyResponse } from '../models/SurveyResponse';
 import { Guest } from '../models/Guest';
+import { TYPES } from '../configs/types';
+import { GuestDao } from './GuestDao';
 
 @injectable()
 export class SurveyDao {
@@ -12,7 +14,7 @@ export class SurveyDao {
     private surveysCollection: CollectionReference<DocumentData>;
     private guestsCollection: CollectionReference<DocumentData>;
 
-    constructor() {
+    constructor(@inject(TYPES.GuestDao) private guestDao: GuestDao) {
         this.surveysCollection = db.collection('surveys');
         this.guestsCollection = db.collection('guests');
     }
@@ -154,16 +156,7 @@ export class SurveyDao {
                 const responseData = doc.data();
                 const guestId = responseData.guest;
 
-                const guestDoc = await this.guestsCollection.doc(guestId).get();
-                if (!guestDoc.exists) {
-                    throw new DatabaseError(`Guest not found for guestId: ${guestId}`);
-                }
-                const guestData = guestDoc.data();
-                this.setDateFields(guestData!);
-                const guest = {
-                    ...guestData,
-                    id: guestDoc.id
-                } as Guest;
+                const guest = await this.guestDao.getGuestById(weddingId, guestId);
 
                 const surveyResponse = new SurveyResponse(
                     doc.id,
@@ -200,17 +193,7 @@ export class SurveyDao {
             for (const doc of querySnapshot.docs) {
                 const responseData = doc.data();
 
-                const guestDoc = await this.guestsCollection.doc(guestId).get();
-                if (!guestDoc.exists) {
-                    throw new DatabaseError(`Guest not found for guestId: ${guestId}`);
-                }
-
-                const guestData = guestDoc.data();
-                this.setDateFields(guestData!);
-                const guest = {
-                    ...guestData,
-                    id: guestDoc.id
-                } as Guest;
+                const guest = await this.guestDao.getGuestById(weddingId, guestId);
 
                 const surveyResponse = new SurveyResponse(
                     doc.id,
@@ -257,17 +240,7 @@ export class SurveyDao {
             }
 
             const guestId = responseData.guest;
-            const guestDoc = await this.guestsCollection.doc(guestId).get();
-            if (!guestDoc.exists) {
-                throw new DatabaseError(`Guest not found for guestId: ${guestId}`);
-            }
-
-            const guestData = guestDoc.data();
-            this.setDateFields(guestData!);
-            const guest = {
-                ...guestData,
-                id: guestDoc.id
-            } as Guest;
+            const guest = await this.guestDao.getGuestById(weddingId, guestId);
 
             const surveyResponse = new SurveyResponse(
                 surveyResponseDoc.id,
@@ -321,17 +294,7 @@ export class SurveyDao {
             const surveyResponseDoc = querySnapshot.docs[0];
             const responseData = surveyResponseDoc.data();
 
-            const guestDoc = await this.guestsCollection.doc(guestId).get();
-            if (!guestDoc.exists) {
-                throw new DatabaseError(`Guest not found for guestId: ${guestId}`);
-            }
-
-            const guestData = guestDoc.data();
-            this.setDateFields(guestData!);
-            const guest = {
-                ...guestData,
-                id: guestDoc.id
-            } as Guest;
+            const guest = await this.guestDao.getGuestById(weddingId, guestId);
 
             const surveyResponse = new SurveyResponse(
                 surveyResponseDoc.id,
@@ -547,17 +510,7 @@ export class SurveyDao {
                 for (const doc of querySnapshot.docs) {
                     const responseData = doc.data();
                     const guestId = responseData.guest;
-                    const guestDoc = await this.guestsCollection.doc(guestId).get();
-                    if (!guestDoc.exists) {
-                        throw new DatabaseError(`Guest not found for guestId: ${guestId}`);
-                    }
-
-                    const guestData = guestDoc.data();
-                    this.setDateFields(guestData!);
-                    const guest = {
-                        ...guestData,
-                        id: guestDoc.id
-                    } as Guest;
+                    const guest = await this.guestDao.getGuestById(weddingId, guestId);
 
                     const surveyResponse = new SurveyResponse(
                         doc.id,
