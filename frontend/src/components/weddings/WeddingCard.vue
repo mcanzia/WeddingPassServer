@@ -1,6 +1,6 @@
 <template>
   <div class="flex-1 mt-5 max-w-sm">
-    <Card class="mx-auto flex flex-col hover:bg-slate-700">
+    <Card class="mx-auto flex flex-col hover:bg-slate-100">
       <CardHeader class="flex-none">
         <CardTitle class="text-2xl">
           {{ weddingRole.wedding.name }}
