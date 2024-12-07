@@ -7,7 +7,7 @@
                     !combinedValue && 'text-muted-foreground',
                 )">
                     <CalendarIcon class="mr-2 h-4 w-4" />
-                    {{ combinedValue ? df.format(combinedValue.toDate(getLocalTimeZone())) : "Pick a date time" }}
+                    {{ combinedValue ? formatCalendarDateTime(combinedValue) : "Pick a date time" }}
                 </Button>
             </PopoverTrigger>
             <PopoverContent class="w-auto p-0">
@@ -29,10 +29,10 @@ import { Calendar } from '@/components/ui/calendar';
 import {
     type DateValue,
     DateFormatter,
-    getLocalTimeZone,
     parseDateTime,
     toCalendarDateTime,
     Time,
+    CalendarDateTime,
 } from '@internationalized/date';
 import { Calendar as CalendarIcon } from 'lucide-vue-next'
 import Separator from "@/components/ui/separator/Separator.vue";
@@ -58,9 +58,7 @@ onMounted(async () => {
         const dateCheck = new Date(props.modelValue);
         const dateTime = parseDateTime(toISOFormat(dateCheck));
         dateValue.value = dateTime;
-
-        const timeDate = dateTime.toDate(getLocalTimeZone());
-        timeValue.value = timeDate;
+        timeValue.value = new Date(dateCheck);
     }
 });
 
@@ -98,9 +96,6 @@ const combinedValue = computed(() => {
     return null;
 });
 
-
-
-
 watch(combinedValue, (newVal) => {
     if (newVal) {
         modelValueComputed.value = newVal.toString();
@@ -120,6 +115,28 @@ function toISOFormat(date: Date) {
 
     return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}.${ms}`;
 }
+
+function formatCalendarDateTime(calendarDateTime: CalendarDateTime) {
+    const monthNames = [
+        'January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+
+    const year = calendarDateTime.year;
+    const monthName = monthNames[calendarDateTime.month - 1];
+    const day = calendarDateTime.day;
+
+    let hour = calendarDateTime.hour;
+    const minute = calendarDateTime.minute;
+
+    const period = hour >= 12 ? 'PM' : 'AM';
+    hour = hour % 12 || 12;
+
+    const minuteStr = minute > 0 ? `:${String(minute).padStart(2, '0')}` : '';
+
+    return `${monthName} ${day}, ${year} at ${hour}${minuteStr} ${period}`;
+}
+
 
 
 
