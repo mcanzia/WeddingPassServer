@@ -76,6 +76,7 @@ export class GuestDao {
                 const guestData = doc.data();
                 guestData.id = doc.id;
                 guestData.events = guestData.events.map((event: string) => events.get(event));
+                guestData.attendingEvents = guestData.attendingEvents.map((event: string) => events.get(event));
                 this.setDateFields(guestData);
                 guests.push(guestData as Guest);
             });
@@ -134,6 +135,7 @@ export class GuestDao {
             const guestData = guestDoc.data();
             if (guestData) {
                 guestData.events = guestData.events.map((event: string) => events.get(event));
+                guestData.attendingEvents = guestData.attendingEvents.map((event: string) => events.get(event));
                 guestData.id = guestDoc.id;
                 this.setDateFields(guestData);
             }
@@ -164,6 +166,7 @@ export class GuestDao {
                 const guestData = doc.data();
                 guestData.id = doc.id;
                 guestData.events = guestData.events.map((event: string) => events.get(event));
+                guestData.attendingEvents = guestData.attendingEvents.map((event: string) => events.get(event));
                 this.setDateFields(guestData);
                 guests.push(guestData as Guest);
             });
@@ -204,6 +207,7 @@ export class GuestDao {
                 const guestData = doc.data();
                 guestData.id = doc.id;
                 guestData.events = guestData.events.map((eventId: string) => events.get(eventId));
+                guestData.attendingEvents = guestData.attendingEvents.map((eventId: string) => events.get(eventId));
                 this.setDateFields(guestData);
                 guests.push(guestData as Guest);
             });
@@ -238,6 +242,7 @@ export class GuestDao {
                 const guestData = doc.data();
                 guestData.id = doc.id;
                 guestData.events = guestData.events.map((eventId: string) => events.get(eventId));
+                guestData.attendingEvents = guestData.attendingEvents.map((eventId: string) => events.get(eventId));
                 this.setDateFields(guestData);
                 guests.push(guestData as Guest);
             });
@@ -272,6 +277,7 @@ export class GuestDao {
                 const guestData = doc.data();
                 guestData.id = doc.id;
                 guestData.events = guestData.events.map((eventId: string) => events.get(eventId));
+                guestData.attendingEvents = guestData.attendingEvents.map((eventId: string) => events.get(eventId));
                 this.setDateFields(guestData);
                 guests.push(guestData as Guest);
             });
@@ -304,6 +310,7 @@ export class GuestDao {
                 const guestData = doc.data();
                 guestData.id = doc.id;
                 guestData.events = guestData.events.map((event: string) => events.get(event));
+                guestData.attendingEvents = guestData.attendingEvents.map((event: string) => events.get(event));
                 this.setDateFields(guestData);
                 guests.push(guestData as Guest);
             });
@@ -448,6 +455,8 @@ export class GuestDao {
                 email: validator.escape(updatedGuest.email.trim()),
                 phone: validator.escape(updatedGuest.phone.trim()),
                 weddingId: guestData.weddingId,
+                events: updatedGuest.events.map((event: WeddingEvent) => event.id),
+                attendingEvents: updatedGuest.events.map((event: WeddingEvent) => event.id),
             };
 
             this.setTimestampFields(updatedData);

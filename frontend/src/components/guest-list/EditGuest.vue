@@ -1,6 +1,6 @@
 <template>
     <div class="flex-1 mt-5 h-screen w-screen">
-        <Card class="mx-auto max-w-sm">
+        <Card class="mx-auto max-w-sm" v-if="!loading">
             <CardHeader>
                 <CardTitle class="text-2xl">
                     Editing Guest
@@ -45,6 +45,7 @@
                 </div>
             </CardContent>
         </Card>
+        <Loader v-else />
     </div>
 </template>
 
@@ -66,6 +67,7 @@ import { ErrorHandler } from '@/util/error/ErrorHandler';
 import { storeToRefs } from 'pinia';
 import { useRouterHelper } from '@/util/composables/useRouterHelper';
 import PhoneInput from '@/components/common/PhoneInput.vue';
+import Loader from '@/components/Loader.vue';
 
 const props = defineProps<{
     guestId: string;
@@ -77,7 +79,10 @@ const { setMessage } = notificationStore;
 const userStore = useUserStore();
 const { hasEditAuthority } = storeToRefs(userStore);
 
+const loading = ref(false);
+
 onMounted(async () => {
+    loading.value = true;
     const eventService = new EventService();
     weddingEvents.value = await eventService.getAllEvents();
 
@@ -97,6 +102,7 @@ onMounted(async () => {
     editUserForm.value.groupNumber = editGuest.groupNumber;
     editUserForm.value.attendingEvents = editGuest.attendingEvents;
     editUserForm.value.events = editGuest.events.map((event: { id: any; }) => event.id);
+    loading.value = false;
 });
 
 const weddingEvents = ref<WeddingEvent[]>([]);
@@ -105,7 +111,6 @@ const editUserForm = ref<{
     id: string;
     weddingId: string;
     name: string;
-    groupNumber: number;
     email: string;
     phone: string;
     groupNumber: number;
@@ -118,7 +123,6 @@ const editUserForm = ref<{
     groupNumber: 0,
     email: '',
     phone: '',
-    groupNumber: 0,
     events: [],
     attendingEvents: []
 });
