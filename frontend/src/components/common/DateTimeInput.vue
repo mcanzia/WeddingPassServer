@@ -7,7 +7,7 @@
                     !combinedValue && 'text-muted-foreground',
                 )">
                     <CalendarIcon class="mr-2 h-4 w-4" />
-                    {{ combinedValue ? formatCalendarDateTime(combinedValue) : "Pick a date time" }}
+                    {{ combinedValue ? calendarDateTimeToString(combinedValue) : "Pick a date time" }}
                 </Button>
             </PopoverTrigger>
             <PopoverContent class="w-auto p-0">
@@ -32,10 +32,10 @@ import {
     parseDateTime,
     toCalendarDateTime,
     Time,
-    CalendarDateTime,
 } from '@internationalized/date';
 import { Calendar as CalendarIcon } from 'lucide-vue-next'
 import Separator from "@/components/ui/separator/Separator.vue";
+import { useDateUtils } from "@/components/common/useDateUtils";
 
 const props = defineProps({
     modelValue: {
@@ -51,6 +51,8 @@ const props = defineProps({
 });
 
 const emits = defineEmits(['update:modelValue']);
+
+const { calendarDateTimeToString, toISOFormat } = useDateUtils();
 
 onMounted(async () => {
     await nextTick();
@@ -101,43 +103,6 @@ watch(combinedValue, (newVal) => {
         modelValueComputed.value = newVal.toString();
     }
 });
-
-function toISOFormat(date: Date) {
-    const pad = (num: number, size = 2) => String(num).padStart(size, '0');
-
-    const year = date.getFullYear();
-    const month = pad(date.getMonth() + 1);
-    const day = pad(date.getDate());
-    const hours = pad(date.getHours());
-    const minutes = pad(date.getMinutes());
-    const seconds = pad(date.getSeconds());
-    const ms = pad(date.getMilliseconds(), 3);
-
-    return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}.${ms}`;
-}
-
-function formatCalendarDateTime(calendarDateTime: CalendarDateTime) {
-    const monthNames = [
-        'January', 'February', 'March', 'April', 'May', 'June',
-        'July', 'August', 'September', 'October', 'November', 'December'
-    ];
-
-    const year = calendarDateTime.year;
-    const monthName = monthNames[calendarDateTime.month - 1];
-    const day = calendarDateTime.day;
-
-    let hour = calendarDateTime.hour;
-    const minute = calendarDateTime.minute;
-
-    const period = hour >= 12 ? 'PM' : 'AM';
-    hour = hour % 12 || 12;
-
-    const minuteStr = minute > 0 ? `:${String(minute).padStart(2, '0')}` : '';
-
-    return `${monthName} ${day}, ${year} at ${hour}${minuteStr} ${period}`;
-}
-
-
 
 
 </script>

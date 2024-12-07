@@ -12,8 +12,12 @@ import { ColumnDef } from "@tanstack/vue-table";
 import { TransportationType } from "@/models/TransportationType";
 import { Transportation } from "@/models/Transportation";
 import { isFlight, isBus, isTrain } from "@/models/TransportationTypeGuard";
+import { useDateUtils } from "@/components/common/useDateUtils";
 
 export function useColumnDefinition() {
+
+    const { dateToString } = useDateUtils();
+
     const columnDefs = computed(() => {
         return [
             {
@@ -181,7 +185,7 @@ export function useColumnDefinition() {
                 const value = (details as Flight)[fieldName as keyof Flight];
                 const dateCheck = value ? new Date(value) : undefined;
                 if (dateCheck && !isNaN(dateCheck.getTime())) {
-                    return h('div', dateCheck.toLocaleString() || '');
+                    return h('div', dateToString(dateCheck) || '');
                 }
                 return h('div', String(value || ''));
             }
@@ -190,7 +194,7 @@ export function useColumnDefinition() {
                 const value = (details as Train)[fieldName as keyof Train];
                 const dateCheck = value ? new Date(value) : undefined;
                 if (dateCheck && !isNaN(dateCheck.getTime())) {
-                    return h('div', dateCheck.toLocaleString() || '');
+                    return h('div', dateToString(dateCheck) || '');
                 }
                 return h('div', String(value || ''));
             }
@@ -199,7 +203,7 @@ export function useColumnDefinition() {
                 const value = (details as Bus)[fieldName as keyof Bus];
                 const dateCheck = value ? new Date(value) : undefined;
                 if (dateCheck && !isNaN(dateCheck.getTime())) {
-                    return h('div', dateCheck.toLocaleString() || '');
+                    return h('div', dateToString(dateCheck) || '');
                 }
                 return h('div', String(value || ''));
             }
