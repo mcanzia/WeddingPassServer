@@ -10,6 +10,7 @@ const router = express.Router({ mergeParams: true });
 const guestController = container.get<GuestController>(TYPES.GuestController);
 
 router.get('/', authorizeRoles([Roles.EDITOR, Roles.ADMIN, Roles.READONLY]), (req, res, next) => guestController.getGuests(req, res, next));
+router.get('/party/:guestId', authorizeRoles([Roles.EDITOR, Roles.ADMIN, Roles.READONLY, Roles.GUEST]), (req, res, next) => guestController.fetchPartyMembers(req, res, next));
 router.get('/id/:guestId', authorizeRoles([Roles.EDITOR, Roles.ADMIN, Roles.READONLY, Roles.GUEST]), (req, res, next) => guestController.getGuestbyId(req, res, next));
 router.get('/name/:guestName', authorizeRoles([Roles.EDITOR, Roles.ADMIN, Roles.READONLY]), (req, res, next) => guestController.getGuestbyName(req, res, next));
 router.get('/phone/:guestPhone', (req, res, next) => guestController.getGuestsByPhone(req, res, next));

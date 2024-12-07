@@ -43,6 +43,7 @@ const componentsWithPredefinedValue = ['INFO_FIELD'];
 const componentsWithDetailDropdown = ['GUEST_DETAIL_FIELD'];
 const componentsWithEditableInfoToggle = ['INFO_FIELD', 'GUEST_DETAIL_FIELD'];
 const componentsWithAddChildMode = ['SINGLE_SELECT'];
+const disabledComponents = ['PHONE_FIELD'];
 
 export const useSurveyStore = defineStore('surveyStore', () => {
 
@@ -253,9 +254,13 @@ export const useSurveyStore = defineStore('surveyStore', () => {
         return componentsWithAddChildMode.includes(componentType);
     }
 
-    function updateComponentsOrder() {
-        if (survey.value && survey.value.surveyComponents) {
-            const updatedComponents = survey.value.surveyComponents.map((surveyComponent, index) => {
+    function isDisabled(componentType: string) {
+        return disabledComponents.includes(componentType);
+    }
+
+    function updateComponentsOrder(updatedOrderComponents: SurveyComponent[]) {
+        if (survey.value && survey.value.surveyComponents && updatedOrderComponents) {
+            const updatedComponents = updatedOrderComponents.map((surveyComponent, index) => {
                 return { ...surveyComponent, order: index }
             });
             survey.value.surveyComponents = updatedComponents;
@@ -291,7 +296,8 @@ export const useSurveyStore = defineStore('surveyStore', () => {
         togglePreviewMode,
         findSurveyDisplayComponent,
         openAddChild,
-        updateComponentValue
+        updateComponentValue,
+        isDisabled
     }
 
 });

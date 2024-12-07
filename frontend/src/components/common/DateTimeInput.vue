@@ -21,7 +21,7 @@
 
 <script setup lang="ts">
 import TimePicker from "@/components/ui/time-picker/time-picker.vue";
-import { computed, onMounted, ref, watch } from 'vue';
+import { computed, nextTick, onMounted, ref, watch } from 'vue';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { cn } from '@/lib/utils';
@@ -52,9 +52,11 @@ const props = defineProps({
 
 const emits = defineEmits(['update:modelValue']);
 
-onMounted(() => {
+onMounted(async () => {
+    await nextTick();
     if (props.modelValue) {
-        const dateTime = parseDateTime(props.modelValue);
+        const dateCheck = new Date(props.modelValue);
+        const dateTime = parseDateTime(toISOFormat(dateCheck));
         dateValue.value = dateTime;
 
         const timeDate = dateTime.toDate(getLocalTimeZone());
@@ -104,6 +106,21 @@ watch(combinedValue, (newVal) => {
         modelValueComputed.value = newVal.toString();
     }
 });
+
+function toISOFormat(date: Date) {
+    const pad = (num: number, size = 2) => String(num).padStart(size, '0');
+
+    const year = date.getFullYear();
+    const month = pad(date.getMonth() + 1);
+    const day = pad(date.getDate());
+    const hours = pad(date.getHours());
+    const minutes = pad(date.getMinutes());
+    const seconds = pad(date.getSeconds());
+    const ms = pad(date.getMilliseconds(), 3);
+
+    return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}.${ms}`;
+}
+
 
 
 </script>

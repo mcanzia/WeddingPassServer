@@ -13,7 +13,7 @@
                         <ChevronsUpDown class="-mr-2 h-4 w-4 opacity-50" />
                     </Button>
                 </PopoverTrigger>
-                <PopoverContent class="w-[300px] p-0" side="bottom" :avoid-collisions="false">
+                <PopoverContent class="w-[300px] p-0" :avoid-collisions="true">
                     <Command>
                         <CommandInput placeholder="Search country..." />
                         <CommandEmpty>No country found.</CommandEmpty>

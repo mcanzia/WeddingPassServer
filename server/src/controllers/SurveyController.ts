@@ -6,11 +6,12 @@ import { CustomError } from '../util/error/CustomError';
 import { SurveyDao } from '../dao/SurveyDao';
 import { TYPES } from '../configs/types';
 import { SurveyResponse } from '../models/SurveyResponse';
+import { SurveyService } from '../services/SurveyService';
 
 @injectable()
 export class SurveyController {
 
-    constructor(@inject(TYPES.SurveyDao) private surveyDao: SurveyDao) { }
+    constructor(@inject(TYPES.SurveyDao) private surveyDao: SurveyDao, @inject(TYPES.SurveyService) private surveyService: SurveyService) { }
 
     async getSurveys(request: Request, response: Response, next: NextFunction) {
         try {
@@ -144,10 +145,39 @@ export class SurveyController {
             const { weddingId, surveyId } = request.params;
             const surveyResponse: SurveyResponse = request.body;
             const updatedSurveyResponse: SurveyResponse = await this.surveyDao.saveSurveyResponse(weddingId, surveyId, surveyResponse);
-            Logger.info(`Successfully updated survey response for survey ${surveyId} and guest ${surveyResponse.guestId}`);
+            Logger.info(`Successfully updated survey response for survey ${surveyId} and guest ${surveyResponse.guest.name}`);
             response.status(200).json(updatedSurveyResponse);
         } catch (error) {
             Logger.error("Error updated survey response", error);
+            response.status((error as CustomError).statusCode).send((error as CustomError).message);
+        }
+    }
+
+    async initializeSurveysForParty(request: Request, response: Response, next: NextFunction) {
+        try {
+            Logger.info(`Initializing surveys for party with ${request.params.guestId}`);
+            const { weddingId, surveyId, guestId } = request.params;
+            const survey: Survey = request.body;
+            const partySurveyResponses: SurveyResponse[] = await this.surveyService.initializeSurveysForParty(weddingId, guestId, survey);
+            Logger.info(`Successfully added survey responses for survey ${surveyId} and party with guest ${guestId}`);
+            response.status(200).json(partySurveyResponses);
+        } catch (error) {
+            Logger.error("Error updated survey response", error);
+            response.status((error as CustomError).statusCode).send((error as CustomError).message);
+        }
+    }
+
+    async fetchPartySurveyResponses(request: Request, response: Response, next: NextFunction) {
+        try {
+            Logger.info(`Retrieving party survey responses`);
+            const { weddingId, surveyId, guestId } = request.params;
+
+            const surveyResponses: Array<SurveyResponse> = await this.surveyDao.fetchPartySurveyResponses(weddingId, surveyId, guestId);
+
+            Logger.info(`Number of survey responses retrieved successfully: ${surveyResponses.length}`);
+            response.status(200).json(surveyResponses);
+        } catch (error) {
+            Logger.error("Error retrieving party survey responses");
             response.status((error as CustomError).statusCode).send((error as CustomError).message);
         }
     }

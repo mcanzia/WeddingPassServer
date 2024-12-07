@@ -1,40 +1,30 @@
+import { Guest } from "./Guest";
+import { Survey } from "./Survey";
 import { SurveyComponent } from "./SurveyComponent";
 
 export class SurveyResponse {
 
     responseId: string;
-    surveyId: string;
-    weddingId: string;
-    guestId: string;
-    responses: SurveyComponent[];
+    guest: Guest;
+    survey: Survey;
     updatedAt: Date;
     submitted: boolean;
-    title: string;
-    showPartyMemberSurveys: boolean;
 
-    constructor(responseId: string, surveyId: string, weddingId: string, guestId: string, responses: SurveyComponent[], updatedAt: Date, submitted: boolean, title: string, showPartyMemberSurveys: boolean) {
-        this.surveyId = surveyId;
+    constructor(responseId: string, guest: Guest, survey: Survey, updatedAt: Date, submitted: boolean) {
         this.responseId = responseId;
-        this.weddingId = weddingId;
-        this.guestId = guestId;
-        this.responses = responses;
+        this.guest = guest;
+        this.survey = survey;
         this.updatedAt = updatedAt;
         this.submitted = submitted;
-        this.title = title;
-        this.showPartyMemberSurveys = showPartyMemberSurveys;
     }
 
     toObject?() {
         return {
-            surveyId: this.surveyId,
             responseId: this.responseId,
-            weddingId: this.weddingId,
-            guestId: this.guestId,
-            responses: this.responses?.map(response => response.toObject ? response.toObject() : response),
+            guest: this.guest.toObject ? this.guest.toObject() : this.guest,
+            survey: this.survey.toObject ? this.survey.toObject() : this.survey,
             updatedAt: this.updatedAt,
-            submitted: this.submitted,
-            title: this.title,
-            showPartyMemberSurveys: this.showPartyMemberSurveys
+            submitted: this.submitted
         };
     }
 }

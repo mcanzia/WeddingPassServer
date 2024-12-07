@@ -8,21 +8,11 @@
     <CardContent class="flex flex-col gap-4 max-h-[70vh]">
       <Separator />
       <ScrollArea class="h-screen">
-        <div
-          ref="parent"
-          class="grid gap-5 font-['Faculty_Glyphic']"
-        >
-          <BaseSurveyComponent
-            v-for="display in displayComponents"
-            :key="display.id"
-            :modelValue="display.componentValue"
-            :builder-mode="!previewMode"
-            :componentDetails="display"
-            @remove="remove"
-            @openAddChild="handleOpenAddChild"
-            @update:modelValue="handleValueUpdate"
-            :class="`${previewMode ? 'my-0' : 'my-2'}`"
-          />
+        <div ref="parent" class="grid gap-5 font-['Faculty_Glyphic']">
+          <BaseSurveyComponent v-for="display in displayComponents" :key="display.id"
+            :modelValue="display.componentValue" :builder-mode="!previewMode" :componentDetails="display"
+            @remove="remove" @openAddChild="handleOpenAddChild" @update:modelValue="handleValueUpdate"
+            :class="`${previewMode ? 'my-0' : 'my-2'}`" />
         </div>
       </ScrollArea>
     </CardContent>
@@ -54,7 +44,9 @@ const [parent, displayComponents] = useDragAndDrop(
     dragDropEffect: "move",
     dragHandle: ".kanban-handle",
     dropZoneClass: "drop-zone",
-    onDragend: updateComponentsOrder,
+    onDragend(newOrder) {
+      updateComponentsOrder(newOrder.values as SurveyComponent[]);
+    },
   }
 ) as [HTMLElement, SurveyComponent[]];
 
@@ -84,10 +76,12 @@ function handleValueUpdate(componentId: string, value: any) {
 
 <style scoped>
 @import url("https://fonts.googleapis.com/css2?family=Faculty+Glyphic&family=Geist:wght@100..900&display=swap");
+
 .drop-zone {
   opacity: 90%;
   border: solid 2px white;
 }
+
 .maybe-survey-settings {
   /*bg-[#FCF4EB] text-zinc-950*/
 }

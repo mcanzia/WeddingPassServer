@@ -5,7 +5,7 @@ import { CustomError, DatabaseError, NoDataError } from '../util/error/CustomErr
 import { injectable } from 'inversify';
 import { Guest } from '../models/Guest';
 import { WeddingEvent } from '../models/WeddingEvent';
-import { CollectionReference, DocumentData, QuerySnapshot, QueryDocumentSnapshot } from 'firebase-admin/firestore';
+import { CollectionReference, DocumentData, QuerySnapshot, QueryDocumentSnapshot, Timestamp } from 'firebase-admin/firestore';
 import validator from 'validator';
 
 @injectable()
@@ -76,6 +76,7 @@ export class GuestDao {
                 const guestData = doc.data();
                 guestData.id = doc.id;
                 guestData.events = guestData.events.map((event: string) => events.get(event));
+                this.setDateFields(guestData);
                 guests.push(guestData as Guest);
             });
 
@@ -105,6 +106,7 @@ export class GuestDao {
                 guestData.id = doc.id;
                 guestData.events = guestData.events.map((event: string) => events.get(event));
                 guestData.attendingEvents = guestData.attendingEvents.map((event: string) => events.get(event));
+                this.setDateFields(guestData);
                 guests.push(guestData as Guest);
             });
 
@@ -133,6 +135,7 @@ export class GuestDao {
             if (guestData) {
                 guestData.events = guestData.events.map((event: string) => events.get(event));
                 guestData.id = guestDoc.id;
+                this.setDateFields(guestData);
             }
 
             return guestData as Guest;
@@ -161,6 +164,7 @@ export class GuestDao {
                 const guestData = doc.data();
                 guestData.id = doc.id;
                 guestData.events = guestData.events.map((event: string) => events.get(event));
+                this.setDateFields(guestData);
                 guests.push(guestData as Guest);
             });
 
@@ -172,9 +176,21 @@ export class GuestDao {
 
     async fetchPartyMembers(weddingId: string, guestId: string): Promise<Array<Guest>> {
         try {
+            const guestDoc = await this.guestsCollection.doc(guestId).get();
+            if (!guestDoc.exists) {
+                return [];
+            }
+            const guestData = guestDoc.data();
+
+            if (!guestData) {
+                return [];
+            }
+
+            const groupNumber = guestData.groupNumber;
 
             const querySnapshot: QuerySnapshot<DocumentData> = await this.guestsCollection
                 .where('weddingId', '==', weddingId)
+                .where('groupNumber', '==', groupNumber)
                 .get();
 
             if (querySnapshot.empty) {
@@ -182,19 +198,19 @@ export class GuestDao {
             }
 
             const guests: Array<Guest> = [];
-
             const events: Map<string, WeddingEvent> = await this.fetchAllEvents(weddingId);
 
             querySnapshot.forEach((doc: QueryDocumentSnapshot<DocumentData>) => {
                 const guestData = doc.data();
                 guestData.id = doc.id;
                 guestData.events = guestData.events.map((eventId: string) => events.get(eventId));
+                this.setDateFields(guestData);
                 guests.push(guestData as Guest);
             });
 
             return guests;
         } catch (error: any) {
-            throw new DatabaseError("Could not retrieve guests by email from database: " + error.message);
+            throw new DatabaseError("Could not retrieve party members from database: " + error.message);
         }
     }
 
@@ -222,6 +238,7 @@ export class GuestDao {
                 const guestData = doc.data();
                 guestData.id = doc.id;
                 guestData.events = guestData.events.map((eventId: string) => events.get(eventId));
+                this.setDateFields(guestData);
                 guests.push(guestData as Guest);
             });
 
@@ -255,6 +272,7 @@ export class GuestDao {
                 const guestData = doc.data();
                 guestData.id = doc.id;
                 guestData.events = guestData.events.map((eventId: string) => events.get(eventId));
+                this.setDateFields(guestData);
                 guests.push(guestData as Guest);
             });
 
@@ -286,6 +304,7 @@ export class GuestDao {
                 const guestData = doc.data();
                 guestData.id = doc.id;
                 guestData.events = guestData.events.map((event: string) => events.get(event));
+                this.setDateFields(guestData);
                 guests.push(guestData as Guest);
             });
 
@@ -327,6 +346,7 @@ export class GuestDao {
             guest.email = validator.escape(guest.email.trim());
             guest.phone = validator.escape(guest.phone.trim());
             guest.attendingEvents = [];
+            this.setTimestampFields(guest);
 
             const newGuest = guest.toObject ? { ...guest.toObject(), events: validatedEvents } : { ...guest, events: validatedEvents };
 
@@ -393,6 +413,7 @@ export class GuestDao {
                     guest.email = validator.escape(guest.email.trim());
                     guest.phone = validator.escape(guest.phone.trim());
                     guest.attendingEvents = [];
+                    this.setTimestampFields(guest);
                     batch.set(newGuestRef, guest);
                 });
 
@@ -426,10 +447,10 @@ export class GuestDao {
                 name: validator.escape(updatedGuest.name.trim()),
                 email: validator.escape(updatedGuest.email.trim()),
                 phone: validator.escape(updatedGuest.phone.trim()),
-                events: updatedGuest.events.map(event => event.id),
-                attendingEvents: updatedGuest.attendingEvents?.map(event => event.id),
                 weddingId: guestData.weddingId,
             };
+
+            this.setTimestampFields(updatedData);
 
             await guestRef.update(updatedData);
         } catch (error) {
@@ -498,6 +519,56 @@ export class GuestDao {
             }
         } catch (error: any) {
             throw new DatabaseError('Could not batch delete guests: ' + error);
+        }
+    }
+
+    setDateFields(guestData: DocumentData) {
+        if (guestData.arrival) {
+            if (guestData.arrival.flightTime) {
+                guestData.arrival.flightTime = guestData.arrival.flightTime.toDate();
+            }
+            if (guestData.arrival.trainTime) {
+                guestData.arrival.trainTime = guestData.arrival.trainTime.toDate();
+            }
+            if (guestData.arrival.busTime) {
+                guestData.arrival.busTime = guestData.arrival.busTime.toDate();
+            }
+        }
+        if (guestData.departure) {
+            if (guestData.departure.flightTime) {
+                guestData.departure.flightTime = guestData.departure.flightTime.toDate();
+            }
+            if (guestData.departure.trainTime) {
+                guestData.departure.trainTime = guestData.departure.trainTime.toDate();
+            }
+            if (guestData.departure.busTime) {
+                guestData.departure.busTime = guestData.departure.busTime.toDate();
+            }
+        }
+    }
+
+    setTimestampFields(guestData: any) {
+        if (guestData.arrival) {
+            if (guestData.arrival.flightTime) {
+                guestData.arrival.flightTime = Timestamp.fromDate(new Date(guestData.arrival.flightTime));
+            }
+            if (guestData.arrival.trainTime) {
+                guestData.arrival.trainTime = Timestamp.fromDate(new Date(guestData.arrival.trainTime));
+            }
+            if (guestData.arrival.busTime) {
+                guestData.arrival.busTime = Timestamp.fromDate(new Date(guestData.arrival.busTime));
+            }
+        }
+        if (guestData.departure) {
+            if (guestData.departure.flightTime) {
+                guestData.departure.flightTime = Timestamp.fromDate(new Date(guestData.departure.flightTime));
+            }
+            if (guestData.departure.trainTime) {
+                guestData.departure.trainTime = Timestamp.fromDate(new Date(guestData.departure.trainTime));
+            }
+            if (guestData.departure.busTime) {
+                guestData.departure.busTime = Timestamp.fromDate(new Date(guestData.departure.busTime));
+            }
         }
     }
 }

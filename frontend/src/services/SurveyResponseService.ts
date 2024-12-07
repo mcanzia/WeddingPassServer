@@ -28,6 +28,28 @@ export class SurveyResponseService {
         }
     }
 
+    async initializeSurveysForParty(guestId: string, survey: Survey) {
+        try {
+            const userAccessToken = await this.userStore.getAccessToken();
+            const response = await this.surveyResponseController.initializeSurveysForParty(userAccessToken, this.weddingRole, guestId, survey);
+            const partySurveys = response ? response : [];
+            return partySurveys;
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    async fetchPartySurveyResponses(surveyId: string, guestId: string) {
+        try {
+            const userAccessToken = await this.userStore.getAccessToken();
+            const response = await this.surveyResponseController.fetchPartySurveyResponses(userAccessToken, this.weddingRole, surveyId, guestId);
+            const partySurveys = response ? response : [];
+            return partySurveys;
+        } catch (error) {
+            throw error;
+        }
+    }
+
     async getAllSurveyResponsesForGuest(guestId: string) {
         try {
             const userAccessToken = await this.userStore.getAccessToken();
@@ -59,10 +81,10 @@ export class SurveyResponseService {
         }
     }
 
-    async saveSurveyResponse(surveyId: string, surveyResponse: SurveyResponse) {
+    async saveSurveyResponse(surveyResponse: SurveyResponse) {
         try {
             const userAccessToken = await this.userStore.getAccessToken();
-            const updatedSurveyResponse = await this.surveyResponseController.saveSurveyResponse(userAccessToken, this.weddingRole, surveyId, surveyResponse);
+            const updatedSurveyResponse = await this.surveyResponseController.saveSurveyResponse(userAccessToken, this.weddingRole, surveyResponse);
             return updatedSurveyResponse;
         } catch (error) {
             throw error;

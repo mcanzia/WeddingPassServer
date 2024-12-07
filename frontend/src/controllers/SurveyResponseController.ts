@@ -51,12 +51,32 @@ export class SurveyResponseController {
         }
     }
 
-    async saveSurveyResponse(userAuthToken: any, weddingRole: WeddingRole, surveyId: string, surveyResponse: SurveyResponse) {
+    async saveSurveyResponse(userAuthToken: any, weddingRole: WeddingRole, surveyResponse: SurveyResponse) {
         try {
-            const requestUrl = `${this.getSurveyBaseUrl(weddingRole)}/${surveyId}/response`;
+            const requestUrl = `${this.getSurveyBaseUrl(weddingRole)}/${surveyResponse.survey.id}/response`;
             return await RequestUtil.apiRequest(requestUrl, RequestUtil.POSTRequestParams(userAuthToken, surveyResponse, weddingRole.role));
         } catch (error: any) {
             ErrorHandler.handleAddError<SurveyResponse>(userAuthToken, ObjectType.SURVEY_RESPONSE, surveyResponse, error);
+            throw error;
+        }
+    }
+
+    async initializeSurveysForParty(userAuthToken: any, weddingRole: WeddingRole, guestId: string, survey: Survey) {
+        try {
+            const requestUrl = `${this.getSurveyBaseUrl(weddingRole)}/${survey.id}/response/party/${guestId}`;
+            return await RequestUtil.apiRequest(requestUrl, RequestUtil.PUTRequestParams(userAuthToken, survey, weddingRole.role));
+        } catch (error: any) {
+            ErrorHandler.handleUpdateError(ObjectType.SURVEY_RESPONSE);
+            throw error;
+        }
+    }
+
+    async fetchPartySurveyResponses(userAuthToken: any, weddingRole: WeddingRole, surveyId: string, guestId: string) {
+        try {
+            const requestUrl = `${this.getSurveyBaseUrl(weddingRole)}/${surveyId}/response/party/${guestId}`;
+            return await RequestUtil.apiRequest(requestUrl, RequestUtil.GETRequestParams(userAuthToken, weddingRole.role));
+        } catch (error: any) {
+            ErrorHandler.handleUpdateError(ObjectType.SURVEY_RESPONSE);
             throw error;
         }
     }
@@ -70,4 +90,5 @@ export class SurveyResponseController {
             throw error;
         }
     }
+
 }

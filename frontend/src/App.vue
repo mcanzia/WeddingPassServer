@@ -33,7 +33,7 @@ const { resetError, resetSuccess } = notificationStore;
 const { toast } = useToast();
 
 onMounted(() => {
- // document.documentElement.classList.add("dark");
+  // document.documentElement.classList.add("dark");
 });
 
 watch(errorMessage, (val) => {
@@ -53,6 +53,7 @@ watch(successMessage, (val) => {
       title: "Success",
       description: val.message,
       variant: "success",
+      class: "text-white"
     });
     resetSuccess();
   }

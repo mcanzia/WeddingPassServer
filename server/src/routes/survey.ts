@@ -19,7 +19,9 @@ router.get('/response/:guestId', authorizeRoles([Roles.EDITOR, Roles.ADMIN, Role
 router.get('/:surveyId/response', authorizeRoles([Roles.EDITOR, Roles.ADMIN, Roles.READONLY]), (req, res, next) => surveyController.getSurveyResponses(req, res, next));
 router.get('/:surveyId/response/id/:surveyResponseId', authorizeRoles([Roles.EDITOR, Roles.ADMIN, Roles.READONLY, Roles.GUEST]), (req, res, next) => surveyController.getSurveyResponseById(req, res, next));
 router.get('/:surveyId/response/guest/:guestId', authorizeRoles([Roles.EDITOR, Roles.ADMIN, Roles.READONLY, Roles.GUEST]), (req, res, next) => surveyController.getSurveyResponseByGuest(req, res, next));
+router.get('/:surveyId/response/party/:guestId', authorizeRoles([Roles.EDITOR, Roles.ADMIN, Roles.GUEST]), (req, res, next) => surveyController.fetchPartySurveyResponses(req, res, next));
 router.post('/:surveyId/response', authorizeRoles([Roles.EDITOR, Roles.ADMIN, Roles.GUEST]), (req, res, next) => surveyController.saveSurveyResponse(req, res, next));
+router.put('/:surveyId/response/party/:guestId', authorizeRoles([Roles.EDITOR, Roles.ADMIN, Roles.GUEST]), (req, res, next) => surveyController.initializeSurveysForParty(req, res, next));
 router.delete('/:surveyId/response', authorizeRoles([Roles.EDITOR, Roles.ADMIN, Roles.GUEST]), (req, res, next) => surveyController.deleteSurveyResponse(req, res, next));
 
 export default router;

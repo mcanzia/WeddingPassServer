@@ -1,33 +1,17 @@
 <template>
   <div class="mx-4 mt-4">
     <div class="inline-flex gap-4" v-if="adminMode">
-      <Search
-        class="mb-4"
-        placeholder="Search for survey..."
-        v-model="searchQuery"
-      />
-      <Button
-        @click="goToEditSurvey(null)"
-      >Create Survey</Button>
+      <Search class="mb-4" placeholder="Search for survey..." v-model="searchQuery" />
+      <Button @click="goToEditSurvey(null)">Create Survey</Button>
     </div>
     <div v-if="surveys.length">
-      <SurveyCard
-        class="cursor-pointer"
-        v-for="survey in filteredSurveys"
-        :admin-mode="adminMode"
-        :survey="survey"
-        :key="survey.id"
-        @click="goToEditSurvey(survey)"
-      />
+      <SurveyCard class="cursor-pointer" v-for="survey in filteredSurveys" :admin-mode="adminMode" :survey="survey"
+        :title="survey.title" :key="survey.id" @click="goToEditSurvey(survey)" />
     </div>
-    <div v-if="surveyResponses.length">
-      <SurveyCard
-        class="cursor-pointer"
-        v-for="surveyResponse in surveyResponses"
-        :survey="surveyResponse"
-        :key="surveyResponse.responseId"
-        @click="goToCompleteSurvey(surveyResponse)"
-      />
+    <div v-if="guestSurveyResponses.length">
+      <SurveyCard class="cursor-pointer" v-for="surveyResponse in guestSurveyResponses" :survey="surveyResponse"
+        :title="surveyResponse.survey.title" :key="surveyResponse.responseId"
+        @click="goToCompleteSurvey(surveyResponse)" />
     </div>
   </div>
 </template>
@@ -46,15 +30,16 @@ import { SurveyResponse } from "@/models/SurveyResponse";
 import { useSurveyResponseStore } from '@/components/surveys/SurveyResponseStore';
 import { useUserStore } from "@/stores/UserStore";
 import { useSurveyTypeGuard } from "@/components/surveys/useSurveyTypeGuard";
+import { ErrorHandler } from "@/util/error/ErrorHandler";
 
 const surveyStore = useSurveyStore();
 const { survey } = storeToRefs(surveyStore);
 const { saveSurvey } = surveyStore;
 const surveyResponseStore = useSurveyResponseStore();
-const { surveyResponse } = storeToRefs(surveyResponseStore);
-const { saveSurveyResponse, initializeGuestValues } = surveyResponseStore;
+const { surveyResponses, currentSurveyResponse } = storeToRefs(surveyResponseStore);
+const { initializeSurveysForParty } = surveyResponseStore;
 const userStore = useUserStore();
-const {loggedInGuest} = storeToRefs(userStore);
+const { loggedInGuest } = storeToRefs(userStore);
 
 const props = defineProps({
   adminMode: {
@@ -67,7 +52,7 @@ const props = defineProps({
     required: false,
     default: () => [],
   },
-  surveyResponses: {
+  guestSurveyResponses: {
     type: Array as PropType<SurveyResponse[]>,
     required: false,
     default: () => []
@@ -75,7 +60,7 @@ const props = defineProps({
 });
 
 const { goToRoute, goToRouteSecured } = useRouterHelper();
-const {isSurvey, isSurveyResponse} = useSurveyTypeGuard();
+const { isSurvey, isSurveyResponse } = useSurveyTypeGuard();
 const searchQuery = ref("");
 const debouncedSearchQuery = ref("");
 
@@ -123,21 +108,14 @@ async function goToEditSurvey(surveyToEdit: Survey | null) {
 async function goToCompleteSurvey(surveyResponseToEdit: Survey | SurveyResponse) {
   if (isSurvey(surveyResponseToEdit)) {
     // Set initial guest values
-    surveyResponseToEdit.surveyComponents = await initializeGuestValues(surveyResponseToEdit.surveyComponents, loggedInGuest.value);
-    surveyResponse.value = {
-      surveyId: surveyResponseToEdit.id!,
-      weddingId: surveyResponseToEdit.weddingId!,
-      guestId: loggedInGuest.value,
-      responses: surveyResponseToEdit.surveyComponents,
-      updatedAt: new Date(),
-      submitted: false,
-      title: surveyResponseToEdit.title,
-      showPartyMemberSurveys: surveyResponseToEdit.showPartyMemberSurveys
-    } as SurveyResponse;
-    await saveSurveyResponse();
-    goToRouteSecured("survey-response", { surveyId: surveyResponse.value.surveyId, surveyResponseId: surveyResponse.value.responseId });
+    await initializeSurveysForParty(loggedInGuest.value, surveyResponseToEdit);
+    if (currentSurveyResponse.value) {
+      goToRouteSecured("survey-response", { surveyId: currentSurveyResponse.value.survey.id, surveyResponseId: currentSurveyResponse.value.responseId });
+    } else {
+      ErrorHandler.handleCustomError('Error loading survey.');
+    }
   } else {
-    goToRouteSecured("survey-response", { surveyId: surveyResponseToEdit.surveyId, surveyResponseId: surveyResponseToEdit.responseId });
+    goToRouteSecured("survey-response", { surveyId: surveyResponseToEdit.survey.id, surveyResponseId: surveyResponseToEdit.responseId });
   }
 }
 </script>

@@ -25,8 +25,17 @@ import SurveyResponder from "@/components/surveys/SurveyResponder.vue";
 import QAndA from "@/components/guests/QAndA.vue";
 import ThingsToDo from "@/components/guests/ThingsToDo.vue";
 import PendingGuests from "@/components/pending-guests/PendingGuests.vue";
+import LoginDirect from "@/components/LoginDirect.vue";
 
 const routes = [
+   {
+      path: '/',
+      name: 'landing',
+      component: WeddingList,
+      meta: {
+         allowedRoles: [Roles.ADMIN, Roles.EDITOR]
+      }
+   },
    {
       path: '/:weddingId/guests',
       name: 'guests',
@@ -70,14 +79,6 @@ const routes = [
       props: true,
       meta: {
          allowedRoles: [Roles.ADMIN]
-      }
-   },
-   {
-      path: '/',
-      name: 'landing',
-      component: WeddingList,
-      meta: {
-         allowedRoles: [Roles.ADMIN, Roles.EDITOR]
       }
    },
    {
@@ -136,6 +137,11 @@ const routes = [
       path: '/:weddingId/',
       name: 'home',
       component: HomeRouter,
+   },
+   {
+      path: '/login-router',
+      name: 'login-router',
+      component: LoginDirect,
    },
    {
       path: '/login',
@@ -229,14 +235,14 @@ router.beforeEach((to, from, next) => {
       const isAuthenticated = !!user.value;
       const isGuest = localStorage.getItem('guest');
       // let userRole = userStore.localUser?.weddingRoles;
-      const exemptedRoutes = ['login', 'invite', 'guest-login'];
+      const exemptedRoutes = ['login', 'invite', 'guest-login', 'login-router'];
       if (!isAuthenticated && !exemptedRoutes.includes(String(to.name))) {
          if (isGuest) {
             next({ name: 'guest-login' });
          } else {
-            next({ name: 'login' });
+            next({ name: 'login-router' });
          }
-      } else if (to.name === 'login' && isAuthenticated) {
+      } else if (to.name && to.name in exemptedRoutes && isAuthenticated) {
          next({ name: 'landing' });
       } else {
          next();

@@ -3,7 +3,7 @@
         <Card class="mx-auto flex flex-col hover:bg-slate-700">
             <CardHeader class="flex-none">
                 <CardTitle class="text-2xl">
-                    {{ survey.title }}
+                    {{ title }}
                 </CardTitle>
                 <Separator />
             </CardHeader>
@@ -24,11 +24,12 @@ import { SurveyResponse } from '@/models/SurveyResponse';
 import { useSurveyTypeGuard } from '@/components/surveys/useSurveyTypeGuard';
 
 const props = defineProps<{
-  adminMode?: boolean;
-  survey: Survey | SurveyResponse;
+    adminMode?: boolean;
+    survey: Survey | SurveyResponse;
+    title?: string;
 }>();
 
-const {isSurvey, isSurveyResponse} = useSurveyTypeGuard();
+const { isSurvey, isSurveyResponse } = useSurveyTypeGuard();
 
 
 const surveyStatusComputed = computed(() => {
@@ -39,7 +40,7 @@ const surveyStatusComputed = computed(() => {
     } else {
         return 'New';
     }
-    
+
 })
 
 </script>

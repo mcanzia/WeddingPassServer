@@ -1,27 +1,20 @@
-import { SurveyComponent } from "./SurveyComponent";
+import { Guest } from "./Guest";
+import { Survey } from "./Survey";
 
 export class SurveyResponse {
 
     responseId?: string;
-    surveyId: string;
-    weddingId: string;
-    guestId: string;
-    responses: SurveyComponent[];
+    guest: Guest;
+    survey: Survey;
     updatedAt: Date;
     submitted: boolean;
-    title: string;
-    showPartyMemberSurveys: boolean;
 
-    constructor(surveyId: string, weddingId: string, guestId: string, responses: SurveyComponent[], updatedAt: Date, submitted: boolean, title: string, showPartyMemberSurveys: boolean, responseId?: string) {
+    constructor(guest: Guest, survey: Survey, updatedAt: Date, submitted: boolean, responseId?: string) {
         this.responseId = responseId;
-        this.surveyId = surveyId;
-        this.weddingId = weddingId;
-        this.guestId = guestId;
-        this.responses = responses;
+        this.guest = guest;
+        this.survey = survey;
         this.updatedAt = updatedAt;
         this.submitted = submitted;
-        this.title = title;
-        this.showPartyMemberSurveys = showPartyMemberSurveys;
     }
 
 }

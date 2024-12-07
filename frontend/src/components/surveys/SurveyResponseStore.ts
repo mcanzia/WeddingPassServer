@@ -1,5 +1,6 @@
 import { Guest } from "@/models/Guest";
 import { NotificationType } from "@/models/NotificationType";
+import { Survey } from "@/models/Survey";
 import { SurveyComponent } from "@/models/SurveyComponent";
 import { SurveyResponse } from "@/models/SurveyResponse";
 import { GuestService } from "@/services/GuestService";
@@ -7,56 +8,61 @@ import { SurveyResponseService } from "@/services/SurveyResponseService";
 import { useNotificationStore } from "@/stores/NotificationStore";
 import { ErrorHandler } from "@/util/error/ErrorHandler";
 import { defineStore } from "pinia";
-import { ref } from "vue";
+import { computed, ref } from "vue";
 
 export const useSurveyResponseStore = defineStore('surveyResponseStore', () => {
 
-    const surveyResponse = ref<SurveyResponse>();
-    const currentGuest = ref<Guest>();
-    const partyMembers = ref<Guest[]>();
+    const surveyResponses = ref<SurveyResponse[]>();
+    const currentSurveyResponse = ref<SurveyResponse>();
+
+    const partyMembers = computed(() => {
+        return surveyResponses.value?.map(surveyResponse => surveyResponse.guest);
+    });
+
+    const currentSurveyStatus = computed(() => {
+        return currentSurveyResponse.value?.submitted ? 'Survey Submitted' : 'Survey In Progress';
+    });
 
     async function saveSurveyResponse() {
-        if (surveyResponse.value) {
+        if (currentSurveyResponse.value) {
             try {
                 // Handle guest field updates (if any)
-                if (surveyResponse.value.submitted && currentGuest.value) {
-                    processSurveyComponents(surveyResponse.value.responses, currentGuest.value);
+                if (currentSurveyResponse.value.submitted && currentSurveyResponse.value) {
+                    processSurveyComponents(currentSurveyResponse.value.survey.surveyComponents, currentSurveyResponse.value.guest);
                     const guestService = new GuestService();
-                    await guestService.updateGuest(currentGuest.value);
+                    await guestService.updateGuest(currentSurveyResponse.value.guest);
                 }
             } catch (error: any) {
                 console.error('Error updating guest details', error);
             }
             const surveyResponseService = new SurveyResponseService();
-            const updatedSurveyResponse = await surveyResponseService.saveSurveyResponse(surveyResponse.value.surveyId, surveyResponse.value);
-            surveyResponse.value = updatedSurveyResponse;
+            const updatedSurveyResponse = await surveyResponseService.saveSurveyResponse(currentSurveyResponse.value);
+            currentSurveyResponse.value = updatedSurveyResponse;
+            const updateIndex = surveyResponses.value?.findIndex(surveyResponse => surveyResponse.responseId === currentSurveyResponse.value?.responseId);
+            if (updateIndex) {
+                surveyResponses.value![updateIndex] = updatedSurveyResponse;
+            }
         } else {
             ErrorHandler.displayGenericError();
         }
     }
 
-    async function initializeGuestValues(components: SurveyComponent[], guestId: string) {
-        const guestService = new GuestService();
-        currentGuest.value = await guestService.getGuestById(guestId);
-        if (currentGuest.value) {
-            processSurveyComponents(components, currentGuest.value);
-        } else {
-            ErrorHandler.handleCustomError('Guest not found.');
+    async function initializeSurveysForParty(guestId: string, survey: Survey) {
+        const surveyResponseService = new SurveyResponseService();
+        surveyResponses.value = await surveyResponseService.initializeSurveysForParty(guestId, survey);
+        if (surveyResponses.value) {
+            currentSurveyResponse.value = surveyResponses.value.find(surveyResponse => surveyResponse.guest.id === guestId);
         }
-        return components;
     }
 
     function processSurveyComponents(components: SurveyComponent[], guest: Guest): void {
         for (const component of components) {
             if (component.infoLookupField) {
                 const fields = component.infoLookupField.split(':');
-                if (!component.componentValue) {
-                    component.componentValue = getGuestFieldValue(guest, fields);
-                } else {
+                if (component.componentValue) {
                     setGuestField(guest, fields, component.componentValue);
                 }
             }
-
             if (component.surveyTriggers && component.surveyTriggers.length > 0) {
                 for (const trigger of component.surveyTriggers) {
                     if (trigger.child) {
@@ -65,17 +71,6 @@ export const useSurveyResponseStore = defineStore('surveyResponseStore', () => {
                 }
             }
         }
-    }
-
-    function getGuestFieldValue(guest: Guest, fields: string[]) {
-        let value: any = guest;
-
-        for (let i = 0; i < fields.length; i++) {
-            const field = fields[i];
-
-            value = value[field];
-        }
-        return value;
     }
 
 
@@ -93,23 +88,16 @@ export const useSurveyResponseStore = defineStore('surveyResponseStore', () => {
         }
         const lastField = fields[fields.length - 1];
         value[lastField] = newValue;
-        return guest;
     }
 
 
-    async function fetchSurveyResponse(surveyId: string, surveyResponseId: string) {
+    async function fetchPartySurveyResponses(surveyId: string, guestId: string, surveyResponseId: string) {
         const surveyResponseService = new SurveyResponseService();
-        surveyResponse.value = await surveyResponseService.getSurveyResponseById(surveyId, surveyResponseId);
-        if (surveyResponse.value && surveyResponse.value.responses) {
-            surveyResponse.value.responses = surveyResponse.value.responses.sort((a, b) => a.order! - b.order!);
-        }
-    }
-
-    async function fetchPartyMembers() {
-        if (currentGuest.value) {
-            const guestService = new GuestService();
-            partyMembers.value = await guestService.fetchPartyMembers(currentGuest.value!.id!);
-        }
+        surveyResponses.value = await surveyResponseService.fetchPartySurveyResponses(surveyId, guestId);
+        currentSurveyResponse.value = surveyResponses.value?.find(surveyResponse => surveyResponse.responseId === surveyResponseId);
+        // if (surveyResponse.value && surveyResponse.value.survey.surveyComponents) {
+        //     surveyResponse.value.survey.surveyComponents = surveyResponse.value.survey.surveyComponents.sort((a, b) => a.order! - b.order!);
+        // }
     }
 
     function updateComponentValue(
@@ -151,13 +139,15 @@ export const useSurveyResponseStore = defineStore('surveyResponseStore', () => {
 
     return {
         //state
-        surveyResponse,
-        currentGuest,
+        surveyResponses,
+        currentSurveyResponse,
+        partyMembers,
+        currentSurveyStatus,
         //actions
         saveSurveyResponse,
-        fetchSurveyResponse,
+        fetchPartySurveyResponses,
         updateComponentValue,
-        initializeGuestValues
+        initializeSurveysForParty
     }
 
 });

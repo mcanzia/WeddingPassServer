@@ -1,54 +1,26 @@
 <template>
   <div>
-    <SurveyComponentWrapper
-      v-if="builderMode"
-      @remove="removeComponent"
-      @openAddChild="openAddChild"
-      v-model:component-label="componentDetails.label"
-      :componentId="componentDetails.id"
-      :hasAddChild="hasAddChildComputed"
-      :infoLookupField="componentDetails.infoLookupField"
-      :trigger-field="triggerField"
-    >
+    <SurveyComponentWrapper v-if="builderMode" @remove="removeComponent" @openAddChild="openAddChild"
+      v-model:component-label="componentDetails.label" :componentId="componentDetails.id"
+      :hasAddChild="hasAddChildComputed" :infoLookupField="componentDetails.infoLookupField"
+      :trigger-field="triggerField">
       <div class="w-full">
-        <Component
-          :is="displayComponentComputed"
-          v-model="modelValueComputed"
-          v-bind="componentProps"
-        />
+        <Component :is="displayComponentComputed" v-model="modelValueComputed" v-bind="componentProps" />
       </div>
     </SurveyComponentWrapper>
 
-    <div
-      class="flex flex-col gap-2 w-full px-4"
-      v-else
-    >
+    <div class="flex flex-col gap-2 w-full px-4" v-else>
       <Label class="font-bold text-lg">{{ componentDetails.label }}</Label>
-      <Component
-        :is="displayComponentComputed"
-        v-model="modelValueComputed"
-        v-bind="componentProps"
-      />
+      <Component :is="displayComponentComputed" v-model="modelValueComputed" v-bind="componentProps" />
     </div>
 
     <div v-if="componentDetails.surveyTriggers && componentDetails.surveyTriggers.length">
-      <div
-        v-for="trigger in componentDetails.surveyTriggers"
-        :key="trigger.child.id"
-        class="mt-3"
-      >
+      <div v-for="trigger in componentDetails.surveyTriggers" :key="trigger.child.id" class="mt-3">
         <BaseSurveyComponent
           v-if="builderMode || (!builderMode && componentDetails.componentValue === trigger.triggerField)"
-          :key="trigger.child.id"
-          :guest="guest"
-          :componentDetails="trigger.child"
-          :builderMode="builderMode"
-          :triggerField="trigger.triggerField"
-          :parentId="props.componentDetails.id"
-          @remove="removeComponent"
-          @openAddChild="openAddChild"
-          @update:modelValue="emitModelValue"
-        />
+          :key="trigger.child.id" :guest="guest" :componentDetails="trigger.child" :builderMode="builderMode"
+          :triggerField="trigger.triggerField" :parentId="props.componentDetails.id" @remove="removeComponent"
+          @openAddChild="openAddChild" @update:modelValue="emitModelValue" />
       </div>
     </div>
   </div>
@@ -93,24 +65,24 @@ const props = defineProps({
 });
 
 const surveyStore = useSurveyStore();
-const { hasOptionsProp, hasAddChildButton, findSurveyDisplayComponent } =
+const { hasOptionsProp, hasAddChildButton, isDisabled, findSurveyDisplayComponent } =
   surveyStore;
-const {lookupGuestField} = useSurveyFieldLookup();
+const { lookupGuestField } = useSurveyFieldLookup();
 
 onMounted(() => {
   if (
-      props.guest &&
-      !props.componentDetails.componentValue &&
-      props.componentDetails.infoLookupField
-    ) {
-      const fieldValue = lookupGuestField(props.guest, props.componentDetails.infoLookupField);
-      modelValueComputed.value = fieldValue;
-    }
+    props.guest &&
+    !props.componentDetails.componentValue &&
+    props.componentDetails.infoLookupField
+  ) {
+    const fieldValue = lookupGuestField(props.guest, props.componentDetails.infoLookupField);
+    modelValueComputed.value = fieldValue;
+  }
 });
 
 const modelValueComputed = computed({
   get() {
-      return props.componentDetails.componentValue;
+    return props.componentDetails.componentValue;
   },
   set(val) {
     emit("update:modelValue", props.componentDetails.id, val);
@@ -130,6 +102,9 @@ const componentProps = computed(() => {
 
   if (props.componentDetails.editableInfo) {
     propsToPass["editableInfo"] = true;
+  }
+  if (isDisabled(props.componentDetails.type)) {
+    propsToPass["disabled"] = true;
   }
 
   return propsToPass;

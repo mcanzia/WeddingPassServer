@@ -1,3 +1,5 @@
+import { SurveyService } from "../services/SurveyService";
+
 export const TYPES = {
     AuthController: Symbol.for("AuthController"),
     AuthService: Symbol.for("AuthService"),
@@ -10,6 +12,7 @@ export const TYPES = {
     EventController: Symbol.for("EventController"),
     EventDao: Symbol.for("EventDao"),
     SurveyController: Symbol.for("SurveyController"),
+    SurveyService: Symbol.for("SurveyService"),
     SurveyDao: Symbol.for("SurveyDao"),
     WeddingController: Symbol.for("WeddingController"),
     WeddingDao: Symbol.for("WeddingDao"),

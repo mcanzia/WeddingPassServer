@@ -3,9 +3,9 @@ import { Transportation } from "./Transportation";
 export class Flight extends Transportation {
 
     flightNumber?: string;
-    flightTime?: string;
+    flightTime?: Date;
 
-    constructor(type?: string, flightNumber?: string, flightTime?: string) {
+    constructor(type?: string, flightNumber?: string, flightTime?: Date) {
         super(type);
         this.flightNumber = flightNumber;
         this.flightTime = flightTime;

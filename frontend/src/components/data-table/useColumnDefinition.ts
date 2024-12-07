@@ -179,17 +179,29 @@ export function useColumnDefinition() {
         if (isFlight(details)) {
             if (fieldName in details) {
                 const value = (details as Flight)[fieldName as keyof Flight];
-                return h('div', value || '');
+                const dateCheck = value ? new Date(value) : undefined;
+                if (dateCheck && !isNaN(dateCheck.getTime())) {
+                    return h('div', dateCheck.toLocaleString() || '');
+                }
+                return h('div', String(value || ''));
             }
         } else if (isTrain(details)) {
             if (fieldName in details) {
                 const value = (details as Train)[fieldName as keyof Train];
-                return h('div', value || '');
+                const dateCheck = value ? new Date(value) : undefined;
+                if (dateCheck && !isNaN(dateCheck.getTime())) {
+                    return h('div', dateCheck.toLocaleString() || '');
+                }
+                return h('div', String(value || ''));
             }
         } else if (isBus(details)) {
             if (fieldName in details) {
                 const value = (details as Bus)[fieldName as keyof Bus];
-                return h('div', value || '');
+                const dateCheck = value ? new Date(value) : undefined;
+                if (dateCheck && !isNaN(dateCheck.getTime())) {
+                    return h('div', dateCheck.toLocaleString() || '');
+                }
+                return h('div', String(value || ''));
             }
         }
 
