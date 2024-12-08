@@ -1,6 +1,6 @@
 <template>
     <AlertDialog>
-        <AlertDialogTrigger>
+        <AlertDialogTrigger :disabled="disabled">
             <slot />
         </AlertDialogTrigger>
         <AlertDialogContent>
@@ -10,6 +10,7 @@
                     {{ alertDescription }}
                 </AlertDialogDescription>
             </AlertDialogHeader>
+            <slot name="content" />
             <AlertDialogFooter>
                 <AlertDialogCancel @click="onCancel">{{ alertCancelText }}</AlertDialogCancel>
                 <AlertDialogAction @click="onConfirm">{{ alertConfirmText }}</AlertDialogAction>
@@ -51,6 +52,11 @@ defineProps({
         type: String,
         required: false,
         default: () => 'Confirm'
+    },
+    disabled: {
+        type: Boolean,
+        required: false,
+        default: () => false
     }
 });
 

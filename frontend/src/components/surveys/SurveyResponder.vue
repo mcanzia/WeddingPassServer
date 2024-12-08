@@ -10,10 +10,24 @@
           <Button @click="submitSurveyResponse" :disabled="currentSurveyResponse.submitted">{{ submitButtonText
             }}</Button>
         </div>
-        <div class="grid gap-2 max-w-sm">
+        <div class="grid gap-2">
           <Label for="party-members">Party Members</Label>
-          <SingleSelectDropdown v-model="currentPartyMemberComputed" :select-options="partyMemberNames"
-            id="party-members" />
+          <div class="flex inline-flex gap-5">
+            <SingleSelectDropdown v-model="currentPartyMemberComputed" :select-options="partyMemberNames"
+              id="party-members" class="w-full" />
+            <ConfirmAction alert-title="Copy responses of another party member?"
+              alert-description="You will still need to Submit the survey copying." @on-confirm="copyResponses"
+              :disabled="currentSurveyResponse.submitted">
+              <Button class="bg-border text-black hover:bg-border" :disabled="currentSurveyResponse.submitted">Copy
+                Responses</Button>
+              <template v-slot:content>
+                <div class="max-w-sm">
+                  <SingleSelectDropdown v-model="copyResponsesMemberComputed" :select-options="partyMemberNames"
+                    id="copy-responses-members" />
+                </div>
+              </template>
+            </ConfirmAction>
+          </div>
         </div>
         <div class="grid gap-2 max-w-sm flex justify-center">
           <Badge class="w-[40vw] max-w-sm mt-2 flex justify-center"
@@ -58,6 +72,7 @@ import { useUserStore } from '@/stores/UserStore';
 import { GuestService } from '@/services/GuestService';
 import Badge from '@/components/ui/badge/Badge.vue';
 import Loader from '../Loader.vue';
+import ConfirmAction from '@/components/data-table/ConfirmAction.vue';
 
 const surveyResponseStore = useSurveyResponseStore();
 const { surveyResponses, currentSurveyResponse, partyMembers, currentSurveyStatus } = storeToRefs(surveyResponseStore);
@@ -69,6 +84,7 @@ const { loggedInGuest } = storeToRefs(userStore);
 const attrs = useAttrs();
 
 const loading = ref(false);
+const copyResponsesMember = ref<SurveyResponse>();
 
 onMounted(async () => {
   loading.value = true;
@@ -96,6 +112,18 @@ const currentPartyMemberComputed = computed({
   }
 });
 
+const copyResponsesMemberComputed = computed({
+  get() {
+    return copyResponsesMember.value?.guest.name;
+  },
+  set(val) {
+    const selectedGuest = partyMembers.value?.find(member => member.name === val);
+    if (selectedGuest) {
+      copyResponsesMember.value = surveyResponses.value?.find(surveyResponse => surveyResponse.guest.id === selectedGuest.id);
+    }
+  }
+});
+
 const submitButtonText = computed(() => {
   if (currentSurveyResponse.value && currentSurveyResponse.value.submitted) {
     return 'Survey Submitted';
@@ -108,6 +136,23 @@ function handleValueUpdate(componentId: string, value: any) {
     updateComponentValue(currentSurveyResponse.value.survey.surveyComponents, componentId, value);
   }
 }
+
+function copyResponses() {
+  const copyComponents = copyResponsesMember.value?.survey?.surveyComponents;
+  const currentComponents = currentSurveyResponse.value?.survey?.surveyComponents;
+
+  if (copyComponents && currentComponents && currentSurveyResponse.value) {
+    const holdName = currentComponents.find(component => component.infoLookupField === 'name');
+
+    currentSurveyResponse.value.survey.surveyComponents = copyComponents.map(component => {
+      if (holdName && component.id === holdName.id) {
+        return holdName;
+      }
+      return component;
+    });
+  }
+}
+
 
 async function submitSurveyResponse() {
   currentSurveyResponse.value = { ...currentSurveyResponse.value, submitted: true } as SurveyResponse;

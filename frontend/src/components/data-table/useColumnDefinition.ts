@@ -73,7 +73,7 @@ export function useColumnDefinition() {
                 },
                 cell: ({ row }) => {
                     const events: WeddingEvent[] = row.getValue('events') || [];
-                    const circles = events.map(event =>
+                    const circles = events.sort((a, b) => a.order - b.order).map(event =>
                         h(EventCircle, { event, key: event.id })
                     );
                     return h('div', { class: 'flex gap-1 whitespace-nowrap text-center' }, circles);
@@ -314,21 +314,69 @@ export function useColumnDefinition() {
         return h('div', '');
     }
 
-    function getAccommodationField(details: Accommodation | undefined, fieldName: string) {
+    function getAccommodationField(details: Accommodation | undefined, fieldName: string, defaultVal?: string) {
         if (!details || !fieldName) {
-            return h('div', '');
+            return h('div', defaultVal ?? '');
         }
 
         if (fieldName === 'name') {
-            return h('div', details.hotel?.name ?? '');
+            return h('div', details.hotel?.name ?? defaultVal ?? '');
         }
 
         const value = details[fieldName as keyof Accommodation];
-        return h('div', String(value) ?? '');
+        return h('div', String(value) ?? defaultVal ?? '');
     }
+
+    function getEventsDisplay(events: WeddingEvent[]) {
+        if (events.length) {
+            return events.sort((a, b) => a.order - b.order).map(event => event.name).join(', ');
+        }
+        return 'Not Attending Events'
+    }
+
+    const partyColumnDefs = computed(() => {
+        return [
+            {
+                accessorKey: 'name',
+                header: ({ column }: any) => {
+                    return setHeaderDetails(column, 'Name');
+                },
+                cell: ({ row }: any) => h('div', { class: 'capitalize whitespace-nowrap text-center' }, row.getValue('name')),
+            },
+            {
+                accessorKey: 'hotelName',
+                header: ({ column }) => {
+                    return setHeaderDetails(column, 'Hotel Name');
+                },
+                cell: ({ row }) => {
+                    return getAccommodationField(row.original.accommodation, 'name');
+                },
+            },
+            {
+                accessorKey: 'roomNumber',
+                header: ({ column }) => {
+                    return setHeaderDetails(column, 'Room Number');
+                },
+                cell: ({ row }: any) => {
+                    return getAccommodationField(row.original.accommodation, 'roomNumber', 'To Be Assigned');
+                },
+            },
+            {
+                accessorKey: 'events',
+                header: ({ column }) => {
+                    return setHeaderDetails(column, 'Events');
+                },
+                cell: ({ row }) => {
+                    const events: WeddingEvent[] = row.getValue('events') || [];
+                    return h('div', { class: 'flex gap-1 whitespace-nowrap text-center' }, getEventsDisplay(events));
+                },
+            },
+        ]
+    });
 
 
     return {
-        columnDefs
+        columnDefs,
+        partyColumnDefs
     }
 }
