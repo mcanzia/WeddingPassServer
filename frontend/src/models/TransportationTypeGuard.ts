@@ -12,7 +12,3 @@ export function isFlight(details: Transportation): details is Flight {
 export function isTrain(details: Transportation): details is Train {
     return details.type === TransportationType.TRAIN;
 }
-
-export function isBus(details: Transportation): details is Bus {
-    return details.type === TransportationType.BUS;
-}

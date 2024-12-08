@@ -29,7 +29,7 @@
         </div>
 
         <div class="flex gap-2 items-center mt-2 md:mt-0 w-full md:w-auto" v-if="hasEditAuthority">
-          <Button variant="outline" class="w-full md:w-auto" @click="goToAddGuest">
+          <Button variant="outline" class="w-full md:w-auto" @click="goToUpdateGuest(true)">
             Add Guest
           </Button>
 
@@ -42,7 +42,7 @@
         </div>
 
         <div class="flex items-center mt-2 md:mt-0 w-full md:w-auto" v-if="hasEditAuthority">
-          <Button variant="secondary" class="w-full md:w-auto" @click="goToEditGuest" v-if="showEditButton">
+          <Button variant="secondary" class="w-full md:w-auto" @click="goToUpdateGuest(false)" v-if="showEditButton">
             Edit Selected Guest
           </Button>
         </div>
@@ -246,13 +246,14 @@ watch(() => viewModeComputed.value, (newMode: ViewModes) => {
   }
 }, { immediate: true });
 
-function goToAddGuest() {
-  goToRouteSecured("add-guest");
-}
 
-function goToEditGuest() {
+function goToUpdateGuest(isNew: boolean) {
+  if (isNew) {
+    goToRouteSecured("update-guest");
+    return;
+  }
   const guestId = data.value.at(Number(Object.keys(rowSelection.value)))!.id;
-  goToRouteSecured("edit-guest", { guestId: guestId });
+  goToRouteSecured("update-guest", { guestId: guestId });
 }
 
 async function deleteGuests() {

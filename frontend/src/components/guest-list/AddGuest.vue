@@ -10,26 +10,26 @@
                 </CardDescription>
             </CardHeader>
             <CardContent>
-                <div class="grid grid-cols-2 gap-4">
+                <div class="grid grid-cols-3 gap-4">
                     <div class="grid gap-4">
-                        <div class="grid gap-2">
+                        <div>
                             <Label for="guest-name">Guest Name</Label>
                             <Input id="guest-name" type="text" v-model="newUserForm.name" required />
                         </div>
-                        <div class="grid gap-2">
+                        <div>
                             <Label for="partyNum">Party Number</Label>
                             <Input id="partyNum" type="number" v-model="newUserForm.groupNumber" required />
                         </div>
-                        <div class="grid gap-2">
+                        <div>
                             <Label for="email">Email</Label>
                             <Input id="email" type="email" v-model="newUserForm.email" required />
                         </div>
-                        <div class="grid gap-2">
+                        <div>
                             <Label>Phone</Label>
-                            <PhoneInput v-model="newUserForm.phone" required initial-country="IN"
+                            <PhoneInput v-model="newUserForm.phone" required
                                 :preferred-countries="['IN', 'US', 'IT', 'GB', 'JP', 'CA']" />
                         </div>
-                        <div class="grid gap-2">
+                        <div>
                             <Label for="events">Events</Label>
                             <ToggleGroup type="multiple" variant="outline" class="grid grid-cols-2 sm:grid-cols-3 gap-2"
                                 v-model="newUserForm.events">
@@ -41,38 +41,54 @@
                         </div>
                     </div>
                     <div class="grid gap-4">
-                        <div class="grid gap-2">
+                        <div>
                             <Label for="arrival-type">Arrival Type</Label>
                             <SingleSelectDropdown id="arrival-type" v-model="newUserForm.arrival.type"
-                                @update:modelValue="clearTimeFields" :selectOptions="transportationTypeOptions">
+                                @update:modelValue="clearArrivalTransport" :selectOptions="transportationTypeOptions">
                             </SingleSelectDropdown>
                         </div>
-                        <div class="grid gap-2">
+                        <div>
                             <Label for="arrival-time">Arrival Time</Label>
                             <DateTimeInput :disabled="!newUserForm.arrival.type" id="arrival-time"
                                 v-model="arrivalTimeComputed"></DateTimeInput>
                         </div>
-                        <div class="grid gap-2">
+                        <div>
+                            <Label for="arrival-number">Arrival Flight/Train Number</Label>
+                            <Input id="arrival-number" type="text" :disabled="!newUserForm.arrival.type"
+                                v-model="arrivalNumberComputed" required />
+                        </div>
+                        <div>
                             <Label for="departure-type">Departure Type</Label>
                             <SingleSelectDropdown id="departure-type" v-model="newUserForm.departure.type"
-                                @update:modelValue="clearTimeFields" :selectOptions="transportationTypeOptions">
+                                @update:modelValue="clearDepartureTransport" :selectOptions="transportationTypeOptions">
                             </SingleSelectDropdown>
                         </div>
-                        <div class="grid gap-2">
+                        <div>
                             <Label for="departure-time">Departure Time</Label>
                             <DateTimeInput :disabled="!newUserForm.departure.type" id="departure-time"
                                 v-model="departureTimeComputed"></DateTimeInput>
                         </div>
-                        <div class="grid gap-2">
+                        <div>
+                            <Label for="departure-number">Departure Flight/Train Number</Label>
+                            <Input id="departure-number" type="text" :disabled="!newUserForm.departure.type"
+                                v-model="departureNumberComputed" required />
+                        </div>
+                    </div>
+                    <div class="grid gap-4">
+                        <div>
                             <Label for="hotel">Hotel</Label>
                             <SingleSelectDropdown id="hotel" v-model="newUserForm.accommodation.hotel" fieldKey="name"
                                 :selectOptions="hotels as unknown as Record<string, unknown>[]">
                             </SingleSelectDropdown>
                         </div>
-                        <div class="grid gap-2">
+                        <div>
                             <Label for="room-number">Room Number</Label>
                             <Input id="room-number" type="text" v-model="newUserForm.accommodation.roomNumber"
                                 required />
+                        </div>
+                        <div>
+                            <Label for="dietary-restrictions">Dietary Restrictions</Label>
+                            <Textarea id="dietary-restrictions" v-model="newUserForm.dietaryRestrictions"></Textarea>
                         </div>
                     </div>
                 </div>
@@ -110,12 +126,17 @@ import SingleSelectDropdown from '@/components/common/SingleSelectDropdown.vue';
 import DateTimeInput from '@/components/common/DateTimeInput.vue';
 import { Hotel } from '@/models/Hotel';
 import { HotelService } from '@/services/HotelService';
+import { useRoute } from 'vue-router';
+import Textarea from '../ui/textarea/Textarea.vue';
 
 const { goToRouteSecured } = useRouterHelper();
 const notificationStore = useNotificationStore();
 const { setMessage } = notificationStore;
 const userStore = useUserStore();
 const { hasEditAuthority, selectedWedding } = storeToRefs(userStore);
+
+const route = useRoute();
+const guestId = route.params.guestId as string;
 
 const loading = ref(false);
 const weddingEvents = ref<WeddingEvent[]>([]);
@@ -127,6 +148,35 @@ onMounted(async () => {
     weddingEvents.value = await eventService.getAllEvents();
     const hotelService = new HotelService();
     hotels.value = await hotelService.getAllHotels();
+    if (guestId) {
+        const guestSerice = new GuestService();
+        const editGuest = await guestSerice.getGuestById(guestId);
+
+        if (!editGuest) {
+            console.log('Target guest not found');
+            return;
+        }
+
+        newUserForm.value.id = guestId;
+        newUserForm.value.weddingId = editGuest.weddingId;
+        newUserForm.value.name = editGuest.name;
+        newUserForm.value.groupNumber = editGuest.groupNumber;
+        newUserForm.value.email = editGuest.email;
+        newUserForm.value.phone = editGuest.phone;
+        newUserForm.value.serialNumber = editGuest.serialNumber;
+        newUserForm.value.events = editGuest.events.map((event: { id: any; }) => event.id);
+        newUserForm.value.attendingEvents = editGuest.attendingEvents;
+        newUserForm.value.dietaryRestrictions = editGuest.dietaryRestrictions;
+        if (editGuest.arrival) {
+            newUserForm.value.arrival = editGuest.arrival;
+        }
+        if (editGuest.departure) {
+            newUserForm.value.departure = editGuest.departure;
+        }
+        if (editGuest.accommodation) {
+            newUserForm.value.accommodation = editGuest.accommodation;
+        }
+    }
     loading.value = false;
 });
 
@@ -143,12 +193,16 @@ const newUserForm = ref({
     arrival: {
         type: '',
         flightTime: '',
-        trainTime: ''
+        flightNumber: '',
+        trainTime: '',
+        trainNumber: '',
     },
     departure: {
         type: '',
         flightTime: '',
-        trainTime: ''
+        flightNumber: '',
+        trainTime: '',
+        trainNumber: ''
     },
     dietaryRestrictions: '',
     accommodation: {
@@ -194,6 +248,72 @@ const arrivalTimeComputed = computed({
     }
 });
 
+const arrivalNumberComputed = computed({
+    get() {
+        if (newUserForm.value.arrival) {
+            switch (newUserForm.value.arrival.type) {
+                case TransportationType.FLIGHT: {
+                    return newUserForm.value.arrival.flightNumber;
+                }
+                case TransportationType.TRAIN: {
+                    return newUserForm.value.arrival.trainNumber;
+                }
+                default: {
+                    return ''
+                }
+            }
+        }
+        return '';
+    },
+    set(val) {
+        if (newUserForm.value.arrival) {
+            switch (newUserForm.value.arrival.type) {
+                case TransportationType.FLIGHT: {
+                    newUserForm.value.arrival.flightNumber = val;
+                    break;
+                }
+                case TransportationType.TRAIN: {
+                    newUserForm.value.arrival.trainNumber = val;
+                    break;
+                }
+            }
+        }
+    }
+});
+
+const departureNumberComputed = computed({
+    get() {
+        if (newUserForm.value.departure) {
+            switch (newUserForm.value.departure.type) {
+                case TransportationType.FLIGHT: {
+                    return newUserForm.value.departure.flightNumber;
+                }
+                case TransportationType.TRAIN: {
+                    return newUserForm.value.departure.trainNumber;
+                }
+                default: {
+                    return ''
+                }
+            }
+        }
+        return '';
+    },
+    set(val) {
+        if (newUserForm.value.departure) {
+            switch (newUserForm.value.departure.type) {
+                case TransportationType.FLIGHT: {
+                    newUserForm.value.departure.flightNumber = val;
+                    break;
+                }
+                case TransportationType.TRAIN: {
+                    newUserForm.value.departure.trainNumber = val;
+                    break;
+                }
+            }
+        }
+    }
+});
+
 const departureTimeComputed = computed({
     get() {
         if (newUserForm.value.departure) {
@@ -227,37 +347,41 @@ const departureTimeComputed = computed({
     }
 });
 
-function clearTimeFields() {
-    if (!newUserForm.value.arrival && !newUserForm.value.departure) {
+function clearArrivalTransport() {
+    if (!newUserForm.value.arrival) {
         return;
     }
-    if (newUserForm.value.arrival.type === TransportationType.FLIGHT) {
-        newUserForm.value.arrival.trainTime = '';
-    } else if (newUserForm.value.arrival.type === TransportationType.TRAIN) {
-        newUserForm.value.arrival.flightTime = '';
-    } else {
-        newUserForm.value.arrival.flightTime = '';
-        newUserForm.value.arrival.trainTime = '';
+
+    newUserForm.value.arrival = {
+        ...newUserForm.value.arrival,
+        trainTime: '',
+        trainNumber: '',
+        flightNumber: '',
+        flightTime: ''
+    }
+}
+
+function clearDepartureTransport() {
+    if (!newUserForm.value.departure) {
+        return;
     }
 
-    if (newUserForm.value.departure.type === TransportationType.FLIGHT) {
-        newUserForm.value.departure.trainTime = '';
-    } else if (newUserForm.value.departure.type === TransportationType.TRAIN) {
-        newUserForm.value.departure.flightTime = '';
-    } else {
-        newUserForm.value.departure.flightTime = '';
-        newUserForm.value.departure.trainTime = '';
+    newUserForm.value.departure = {
+        ...newUserForm.value.departure,
+        trainTime: '',
+        trainNumber: '',
+        flightNumber: '',
+        flightTime: ''
     }
-
 }
 
 async function saveGuest() {
     if (hasEditAuthority) {
-        const newGuest: Guest = {
+        const newGuest = {
             ...newUserForm.value,
             weddingId: selectedWedding.value?.id!,
             events: newUserForm.value.events.map(eventId => weddingEvents.value.find(wedEvent => wedEvent.id === eventId) as WeddingEvent),
-        }
+        } as Guest;
         const guestService = new GuestService();
         await guestService.saveGuest(newGuest);
         setMessage('Added user.', NotificationType.SUCCESS);

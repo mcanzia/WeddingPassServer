@@ -11,7 +11,7 @@ import { Guest } from "@/models/Guest";
 import { ColumnDef } from "@tanstack/vue-table";
 import { TransportationType } from "@/models/TransportationType";
 import { Transportation } from "@/models/Transportation";
-import { isFlight, isBus, isTrain } from "@/models/TransportationTypeGuard";
+import { isFlight, isTrain } from "@/models/TransportationTypeGuard";
 import { useDateUtils } from "@/components/common/useDateUtils";
 import { Drinks } from "@/models/Drinks";
 import { Accommodation } from "@/models/Accommodation";
@@ -115,12 +115,30 @@ export function useColumnDefinition() {
                 },
             },
             {
+                accessorKey: 'arrivalFlightNumber',
+                header: ({ column }) => {
+                    return setHeaderDetails(column, 'Arrival Flight Number');
+                },
+                cell: ({ row }) => {
+                    return getTransportationField(row.original.arrival, 'flightNumber');
+                },
+            },
+            {
                 accessorKey: 'arrivalTrainTime',
                 header: ({ column }) => {
                     return setHeaderDetails(column, 'Arrival Train Time');
                 },
                 cell: ({ row }) => {
                     return getTransportationField(row.original.arrival, 'trainTime');
+                },
+            },
+            {
+                accessorKey: 'arrivalTrainNumber',
+                header: ({ column }) => {
+                    return setHeaderDetails(column, 'Arrival Train Number');
+                },
+                cell: ({ row }) => {
+                    return getTransportationField(row.original.arrival, 'trainNumber');
                 },
             },
             {
@@ -159,12 +177,30 @@ export function useColumnDefinition() {
                 },
             },
             {
+                accessorKey: 'departureFlightNumber',
+                header: ({ column }) => {
+                    return setHeaderDetails(column, 'Departure Flight Number');
+                },
+                cell: ({ row }) => {
+                    return getTransportationField(row.original.departure, 'flightNumber');
+                },
+            },
+            {
                 accessorKey: 'departureTrainTime',
                 header: ({ column }) => {
                     return setHeaderDetails(column, 'Departure Train Time');
                 },
                 cell: ({ row }) => {
                     return getTransportationField(row.original.departure, 'trainTime');
+                },
+            },
+            {
+                accessorKey: 'departureTrainNumber',
+                header: ({ column }) => {
+                    return setHeaderDetails(column, 'Departure Train Number');
+                },
+                cell: ({ row }) => {
+                    return getTransportationField(row.original.departure, 'trainNumber');
                 },
             },
             {
@@ -244,9 +280,9 @@ export function useColumnDefinition() {
                 }
                 return h('div', String(value || ''));
             }
-        } else if (isBus(details)) {
+        } else {
             if (fieldName in details) {
-                const value = (details as Bus)[fieldName as keyof Bus];
+                const value = (details as Transportation)[fieldName as keyof Transportation];
                 const dateCheck = value ? new Date(value) : undefined;
                 if (dateCheck && !isNaN(dateCheck.getTime())) {
                     return h('div', dateToString(dateCheck) || '');

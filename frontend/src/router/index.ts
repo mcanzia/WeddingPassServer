@@ -58,18 +58,9 @@ const routes = [
       }
    },
    {
-      path: '/:weddingId/add-guest',
-      name: 'add-guest',
+      path: '/:weddingId/update-guest/:guestId?',
+      name: 'update-guest',
       component: AddGuest,
-      props: true,
-      meta: {
-         allowedRoles: [Roles.ADMIN, Roles.EDITOR]
-      }
-   },
-   {
-      path: '/:weddingId/edit-guest/:guestId',
-      name: 'edit-guest',
-      component: EditGuest,
       props: true,
       meta: {
          allowedRoles: [Roles.ADMIN, Roles.EDITOR]

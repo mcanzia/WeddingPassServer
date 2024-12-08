@@ -1,18 +1,19 @@
 <template>
   <div class="flex gap-2">
-    <Select v-model="internalValue">
+    <Select v-model="internalValue" :disabled="disabled">
       <SelectTrigger>
         <SelectValue :placeholder="placeholder" :value="displayValue" />
       </SelectTrigger>
       <SelectContent class="max-h-60 overflow-y-scroll">
         <SelectGroup>
-          <SelectItem v-for="option in selectOptions" :key="getOptionKey(option)" :value="getOptionKey(option)">
+          <SelectItem v-for="option in selectOptions" :key="getOptionKey(option)" :value="getOptionKey(option)"
+            :disabled="disabled">
             {{ getOptionLabel(option) }}
           </SelectItem>
         </SelectGroup>
       </SelectContent>
     </Select>
-    <IconButton v-if="clearable" icon="close" @click="clearValue"></IconButton>
+    <IconButton v-if="clearable" icon="close" @click="clearValue" :disabled="disabled"></IconButton>
   </div>
 </template>
 
@@ -50,6 +51,11 @@ const props = defineProps({
     default: "",
   },
   clearable: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+  disabled: {
     type: Boolean,
     required: false,
     default: false,

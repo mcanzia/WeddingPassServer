@@ -26,7 +26,7 @@
           </div>
           <div class="grid gap-2" v-if="!guestNames.length">
             <Label for="guest-phone">{{ phoneLabelComputed }}</Label>
-            <PhoneInput disabled v-model="guestPhone!" required initial-country="IN"
+            <PhoneInput disabled v-model="guestPhone!" required
               :preferred-countries="['IN', 'US', 'IT', 'GB', 'JP', 'CA']" />
           </div>
           <Button type="submit" class="w-full" @click="confirmGuest">

@@ -11,16 +11,17 @@
 
     <div class="flex flex-col gap-2 w-full px-4" v-else>
       <Label class="font-bold text-lg">{{ componentDetails.label }}</Label>
-      <Component :is="displayComponentComputed" v-model="modelValueComputed" v-bind="componentProps" />
+      <Component :is="displayComponentComputed" v-model="modelValueComputed" v-bind="componentProps"
+        :disabled="disabled" />
     </div>
 
     <div v-if="componentDetails.surveyTriggers && componentDetails.surveyTriggers.length">
       <div v-for="trigger in componentDetails.surveyTriggers" :key="trigger.child.id" class="mt-3">
         <BaseSurveyComponent
           v-if="builderMode || (!builderMode && componentDetails.componentValue === trigger.triggerField)"
-          :key="trigger.child.id" :guest="guest" :componentDetails="trigger.child" :builderMode="builderMode"
-          :triggerField="trigger.triggerField" :parentId="props.componentDetails.id" @remove="removeComponent"
-          @openAddChild="openAddChild" @update:modelValue="emitModelValue" />
+          :disabled="disabled" :key="trigger.child.id" :guest="guest" :componentDetails="trigger.child"
+          :builderMode="builderMode" :triggerField="trigger.triggerField" :parentId="props.componentDetails.id"
+          @remove="removeComponent" @openAddChild="openAddChild" @update:modelValue="emitModelValue" />
       </div>
     </div>
   </div>
@@ -62,6 +63,11 @@ const props = defineProps({
     type: Object as PropType<Guest>,
     required: false,
   },
+  disabled: {
+    type: Boolean,
+    required: false,
+    default: () => false
+  }
 });
 
 const surveyStore = useSurveyStore();

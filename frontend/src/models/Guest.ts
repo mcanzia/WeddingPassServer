@@ -37,5 +37,5 @@ export class Guest {
         this.accommodation = accommodation;
     }
 
-    static detailKeys = ['name', 'email', 'phone', 'events', 'attendingEvents', 'arrival:type', 'arrival:flightTime', 'arrival:trainTime', 'departure:type', 'departure:flightTime', 'departure:trainTime', 'drinks:willDrinkAlcohol', 'drinks:preferences', 'dietaryRestrictions', 'accommodation:roomNumber', 'accommodation:hotel:name'] as const;
+    static detailKeys = ['name', 'email', 'phone', 'events', 'attendingEvents', 'arrival:type', 'arrival:flightTime', 'arrival:flightNumber', 'arrival:trainTime', 'arrival:trainNumber', 'departure:type', 'departure:flightTime', 'departure:flightNumber', 'departure:trainTime', 'departure:trainNumber', 'drinks:willDrinkAlcohol', 'drinks:preferences', 'dietaryRestrictions', 'accommodation:roomNumber', 'accommodation:hotel:name'] as const;
 }

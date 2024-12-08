@@ -7,7 +7,8 @@
           <CardTitle class="text-2xl font-['Faculty_Glyphic']">
             {{ currentSurveyResponse.survey.title }}
           </CardTitle>
-          <Button @click="submitSurveyResponse">Submit</Button>
+          <Button @click="submitSurveyResponse" :disabled="currentSurveyResponse.submitted">{{ submitButtonText
+            }}</Button>
         </div>
         <div class="grid gap-2 max-w-sm">
           <Label for="party-members">Party Members</Label>
@@ -23,11 +24,12 @@
       </CardHeader>
       <CardContent class="flex flex-col gap-4 max-h-[70vh]">
         <Separator />
-        <ScrollArea class="h-[55vh]">
+        <ScrollArea scrollbar-color="#ffffff" class="h-[55vh]">
           <div ref="parent" class="grid gap-5 font-['Faculty_Glyphic']">
             <BaseSurveyComponent v-for="display in currentSurveyResponse.survey.surveyComponents" :key="display.id"
               :modelValue="display.componentValue" :builder-mode="false" :componentDetails="display"
-              :guest="currentSurveyResponse.guest" @update:modelValue="handleValueUpdate" class="my-0" />
+              :disabled="currentSurveyResponse.submitted" :guest="currentSurveyResponse.guest"
+              @update:modelValue="handleValueUpdate" class="my-0" />
           </div>
         </ScrollArea>
       </CardContent>
@@ -92,6 +94,13 @@ const currentPartyMemberComputed = computed({
       currentSurveyResponse.value = surveyResponses.value?.find(surveyResponse => surveyResponse.guest.id === selectedGuest.id);
     }
   }
+});
+
+const submitButtonText = computed(() => {
+  if (currentSurveyResponse.value && currentSurveyResponse.value.submitted) {
+    return 'Survey Submitted';
+  }
+  return 'Submit';
 });
 
 function handleValueUpdate(componentId: string, value: any) {

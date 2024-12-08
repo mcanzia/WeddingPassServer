@@ -13,7 +13,7 @@
         <div class="grid gap-4">
           <div class="grid gap-2" v-if="!showOtp">
             <Label>Phone</Label>
-            <PhoneInput v-model="loginForm.phone" required initial-country="IN"
+            <PhoneInput v-model="loginForm.phone" required
               :preferred-countries="['IN', 'US', 'IT', 'GB', 'JP', 'CA']" />
           </div>
           <div class="grid gap-2" v-else>

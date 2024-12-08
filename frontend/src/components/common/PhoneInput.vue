@@ -72,11 +72,6 @@ import { computed, ref } from 'vue';
 import countryPhoneData from '@/assets/countries_phone_number_length.json';
 
 const props = defineProps({
-    initialCountry: {
-        type: String,
-        required: false,
-        default: () => 'US'
-    },
     modelValue: {
         type: String,
         required: true,
@@ -101,7 +96,7 @@ const props = defineProps({
 const open = ref(false);
 const phoneInput = ref(null);
 const { focused } = useFocus(phoneInput);
-const selectedCountryCode = ref(props.initialCountry.toUpperCase());
+const selectedCountryCode = ref();
 
 const emits = defineEmits(['update:modelValue']);
 
@@ -115,7 +110,9 @@ const modelValueComputed = computed({
 });
 
 function handleCountryCodeUpdate(newCountryCode: string) {
-    selectedCountryCode.value = newCountryCode.toUpperCase();
+    if (newCountryCode) {
+        selectedCountryCode.value = newCountryCode.toUpperCase();
+    }
 }
 
 const countryPhoneMap = computed(() => {
@@ -133,32 +130,5 @@ const countryPhoneCode = computed(() => {
     }
     return undefined;
 });
-
-// const maxLengthComputed = computed(() => {
-//   const maxLength = getMaxLengthForCountry(selectedCountryCode.value);
-//   if (maxLength) {
-//     return maxLength;
-//   }
-//   return undefined;
-// });
-
-// function getMaxLengthForCountry(countryCode: string): number | undefined {
-//   const countryData = countryPhoneMap.value.get(countryCode.toUpperCase());
-//   if (!countryData) {
-//     console.error(`Country code ${countryCode} not found in data.`);
-//     return undefined;
-//   }
-
-//   if (Array.isArray(countryData.phoneLength)) {
-//     return Math.max(...countryData.phoneLength);
-//   } else if (typeof countryData.phoneLength === 'number') {
-//     return countryData.phoneLength;
-//   } else if (countryData.min && countryData.max) {
-//     return countryData.max;
-//   } else {
-//     console.error(`Invalid phone length data for country code ${countryCode}.`);
-//     return undefined;
-//   }
-// }
 
 </script>
