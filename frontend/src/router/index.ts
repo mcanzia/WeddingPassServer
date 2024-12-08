@@ -26,6 +26,9 @@ import QAndA from "@/components/guests/QAndA.vue";
 import ThingsToDo from "@/components/guests/ThingsToDo.vue";
 import PendingGuests from "@/components/pending-guests/PendingGuests.vue";
 import LoginDirect from "@/components/LoginDirect.vue";
+import GuestInfo from "@/components/guests/GuestInfo.vue";
+import HotelList from "@/components/hotels/HotelList.vue";
+import UpdateHotel from "@/components/hotels/UpdateHotel.vue";
 
 const routes = [
    {
@@ -134,6 +137,24 @@ const routes = [
       }
    },
    {
+      path: '/:weddingId/hotels',
+      name: 'hotels',
+      component: HotelList,
+      props: true,
+      meta: {
+         allowedRoles: [Roles.ADMIN, Roles.EDITOR, Roles.READONLY]
+      }
+   },
+   {
+      path: '/:weddingId/edit-hotel/:hotelId?',
+      name: 'edit-hotel',
+      component: UpdateHotel,
+      props: true,
+      meta: {
+         allowedRoles: [Roles.ADMIN, Roles.EDITOR, Roles.READONLY]
+      }
+   },
+   {
       path: '/:weddingId/',
       name: 'home',
       component: HomeRouter,
@@ -165,6 +186,11 @@ const routes = [
       path: '/invite',
       name: 'invite',
       component: InvitePage,
+   },
+   {
+      path: '/:weddingId/guest-details',
+      name: 'guest-details',
+      component: GuestInfo,
    },
    {
       path: '/:weddingId/guest-surveys',

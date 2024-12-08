@@ -7,4 +7,5 @@ export const ObjectType = Object.freeze({
   WEDDING: "wedding",
   ROLE: "role",
   USER: "user",
+  HOTEL: "hotel"
 });

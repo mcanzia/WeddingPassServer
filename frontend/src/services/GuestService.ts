@@ -76,10 +76,10 @@ export class GuestService {
         }
     }
 
-    async addGuest(guestToAdd: Guest) {
+    async saveGuest(guestToSave: Guest) {
         try {
             const userAccessToken = await this.userStore.getAccessToken();
-            await this.guestController.addGuest(userAccessToken, this.weddingRole, guestToAdd);
+            await this.guestController.saveGuest(userAccessToken, this.weddingRole, guestToSave);
             return;
         } catch (error) {
             throw error;
@@ -90,16 +90,6 @@ export class GuestService {
         try {
             const userAccessToken = await this.userStore.getAccessToken();
             const guest = await this.guestController.batchAddGuests(userAccessToken, this.weddingRole, guests);
-            return;
-        } catch (error) {
-            throw error;
-        }
-    }
-
-    async updateGuest(guest: Guest) {
-        try {
-            const userAccessToken = await this.userStore.getAccessToken();
-            await this.guestController.updateGuest(userAccessToken, this.weddingRole, guest);
             return;
         } catch (error) {
             throw error;

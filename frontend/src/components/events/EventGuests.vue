@@ -102,13 +102,13 @@ function isGuestAttendingEvent(guest: Guest) {
 async function addAttending(guest: Guest) {
   const guestService = new GuestService();
   guest.attendingEvents?.push(props.weddingEvent!);
-  await guestService.updateGuest(guest);
+  await guestService.saveGuest(guest);
 }
 
 async function removeAttending(guest: Guest) {
   const guestService = new GuestService();
   guest.attendingEvents = guest.attendingEvents?.filter(event => event.id != props.weddingEvent?.id);
-  await guestService.updateGuest(guest);
+  await guestService.saveGuest(guest);
 }
 
 function attendingText(guest: Guest) {

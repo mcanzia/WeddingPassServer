@@ -5,7 +5,7 @@ import { ObjectType } from "@/models/ObjectType";
 import { WeddingRole } from "@/models/WeddingRole";
 
 export class EventController {
-    
+
     async getAllEvents(userAuthToken: any, weddingRole: WeddingRole) {
         try {
             const requestUrl = `${RequestUtil.getAPIUrl()}/api/weddings/${weddingRole.wedding.id}/events`;
@@ -18,7 +18,7 @@ export class EventController {
 
     async getEventById(userAuthToken: any, weddingRole: WeddingRole, eventId: string) {
         try {
-            const requestUrl = `${RequestUtil.getAPIUrl()}/api/weddings/${weddingRole.wedding.id}/events/${eventId}`;
+            const requestUrl = `${RequestUtil.getAPIUrl()}/api/weddings/${weddingRole.wedding.id}/events/id/${eventId}`;
             return await RequestUtil.apiRequest(requestUrl, RequestUtil.GETRequestParams(userAuthToken, weddingRole.role));
         } catch (error: any) {
             ErrorHandler.handleGetByIdError();

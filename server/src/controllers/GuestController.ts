@@ -113,16 +113,28 @@ export class GuestController {
         }
     }
 
-    async createGuest(request: Request, response: Response, next: NextFunction) {
+    async getGuestsByHotel(request: Request, response: Response, next: NextFunction) {
         try {
-            Logger.info(`Creating new guest`);
+            Logger.info(`Retrieving guests for hotel: ${request.params.hotelId}`);
+            const { weddingId, hotelId } = request.params;
+            const guests: Array<Guest> = await this.guestDao.getGuestsByHotel(weddingId, hotelId);
+            response.status(200).json(guests);
+        } catch (error) {
+            Logger.error(`Error retrieving guests with hotel ${request.params.hotelId}`);
+            response.status((error as CustomError).statusCode).send((error as CustomError).message);
+        }
+    }
+
+    async saveGuest(request: Request, response: Response, next: NextFunction) {
+        try {
+            Logger.info(`Saving guest`);
             const { weddingId } = request.params;
             const guest: Guest = request.body;
-            await this.guestDao.createGuest(weddingId, guest);
-            Logger.info(`Successfully added guest for ${guest.name}`);
+            await this.guestDao.saveGuest(weddingId, guest);
+            Logger.info(`Successfully saved guest for ${guest.name}`);
             response.status(204).send();
         } catch (error) {
-            Logger.error("Error adding guest", error);
+            Logger.error("Error saving guest", error);
             response.status((error as CustomError).statusCode).send((error as CustomError).message);
         }
     }
@@ -137,19 +149,6 @@ export class GuestController {
             response.status(204).send();
         } catch (error) {
             Logger.error("Error adding batch guests", error);
-            response.status((error as CustomError).statusCode).send((error as CustomError).message);
-        }
-    }
-
-    async updateGuest(request: Request, response: Response, next: NextFunction) {
-        try {
-            Logger.info(`Updating guest: ${JSON.stringify(request.body)}`);
-            const { weddingId, guestId } = request.params;
-            const updateGuestDetails: Guest = request.body;
-            await this.guestDao.updateGuest(weddingId, guestId, updateGuestDetails);
-            response.status(204).send();
-        } catch (error) {
-            Logger.error("Error updating guest", error);
             response.status((error as CustomError).statusCode).send((error as CustomError).message);
         }
     }

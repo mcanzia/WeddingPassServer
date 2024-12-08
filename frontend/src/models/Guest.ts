@@ -1,6 +1,7 @@
 import { WeddingEvent } from "@/models/WeddingEvent";
 import { Transportation } from "@/models/Transportation";
 import { Drinks } from "@/models/Drinks";
+import { Accommodation } from "@/models/Accommodation";
 
 export class Guest {
 
@@ -17,8 +18,9 @@ export class Guest {
     drinks?: Drinks;
     serialNumber?: string;
     dietaryRestrictions?: string;
+    accommodation?: Accommodation;
 
-    constructor(id: string, weddingId: string, name: string, email: string, phone: string, events: WeddingEvent[], groupNumber: Number, attendingEvents: WeddingEvent[], arrival: Transportation, departure: Transportation, drinks?: Drinks, serialNumber?: string, dietaryRestrictions?: string) {
+    constructor(id: string, weddingId: string, name: string, email: string, phone: string, events: WeddingEvent[], groupNumber: Number, attendingEvents: WeddingEvent[], arrival: Transportation, departure: Transportation, drinks?: Drinks, serialNumber?: string, dietaryRestrictions?: string, accommodation?: Accommodation) {
         this.id = id;
         this.weddingId = weddingId;
         this.name = name;
@@ -32,7 +34,8 @@ export class Guest {
         this.drinks = drinks;
         this.serialNumber = serialNumber;
         this.dietaryRestrictions = dietaryRestrictions;
+        this.accommodation = accommodation;
     }
 
-    static detailKeys = ['name', 'email', 'phone', 'events', 'attendingEvents', 'arrival:type', 'arrival:flightTime', 'arrival:trainTime', 'departure:type', 'departure:flightTime', 'departure:trainTime', 'drinks:willDrinkAlcohol', 'drinks:preferences', 'dietaryRestrictions'] as const;
+    static detailKeys = ['name', 'email', 'phone', 'events', 'attendingEvents', 'arrival:type', 'arrival:flightTime', 'arrival:trainTime', 'departure:type', 'departure:flightTime', 'departure:trainTime', 'drinks:willDrinkAlcohol', 'drinks:preferences', 'dietaryRestrictions', 'accommodation:roomNumber', 'accommodation:hotel:name'] as const;
 }

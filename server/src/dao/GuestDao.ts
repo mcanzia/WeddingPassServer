@@ -321,45 +321,59 @@ export class GuestDao {
         }
     }
 
-    async createGuest(weddingId: string, guest: Guest): Promise<void> {
+    async getGuestsByHotel(weddingId: string, hotelId: string): Promise<Array<Guest>> {
         try {
-            const eventNames = Array.from(new Set(guest.events.map(event => event.name)));
+            const querySnapshot: QuerySnapshot<DocumentData> = await this.guestsCollection
+                .where('weddingId', '==', weddingId)
+                .where('accommodation.hotel.id', '==', hotelId)
+                .get();
 
-            if (eventNames.length === 0) {
-                throw new DatabaseError("Guest must be associated with at least one event.");
+            if (querySnapshot.empty) {
+                return [];
             }
 
-            const fetchedEventsMap = await this.fetchEventsByNames(weddingId, eventNames);
+            const guests: Array<Guest> = [];
 
-            for (const name of eventNames) {
-                if (!fetchedEventsMap.has(name)) {
-                    throw new DatabaseError(`Event with name "${name}" does not exist.`);
-                }
-            }
+            const events: Map<string, WeddingEvent> = await this.fetchAllEvents(weddingId);
 
-            const validatedEvents: Array<string> = guest.events.map(event => {
-                const fetchedEvent = fetchedEventsMap.get(event.name);
-                if (fetchedEvent) {
-                    return fetchedEvent.id;
-                } else {
-                    throw new DatabaseError(`Event with name "${event.name}" was not found.`);
-                }
+            querySnapshot.forEach((doc: QueryDocumentSnapshot<DocumentData>) => {
+                const guestData = doc.data();
+                guestData.id = doc.id;
+                guestData.events = guestData.events.map((eventId: string) => events.get(eventId));
+                guestData.attendingEvents = guestData.attendingEvents.map((eventId: string) => events.get(eventId));
+                this.setDateFields(guestData);
+                guests.push(guestData as Guest);
             });
 
-            const newGuestRef = this.guestsCollection.doc();
-            guest.id = newGuestRef.id;
+            return guests;
+        } catch (error: any) {
+            throw new DatabaseError("Could not retrieve guests by hotel from database: " + error.message);
+        }
+    }
+
+    async saveGuest(weddingId: string, guest: Guest): Promise<void> {
+        try {
+
+            const guestId = guest.id || this.guestsCollection.doc().id;
+            const guestRef = this.guestsCollection.doc(guestId);
+
+            guest.id = guestRef.id;
             guest.weddingId = weddingId;
             guest.name = validator.escape(guest.name.trim());
             guest.email = validator.escape(guest.email.trim());
             guest.phone = validator.escape(guest.phone.trim());
-            guest.attendingEvents = [];
             this.setTimestampFields(guest);
 
-            const newGuest = guest.toObject ? { ...guest.toObject(), events: validatedEvents } : { ...guest, events: validatedEvents };
+            const events = await this.getValidatedEvents(guest, weddingId, guest.events);
+            const attendingEvents = await this.getValidatedEvents(guest, weddingId, guest.attendingEvents!);
 
-            await newGuestRef.set(newGuest);
-        } catch (error: any) {
-            throw new DatabaseError("Could not add guest to database: " + error.message);
+            const updatedGuest = guest.toObject ?
+                { ...guest.toObject(), events: events, attendingEvents: attendingEvents } :
+                { ...guest, events: events, attendingEvents: attendingEvents };
+
+            await guestRef.set(updatedGuest, { merge: true });
+        } catch (error) {
+            throw new DatabaseError("Could not save guest: " + error);
         }
     }
 
@@ -431,42 +445,6 @@ export class GuestDao {
         }
     }
 
-    async updateGuest(weddingId: string, guestId: string, updatedGuest: Guest): Promise<void> {
-        try {
-            const guestRef = this.guestsCollection.doc(guestId);
-            const guestDoc = await guestRef.get();
-
-            if (!guestDoc.exists) {
-                throw new Error('Guest to update does not exist.');
-            }
-
-            const guestData = guestDoc.data();
-            if (!guestData) {
-                throw new Error('Guest data is undefined.');
-            }
-
-            if (guestData.weddingId !== weddingId) {
-                throw new Error('Guest does not belong to the specified wedding.');
-            }
-
-            const updatedData = {
-                ...updatedGuest,
-                name: validator.escape(updatedGuest.name.trim()),
-                email: validator.escape(updatedGuest.email.trim()),
-                phone: validator.escape(updatedGuest.phone.trim()),
-                weddingId: guestData.weddingId,
-                events: updatedGuest.events.map((event: WeddingEvent) => event.id),
-                attendingEvents: updatedGuest.events.map((event: WeddingEvent) => event.id),
-            };
-
-            this.setTimestampFields(updatedData);
-
-            await guestRef.update(updatedData);
-        } catch (error) {
-            throw new DatabaseError('Could not update guest details: ' + error);
-        }
-    }
-
 
     async deleteGuest(weddingId: string, guestId: string): Promise<void> {
         try {
@@ -529,6 +507,29 @@ export class GuestDao {
         } catch (error: any) {
             throw new DatabaseError('Could not batch delete guests: ' + error);
         }
+    }
+
+    async getValidatedEvents(guest: Guest, weddingId: string, events: WeddingEvent[]) {
+        const eventNames = Array.from(new Set(events.map(event => event.name)));
+
+        const fetchedEventsMap = await this.fetchEventsByNames(weddingId, eventNames);
+
+        for (const name of eventNames) {
+            if (!fetchedEventsMap.has(name)) {
+                throw new DatabaseError(`Event with name "${name}" does not exist.`);
+            }
+        }
+
+        const validatedEvents: Array<string> = events.map(event => {
+            const fetchedEvent = fetchedEventsMap.get(event.name);
+            if (fetchedEvent) {
+                return fetchedEvent.id;
+            } else {
+                throw new DatabaseError(`Event with name "${event.name}" was not found.`);
+            }
+        });
+
+        return validatedEvents;
     }
 
     setDateFields(guestData: DocumentData) {

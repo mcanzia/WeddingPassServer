@@ -30,7 +30,7 @@ export const useSurveyResponseStore = defineStore('surveyResponseStore', () => {
                 if (currentSurveyResponse.value.submitted && currentSurveyResponse.value) {
                     processSurveyComponents(currentSurveyResponse.value.survey.surveyComponents, currentSurveyResponse.value.guest);
                     const guestService = new GuestService();
-                    await guestService.updateGuest(currentSurveyResponse.value.guest);
+                    await guestService.saveGuest(currentSurveyResponse.value.guest);
                 }
             } catch (error: any) {
                 console.error('Error updating guest details', error);

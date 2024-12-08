@@ -134,7 +134,7 @@ async function updateGuest() {
             events: editUserForm.value.events.map(eventId => weddingEvents.value.find(wedEvent => wedEvent.id === eventId) as WeddingEvent)
         }
         const guestService = new GuestService();
-        await guestService.updateGuest(updatedGuestDetails);
+        await guestService.saveGuest(updatedGuestDetails);
         setMessage('Updated user.', NotificationType.SUCCESS);
         close()
     } else {

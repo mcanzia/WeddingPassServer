@@ -1,26 +1,18 @@
 <template>
   <div class="flex gap-2">
-    <Select v-model="modelValueComputed">
+    <Select v-model="internalValue">
       <SelectTrigger>
-        <SelectValue :placeholder="placeholder" />
+        <SelectValue :placeholder="placeholder" :value="displayValue" />
       </SelectTrigger>
       <SelectContent class="max-h-60 overflow-y-scroll">
         <SelectGroup>
-          <SelectItem
-            v-for="option in selectOptions"
-            :key="option"
-            :value="option"
-          >
-            {{ option }}
+          <SelectItem v-for="option in selectOptions" :key="getOptionKey(option)" :value="getOptionKey(option)">
+            {{ getOptionLabel(option) }}
           </SelectItem>
         </SelectGroup>
       </SelectContent>
     </Select>
-    <IconButton
-      v-if="clearable"
-      icon="close"
-      @click="clearValue"
-    ></IconButton>
+    <IconButton v-if="clearable" icon="close" @click="clearValue"></IconButton>
   </div>
 </template>
 
@@ -38,39 +30,94 @@ import IconButton from "@/components/common/IconButton.vue";
 
 const props = defineProps({
   selectOptions: {
-    type: Array<string>,
+    type: Array as () => (string | Record<string, unknown>)[],
     required: false,
     default: () => [],
   },
   modelValue: {
+    type: [String, Object],
+    required: false,
+    default: null,
+  },
+  fieldKey: {
     type: String,
     required: false,
-    default: () => null,
+    default: null,
   },
   placeholder: {
     type: String,
     required: false,
-    default: () => "",
+    default: "",
   },
   clearable: {
     type: Boolean,
     required: false,
-    default: () => false,
+    default: false,
   },
 });
 
 const emit = defineEmits(["update:modelValue"]);
 
-const modelValueComputed = computed({
+
+const internalValue = computed<string | undefined>({
   get() {
-    return props.modelValue;
+    if (props.modelValue === null) return undefined;
+    if (typeof props.modelValue === "string") {
+      return props.modelValue;
+    }
+    if (typeof props.modelValue === "object" && props.fieldKey) {
+      const fieldValue = props.modelValue[props.fieldKey];
+      return typeof fieldValue === "string" ? fieldValue : undefined;
+    }
+    return undefined;
   },
-  set(val: string | null) {
-    emit("update:modelValue", val);
+  set(val: string | undefined) {
+    if (val === undefined) {
+      emit("update:modelValue", null);
+      return;
+    }
+
+    const matchedOption = props.selectOptions.find(
+      (option) => getOptionKey(option) === val
+    );
+
+    if (matchedOption && typeof matchedOption === "object" && props.fieldKey) {
+      emit("update:modelValue", matchedOption);
+    } else {
+      emit("update:modelValue", val);
+    }
   },
 });
 
+
+const displayValue = computed(() => {
+  if (internalValue.value === null) return "";
+
+  const matchedOption = props.selectOptions.find(
+    (option) => getOptionKey(option) === internalValue.value
+  );
+
+  return matchedOption ? getOptionLabel(matchedOption) : internalValue.value;
+});
+
+
+function getOptionKey(option: string | Record<string, unknown>): string {
+  if (typeof option === "object" && option !== null && props.fieldKey) {
+    const fieldValue = option[props.fieldKey];
+    return typeof fieldValue === "string" ? fieldValue : "";
+  }
+  return typeof option === "string" ? option : "";
+}
+
+function getOptionLabel(option: string | Record<string, unknown>): string {
+  if (typeof option === "object" && option !== null && props.fieldKey) {
+    const fieldValue = option[props.fieldKey];
+    return typeof fieldValue === "string" ? fieldValue : "";
+  }
+  return typeof option === "string" ? option : "";
+}
+
 function clearValue() {
-  modelValueComputed.value = null;
+  internalValue.value = undefined;
 }
 </script>

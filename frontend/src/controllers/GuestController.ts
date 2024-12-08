@@ -66,7 +66,7 @@ export class GuestController {
         }
     }
 
-    async addGuest(userAuthToken: any, weddingRole: WeddingRole, guest: Guest) {
+    async saveGuest(userAuthToken: any, weddingRole: WeddingRole, guest: Guest) {
         try {
             const requestUrl = `${RequestUtil.getAPIUrl()}/api/weddings/${weddingRole.wedding.id}/guests`;
             return await RequestUtil.apiRequest(requestUrl, RequestUtil.POSTRequestParams(userAuthToken, guest, weddingRole.role));
@@ -83,16 +83,6 @@ export class GuestController {
             return await RequestUtil.apiRequest(requestUrl, RequestUtil.POSTRequestParams(userAuthToken, guests, weddingRole.role));
         } catch (error: any) {
             ErrorHandler.handleBatchAddError<Guest>(userAuthToken, ObjectType.GUEST, guests, error);
-            throw error;
-        }
-    }
-
-    async updateGuest(userAuthToken: any, weddingRole: WeddingRole, guest: Guest) {
-        try {
-            const requestUrl = `${RequestUtil.getAPIUrl()}/api/weddings/${weddingRole.wedding.id}/guests/${guest.id}`;
-            return await RequestUtil.apiRequest(requestUrl, RequestUtil.PUTRequestParams(userAuthToken, guest, weddingRole.role));
-        } catch (error: any) {
-            ErrorHandler.handleUpdateError(ObjectType.GUEST);
             throw error;
         }
     }

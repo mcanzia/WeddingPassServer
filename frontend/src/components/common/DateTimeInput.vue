@@ -2,7 +2,7 @@
     <div>
         <Popover>
             <PopoverTrigger as-child>
-                <Button variant="outline" :class="cn(
+                <Button variant="outline" :disabled="disabled" :class="cn(
                     'w-[280px] justify-start text-left font-normal',
                     !combinedValue && 'text-muted-foreground',
                 )">
@@ -48,6 +48,11 @@ const props = defineProps({
         required: false,
         default: () => false
     },
+    disabled: {
+        type: Boolean,
+        required: false,
+        default: () => false
+    },
 });
 
 const emits = defineEmits(['update:modelValue']);
@@ -82,7 +87,7 @@ const df = new DateFormatter('en-US', {
 });
 
 const dateValue = ref<DateValue>();
-const timeValue = ref<Date>();
+const timeValue = ref<Date>(new Date());
 
 const combinedValue = computed(() => {
     if (dateValue.value && timeValue.value) {

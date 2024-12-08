@@ -2,79 +2,47 @@
   <div class="w-full">
     <div v-if="!loading">
       <div class="flex flex-col md:flex-row gap-2 items-center py-4">
-        <div class="flex flex-1 gap-2 items-center w-full">
-          <Input
-            class="w-full md:max-w-sm"
-            placeholder="Filter guests..."
+        <div class="w-full md:max-w-sm">
+          <Input class="md:max-w-sm" placeholder="Filter guests..."
             :model-value="table.getColumn('name')?.getFilterValue() as string"
-            @update:model-value="table.getColumn('name')?.setFilterValue($event)"
-          />
+            @update:model-value="table.getColumn('name')?.setFilterValue($event)" />
 
+        </div>
+        <div class="flex flex-1 gap-2 items-center w-full">
           <DropdownMenu>
             <DropdownMenuTrigger as-child>
-              <Button
-                variant="outline"
-                class="w-full md:w-auto"
-              >
+              <Button variant="outline" class="w-full md:w-auto">
                 Columns
                 <ChevronDown class="ml-2 h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent
-              align="end"
-              class="h-60 overflow-y-scroll"
-            >
-              <DropdownMenuCheckboxItem
-                v-for="column in table.getAllColumns().filter((column) => column.getCanHide())"
-                :key="column.id"
-                class="capitalize"
-                :checked="column.getIsVisible()"
-                @update:checked="(value) => {
-                                    column.toggleVisibility(!!value);
-                                }"
-              >
+            <DropdownMenuContent align="end" class="h-60 overflow-y-scroll">
+              <DropdownMenuCheckboxItem v-for="column in table.getAllColumns().filter((column) => column.getCanHide())"
+                :key="column.id" class="capitalize" :checked="column.getIsVisible()" @update:checked="(value) => {
+                  column.toggleVisibility(!!value);
+                }">
                 {{ column.id }}
               </DropdownMenuCheckboxItem>
             </DropdownMenuContent>
           </DropdownMenu>
+          <SingleSelectDropdown v-model="viewModeComputed" :selectOptions="viewModeOptions"></SingleSelectDropdown>
         </div>
 
-        <div
-          class="flex gap-2 items-center mt-2 md:mt-0 w-full md:w-auto"
-          v-if="hasEditAuthority"
-        >
-          <Button
-            variant="outline"
-            class="w-full md:w-auto"
-            @click="goToAddGuest"
-          >
+        <div class="flex gap-2 items-center mt-2 md:mt-0 w-full md:w-auto" v-if="hasEditAuthority">
+          <Button variant="outline" class="w-full md:w-auto" @click="goToAddGuest">
             Add Guest
           </Button>
 
-          <ConfirmAction
-            alert-title="Do you want to delete these guests?"
-            @on-confirm="deleteGuests"
-            v-if="showDeleteButton"
-          >
-            <Button
-              variant="destructive"
-              class="w-full md:w-auto"
-            >
+          <ConfirmAction alert-title="Do you want to delete these guests?" @on-confirm="deleteGuests"
+            v-if="showDeleteButton">
+            <Button variant="destructive" class="w-full md:w-auto">
               Delete Selected Guests
             </Button>
           </ConfirmAction>
         </div>
 
-        <div
-          class="flex items-center mt-2 md:mt-0 w-full md:w-auto"
-          v-if="hasEditAuthority"
-        >
-          <Button
-            variant="secondary"
-            class="w-full md:w-auto"
-            @click="goToEditGuest"
-            v-if="showEditButton"
-          >
+        <div class="flex items-center mt-2 md:mt-0 w-full md:w-auto" v-if="hasEditAuthority">
+          <Button variant="secondary" class="w-full md:w-auto" @click="goToEditGuest" v-if="showEditButton">
             Edit Selected Guest
           </Button>
         </div>
@@ -82,39 +50,20 @@
       <div class="rounded-md border">
         <Table>
           <TableHeader class="bg-orange-200">
-            <TableRow
-              v-for="headerGroup in table.getHeaderGroups()"
-              :key="headerGroup.id"
-              class="hover:bg-orange-200 border-solid border-black"
-            >
-              <TableHead
-                v-for="header in headerGroup.headers"
-                :key="header.id"              >
-                <FlexRender
-                  v-if="!header.isPlaceholder"
-                  :render="header.column.columnDef.header"
-                  :props="header.getContext()"
-                  class="text-primary hover:bg-orange-50"
-                />
+            <TableRow v-for="headerGroup in table.getHeaderGroups()" :key="headerGroup.id"
+              class="hover:bg-orange-200 border-solid border-black">
+              <TableHead v-for="header in headerGroup.headers" :key="header.id">
+                <FlexRender v-if="!header.isPlaceholder" :render="header.column.columnDef.header"
+                  :props="header.getContext()" class="text-primary hover:bg-orange-50" />
               </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody class="bg-orange-50">
             <template v-if="table.getRowModel().rows?.length">
-              <template
-                v-for="row in table.getRowModel().rows"
-                :key="row.id"
-              >
+              <template v-for="row in table.getRowModel().rows" :key="row.id">
                 <TableRow :data-state="row.getIsSelected() && 'selected'">
-                  <TableCell
-                    v-for="cell in row.getVisibleCells()"
-                    :key="cell.id"
-                  >
-                    <FlexRender
-                      :render="cell.column.columnDef.cell"
-                      :props="cell.getContext()"
-                      
-                    />
+                  <TableCell v-for="cell in row.getVisibleCells()" :key="cell.id">
+                    <FlexRender :render="cell.column.columnDef.cell" :props="cell.getContext()" />
                   </TableCell>
                 </TableRow>
                 <TableRow v-if="row.getIsExpanded()">
@@ -126,10 +75,7 @@
             </template>
 
             <TableRow v-else>
-              <TableCell
-                :colspan="columns.length"
-                class="h-24 text-center"
-              >
+              <TableCell :colspan="columns.length" class="h-24 text-center">
                 No results.
               </TableCell>
             </TableRow>
@@ -143,20 +89,10 @@
           {{ table.getFilteredRowModel().rows.length }} row(s) selected.
         </div>
         <div class="space-x-2">
-          <Button
-            variant="outline"
-            size="sm"
-            :disabled="!table.getCanPreviousPage()"
-            @click="table.previousPage()"
-          >
+          <Button variant="outline" size="sm" :disabled="!table.getCanPreviousPage()" @click="table.previousPage()">
             Previous
           </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            :disabled="!table.getCanNextPage()"
-            @click="table.nextPage()"
-          >
+          <Button variant="outline" size="sm" :disabled="!table.getCanNextPage()" @click="table.nextPage()">
             Next
           </Button>
         </div>
@@ -170,7 +106,7 @@
 import Loader from "@/components/Loader.vue";
 import { ArrowUpDown, ChevronDown } from "lucide-vue-next";
 
-import { computed, h, ref } from "vue";
+import { computed, h, ref, watch } from "vue";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -216,6 +152,9 @@ import {
   getSortedRowModel,
   useVueTable,
 } from "@tanstack/vue-table";
+import SingleSelectDropdown from "@/components/common/SingleSelectDropdown.vue";
+import { ViewModes } from "@/components/data-table/ViewModes";
+import { useColumnVisibility } from "@/components/data-table/useColumnVisibility";
 
 const guestService = new GuestService();
 const { goToRouteSecured } = useRouterHelper();
@@ -224,9 +163,11 @@ const { setMessage } = notificationStore;
 const userStore = useUserStore();
 const { hasEditAuthority } = storeToRefs(userStore);
 const { columnDefs } = useColumnDefinition();
+const { viewModeColumnVisibility } = useColumnVisibility();
 
 const data = ref<Guest[]>([]);
 const loading = ref<Boolean>(false);
+const viewMode = ref<ViewModes>(ViewModes.ALL_FIELDS);
 
 onBeforeMount(async () => {
   loading.value = true;
@@ -284,6 +225,26 @@ const showDeleteButton = computed(() => {
 const showEditButton = computed(() => {
   return Object.keys(rowSelection.value).length === 1;
 });
+
+const viewModeOptions = computed(() => {
+  return Object.values(ViewModes)
+});
+
+const viewModeComputed = computed<ViewModes>({
+  get() {
+    return viewMode.value;
+  },
+  set(val: ViewModes) {
+    viewMode.value = val;
+  }
+});
+
+watch(() => viewModeComputed.value, (newMode: ViewModes) => {
+  const visibilitySettings = viewModeColumnVisibility[newMode];
+  if (visibilitySettings) {
+    table.setColumnVisibility(visibilitySettings);
+  }
+}, { immediate: true });
 
 function goToAddGuest() {
   goToRouteSecured("add-guest");

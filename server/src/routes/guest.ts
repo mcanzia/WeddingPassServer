@@ -15,12 +15,12 @@ router.get('/id/:guestId', authorizeRoles([Roles.EDITOR, Roles.ADMIN, Roles.READ
 router.get('/name/:guestName', authorizeRoles([Roles.EDITOR, Roles.ADMIN, Roles.READONLY]), (req, res, next) => guestController.getGuestbyName(req, res, next));
 router.get('/phone/:guestPhone', (req, res, next) => guestController.getGuestsByPhone(req, res, next));
 router.get('/email/:guestEmail', (req, res, next) => guestController.getGuestsbyEmail(req, res, next));
-router.get('/:serialNumber', authorizeRoles([Roles.EDITOR, Roles.ADMIN, Roles.READONLY]), (req, res, next) => guestController.getGuestbySerialNumber(req, res, next));
+router.get('/serial/:serialNumber', authorizeRoles([Roles.EDITOR, Roles.ADMIN, Roles.READONLY]), (req, res, next) => guestController.getGuestbySerialNumber(req, res, next));
 router.get('/event/:eventId', authorizeRoles([Roles.EDITOR, Roles.ADMIN, Roles.READONLY]), (req, res, next) => guestController.getGuestsForEvent(req, res, next));
-router.post('/', authorizeRoles([Roles.EDITOR, Roles.ADMIN]), (req, res, next) => guestController.createGuest(req, res, next));
+router.get('/hotel/:hotelId', authorizeRoles([Roles.EDITOR, Roles.ADMIN, Roles.READONLY]), (req, res, next) => guestController.getGuestsByHotel(req, res, next));
+router.post('/', authorizeRoles([Roles.EDITOR, Roles.ADMIN, Roles.GUEST]), (req, res, next) => guestController.saveGuest(req, res, next));
 router.post('/batch', authorizeRoles([Roles.EDITOR, Roles.ADMIN]), (req, res, next) => guestController.batchCreateGuests(req, res, next));
 router.post('/upload', authorizeRoles([Roles.EDITOR, Roles.ADMIN]), upload.single('file'), (req, res, next) => guestController.uploadGuests(req, res, next));
-router.put('/:guestId', authorizeRoles([Roles.EDITOR, Roles.ADMIN, Roles.GUEST]), (req, res, next) => guestController.updateGuest(req, res, next));
 router.delete('/', authorizeRoles([Roles.EDITOR, Roles.ADMIN]), (req, res, next) => guestController.deleteGuest(req, res, next));
 router.delete('/batch', authorizeRoles([Roles.EDITOR, Roles.ADMIN]), (req, res, next) => guestController.batchDeleteGuests(req, res, next));
 

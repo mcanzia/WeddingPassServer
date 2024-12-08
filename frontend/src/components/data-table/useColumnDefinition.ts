@@ -13,6 +13,9 @@ import { TransportationType } from "@/models/TransportationType";
 import { Transportation } from "@/models/Transportation";
 import { isFlight, isBus, isTrain } from "@/models/TransportationTypeGuard";
 import { useDateUtils } from "@/components/common/useDateUtils";
+import { Drinks } from "@/models/Drinks";
+import { Accommodation } from "@/models/Accommodation";
+import { Hotel } from "@/models/Hotel";
 
 export function useColumnDefinition() {
 
@@ -164,6 +167,49 @@ export function useColumnDefinition() {
                     return getTransportationField(row.original.departure, 'trainTime');
                 },
             },
+            {
+                accessorKey: 'dietaryRestrictions',
+                header: ({ column }) => {
+                    return setHeaderDetails(column, 'Dietary Restrictions');
+                },
+                cell: ({ row }) => h('div', { class: 'lowercase whitespace-nowrap text-center' }, row.getValue('dietaryRestrictions')),
+            },
+            {
+                accessorKey: 'drinkPreferences',
+                header: ({ column }) => {
+                    return setHeaderDetails(column, 'Drink Preferences');
+                },
+                cell: ({ row }) => {
+                    return getDrinksField(row.original.drinks, 'preferences');
+                },
+            },
+            {
+                accessorKey: 'numberOfDrinks',
+                header: ({ column }) => {
+                    return setHeaderDetails(column, 'Number of Drinks');
+                },
+                cell: ({ row }) => {
+                    return getDrinksField(row.original.drinks, 'numberOfDrinks');
+                },
+            },
+            {
+                accessorKey: 'hotelName',
+                header: ({ column }) => {
+                    return setHeaderDetails(column, 'Hotel Name');
+                },
+                cell: ({ row }) => {
+                    return getAccommodationField(row.original.accommodation, 'name');
+                },
+            },
+            {
+                accessorKey: 'roomNumber',
+                header: ({ column }) => {
+                    return setHeaderDetails(column, 'Room Number');
+                },
+                cell: ({ row }) => {
+                    return getAccommodationField(row.original.accommodation, 'roomNumber');
+                },
+            },
 
         ] as ColumnDef<Guest>[]
     });
@@ -212,6 +258,38 @@ export function useColumnDefinition() {
         return h('div', '');
     }
 
+    function getDrinksField(details: Drinks | undefined, fieldName: string) {
+        if (!details || !fieldName) {
+            return h('div', '');
+        }
+
+        if (fieldName in details) {
+            const value = (details as Drinks)[fieldName as keyof Drinks];
+            let displayValue: string;
+
+            if (Array.isArray(value)) {
+                displayValue = value.join(', ');
+            } else {
+                displayValue = String(value ?? '');
+            }
+
+            return h('div', displayValue);
+        }
+        return h('div', '');
+    }
+
+    function getAccommodationField(details: Accommodation | undefined, fieldName: string) {
+        if (!details || !fieldName) {
+            return h('div', '');
+        }
+
+        if (fieldName === 'name') {
+            return h('div', details.hotel?.name ?? '');
+        }
+
+        const value = details[fieldName as keyof Accommodation];
+        return h('div', String(value) ?? '');
+    }
 
 
     return {

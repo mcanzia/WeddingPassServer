@@ -1,3 +1,4 @@
+import { Accommodation } from "./Accommodation";
 import { Drinks } from "./Drinks";
 import { Transportation } from "./Transportation";
 import { WeddingEvent } from "./WeddingEvent";
@@ -17,8 +18,9 @@ export class Guest {
     drinks?: Drinks;
     serialNumber?: string;
     dietaryRestrictions?: string;
+    accommodation?: Accommodation;
 
-    constructor(id: string, weddingId: string, groupNumber: Number, name: string, email: string, phone: string, events: Array<WeddingEvent>, attendingEvents: Array<WeddingEvent>, arrival?: Transportation, departure?: Transportation, drinks?: Drinks, serialNumber?: string, dietaryRestrictions?: string) {
+    constructor(id: string, weddingId: string, groupNumber: Number, name: string, email: string, phone: string, events: Array<WeddingEvent>, attendingEvents: Array<WeddingEvent>, arrival?: Transportation, departure?: Transportation, drinks?: Drinks, serialNumber?: string, dietaryRestrictions?: string, accommodation?: Accommodation) {
         this.id = id;
         this.weddingId = weddingId;
         this.groupNumber = groupNumber;
@@ -32,6 +34,7 @@ export class Guest {
         this.drinks = drinks;
         this.serialNumber = serialNumber;
         this.dietaryRestrictions = dietaryRestrictions;
+        this.accommodation = accommodation;
     }
 
     toObject?() {
@@ -48,7 +51,8 @@ export class Guest {
             departure: this.departure?.toObject ? this.departure.toObject() : this.departure,
             drinks: this.drinks?.toObject ? this.drinks.toObject() : this.drinks,
             serialNumber: this.serialNumber,
-            dietaryRestrictions: this.dietaryRestrictions
+            dietaryRestrictions: this.dietaryRestrictions,
+            accommodation: this.accommodation?.toObject ? this.accommodation.toObject() : this.accommodation
         };
     }
 
