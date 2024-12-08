@@ -1,7 +1,7 @@
 <template>
 
 <Card class="w-[90vw] justify-self-center bg-[#fff7e7]">
-    <CardHeader class="flex flex-col items-center rounded-lg justify-self-center bg-[#fff7e7] w-[90vw] font-['Faculty_Glyphic']">
+    <CardHeader class="flex flex-col items-center rounded-lg justify-self-center bg-[#fff7e7] w-[80vw] font-['Faculty_Glyphic']">
         <div class="m-4 space-y-1 text-base">
             <p>There are a lot of great places to visit in Udaipur, but here are some of our favorites!</p>
         </div>

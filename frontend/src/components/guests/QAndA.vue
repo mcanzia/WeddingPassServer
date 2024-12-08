@@ -1,6 +1,6 @@
 <template>
 <Card class="w-[90vw] justify-self-center bg-[#fff7e7]">
-    <CardHeader class="flex flex-col items-center rounded-lg justify-self-center bg-[#fff7e7] w-[90vw] font-['Faculty_Glyphic']">
+    <CardHeader class="flex flex-col items-center rounded-lg justify-self-center bg-[#fff7e7] w-[80vw] font-['Faculty_Glyphic']">
         <div class="m-4 space-y-1">
             <p class="font-bold text-lg">Is there a gifts registry?</p>
             <p>Your love and presence coming all the way to our wedding is our biggest present. We know that you'll be spending plenty of time and money making your way there for us, and all that we would like to ask for as we start this new chapter in our lives is to have you there to celebrate with us. PLEASE, NO GIFTS!</p>
