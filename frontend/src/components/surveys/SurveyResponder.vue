@@ -16,7 +16,7 @@
             <SingleSelectDropdown v-model="currentPartyMemberComputed" :select-options="partyMemberNames"
               id="party-members" class="w-full" />
             <ConfirmAction alert-title="Copy responses of another party member?"
-              alert-description="You will still need to Submit the survey copying." @on-confirm="copyResponses"
+              alert-description="You will still need to Submit the survey after copying." @on-confirm="copyResponses"
               :disabled="currentSurveyResponse.submitted">
               <Button class="bg-border text-black hover:bg-border" :disabled="currentSurveyResponse.submitted">Copy
                 Responses</Button>

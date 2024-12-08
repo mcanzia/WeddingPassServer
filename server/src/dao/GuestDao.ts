@@ -32,7 +32,7 @@ export class GuestDao {
 
             snapshot.forEach(doc => {
                 const eventData = doc.data() as WeddingEvent;
-                fetchedEventsMap.set(eventData.name, new WeddingEvent(doc.id, eventData.name, eventData.weddingId));
+                fetchedEventsMap.set(eventData.name, new WeddingEvent(doc.id, eventData.name, eventData.weddingId, eventData.order));
             });
         }
 
