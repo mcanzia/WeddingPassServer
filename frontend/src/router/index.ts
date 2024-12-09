@@ -3,7 +3,6 @@ import GuestList from "@/components/guest-list/GuestList.vue";
 import AddGuest from "@/components/guest-list/AddGuest.vue";
 import AddWedding from "@/components/weddings/AddWedding.vue";
 import EditWedding from "@/components/weddings/EditWedding.vue";
-import EditGuest from "@/components/guest-list/EditGuest.vue";
 import InviteUser from "@/components/InviteUser.vue";
 import EventAttendance from "@/components/events/EventAttendance.vue";
 import GuestUpload from "@/components/guest-list/GuestUpload.vue";
@@ -29,6 +28,7 @@ import LoginDirect from "@/components/LoginDirect.vue";
 import GuestInfo from "@/components/guests/GuestInfo.vue";
 import HotelList from "@/components/hotels/HotelList.vue";
 import UpdateHotel from "@/components/hotels/UpdateHotel.vue";
+import GuestEvents from "@/components/guests/GuestEvents.vue";
 
 const routes = [
    {
@@ -182,6 +182,11 @@ const routes = [
       path: '/:weddingId/guest-details',
       name: 'guest-details',
       component: GuestInfo,
+   },
+   {
+      path: '/:weddingId/guest-events',
+      name: 'guest-events',
+      component: GuestEvents,
    },
    {
       path: '/:weddingId/guest-surveys',

@@ -150,7 +150,7 @@ const navbarRoutes = computed(() => {
     {
       name: "Events",
       secured: true,
-      path: "home",
+      path: "guest-events",
       roles: [Roles.GUEST],
     },
     {
