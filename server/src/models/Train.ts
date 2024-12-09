@@ -3,10 +3,10 @@ import { Transportation } from "./Transportation";
 export class Train extends Transportation {
 
     trainNumber?: string;
-    trainTime?: Date;
+    trainTime?: string;
     trainStation?: string;
 
-    constructor(type?: string, trainNumber?: string, trainTime?: Date, trainStation?: string) {
+    constructor(type?: string, trainNumber?: string, trainTime?: string, trainStation?: string) {
         super(type);
         this.trainNumber = trainNumber;
         this.trainTime = trainTime;

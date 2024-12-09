@@ -530,31 +530,4 @@ export class SurveyDao {
         }
     }
 
-    setDateFields(guestData: DocumentData) {
-        if (guestData.arrival) {
-            if (guestData.arrival.flightTime) {
-                guestData.arrival.flightTime = guestData.arrival.flightTime.toDate();
-            }
-            if (guestData.arrival.trainTime) {
-                guestData.arrival.trainTime = guestData.arrival.trainTime.toDate();
-            }
-            if (guestData.arrival.busTime) {
-                guestData.arrival.busTime = guestData.arrival.busTime.toDate();
-            }
-        }
-        if (guestData.departure) {
-            if (guestData.departure.flightTime) {
-                guestData.departure.flightTime = guestData.departure.flightTime.toDate();
-            }
-            if (guestData.departure.trainTime) {
-                guestData.departure.trainTime = guestData.departure.trainTime.toDate();
-            }
-            if (guestData.departure.busTime) {
-                guestData.departure.busTime = guestData.departure.busTime.toDate();
-            }
-        }
-    }
-
-
-
 }

@@ -81,7 +81,7 @@ export class GuestService {
         guest.weddingId = weddingId;
         guest.name = (data['Name'] || '').trim();
         guest.email = (data['Email'] || '').trim();
-        guest.phone = (data['Phone'] || '').trim();
+        guest.phone = this.cleanPhoneField(data['Phone']);
         guest.serialNumber = (data['Serial Number'] || '').trim();
         guest.groupNumber = Number(data['Party Number'] || -1);
         guest.dietaryRestrictions = (data['Dietary Restrictions'] || '').trim();
@@ -115,20 +115,15 @@ export class GuestService {
         const transportationTypeValue = data[typeField];
         if (!transportationTypeValue) return undefined;
 
-        const transportationType = String(transportationTypeValue).trim().toLowerCase();
         let transportation: Transportation | undefined;
 
-        switch (transportationType) {
+        switch (transportationTypeValue) {
             case TransportationType.FLIGHT: {
                 transportation = new Flight(TransportationType.FLIGHT);
                 break;
             }
             case TransportationType.TRAIN: {
                 transportation = new Train(TransportationType.TRAIN);
-                break;
-            }
-            case TransportationType.BUS: {
-                transportation = new Bus(TransportationType.BUS);
                 break;
             }
             default: {
@@ -138,13 +133,20 @@ export class GuestService {
 
         const fieldsMapping: { [key: string]: string } = this.getTransportationFieldsMapping(transportation);
 
+        if (transportation.type === TransportationType.FLIGHT && data[`${prefix}.Date`] && data[`${prefix}.Time`]) {
+            (transportation as any)['flightTime'] = this.combineDateTime(data[`${prefix}.Date`], data[`${prefix}.Time`]);
+        }
+
+        if (transportation.type === TransportationType.TRAIN && data[`${prefix}.Date`] && data[`${prefix}.Time`]) {
+            (transportation as any)['trainTime'] = this.combineDateTime(data[`${prefix}.Date`], data[`${prefix}.Time`]);
+        }
+
         for (const [dataField, propName] of Object.entries(fieldsMapping)) {
             const value = data[`${prefix}.${dataField}`];
             if (value) {
                 (transportation as any)[propName] = String(value).trim();
             }
         }
-
         return transportation;
     }
 
@@ -152,22 +154,41 @@ export class GuestService {
         if (transportation.type === TransportationType.FLIGHT) {
             return {
                 'Flight.Num': 'flightNumber',
-                'Flight.Time': 'flightTime',
             };
         } else if (transportation.type === TransportationType.TRAIN) {
             return {
                 'Train.Num': 'trainNumber',
-                'Train.Time': 'trainTime',
                 'Train.Station': 'trainStation',
-            };
-        } else if (transportation.type === TransportationType.BUS) {
-            return {
-                'Bus.Time': 'busTime',
-                'Bus.PickupPoint': 'busPickupPoint',
             };
         }
         return {};
     }
+
+    private combineDateTime(dateStr: string, timeStr: string): string {
+        const date = new Date(`${dateStr} ${timeStr}`);
+
+        const yyyy = date.getFullYear();
+        const mm = String(date.getMonth() + 1).padStart(2, '0');
+        const dd = String(date.getDate()).padStart(2, '0');
+        const hh = String(date.getHours()).padStart(2, '0');
+        const min = String(date.getMinutes()).padStart(2, '0');
+        const ss = String(date.getSeconds()).padStart(2, '0');
+
+        return `${yyyy}-${mm}-${dd}T${hh}:${min}:${ss}`;
+
+    }
+
+    private cleanPhoneField(phone: string): string {
+        if (!phone) {
+            return '';
+        }
+        let cleaned = phone.trim().replace(/[^\d+]/g, '');
+        if (cleaned.indexOf('+') > 0) {
+            cleaned = cleaned.replace(/\+/g, '');
+        }
+        return cleaned;
+    }
+
 
     async validateGuests(weddingId: string, guests: Guest[]): Promise<UploadValidation> {
         const currentGuestNames = (await this.guestDao.getAllGuests(weddingId)).map(guest => guest.name.toLowerCase());
@@ -196,10 +217,6 @@ export class GuestService {
             return PARTY_NUMBER_MISSING;
         }
 
-        if (!guest.events || guest.events.length === 0) {
-            return MISSING_EVENT;
-        }
-
         if (currentGuestNames.includes(guest.name.toLowerCase())) {
             return DUPLICATE_GUEST;
         }
@@ -218,9 +235,4 @@ export class GuestService {
 
         return null;
     }
-
-    // private isValidEmail(email: string) {
-    //     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    //     return emailRegex.test(email);
-    // }
 }
