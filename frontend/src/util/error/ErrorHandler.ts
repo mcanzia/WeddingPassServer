@@ -10,12 +10,12 @@ export class ErrorHandler {
         console.log("Error occurred. Please try again.");
     }
 
-    static handleCustomError(errorMessage : string) {
+    static handleCustomError(errorMessage: string) {
         const notificationStore = useNotificationStore();
         notificationStore.setMessage(errorMessage, NotificationType.ERROR);
     }
 
-    static handleUserAuthError<T>(user : any, error : FirebaseError) {
+    static handleUserAuthError<T>(user: any, error: FirebaseError) {
         const notificationStore = useNotificationStore();
         if (error.code === 'auth/email-already-in-use') {
             notificationStore.setMessage("This email is already in use. Please try a different one.", NotificationType.ERROR);
@@ -63,6 +63,11 @@ export class ErrorHandler {
         notificationStore.setMessage(`Error adding ${itemType}s. Please try again.`, NotificationType.ERROR);
     }
 
+    static handleBatchUpdateError<T>(userAuthToken: any, itemType: string, itemsToUpdate: T[], error: Error) {
+        const notificationStore = useNotificationStore();
+        notificationStore.setMessage(`Error updating ${itemType}s. Please try again.`, NotificationType.ERROR);
+    }
+
     static handleUpdateError(itemType: string) {
         const notificationStore = useNotificationStore();
         notificationStore.setMessage(`Error updating ${itemType}. Please try again.`, NotificationType.ERROR);
@@ -81,5 +86,10 @@ export class ErrorHandler {
     static handleGuestUploadError() {
         const notificationStore = useNotificationStore();
         notificationStore.setMessage(`Error uploading guests. Please try again.`, NotificationType.ERROR);
+    }
+
+    static handleGuestDownloadError() {
+        const notificationStore = useNotificationStore();
+        notificationStore.setMessage(`Error downloading guest csv. Please try again.`, NotificationType.ERROR);
     }
 }

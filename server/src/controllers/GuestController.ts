@@ -7,6 +7,7 @@ import { GuestDao } from '../dao/GuestDao';
 import { TYPES } from '../configs/types';
 import { GuestService } from '../services/GuestService';
 import { UploadValidation } from '../models/UploadValidation';
+import { UploadGuestLists } from '../models/UploadGuestLists';
 
 @injectable()
 export class GuestController {
@@ -153,6 +154,20 @@ export class GuestController {
         }
     }
 
+    async batchUpdateGuests(request: Request, response: Response, next: NextFunction) {
+        try {
+            Logger.info(`Batch updating guests`);
+            const { weddingId } = request.params;
+            const guests: Array<Guest> = request.body;
+            await this.guestDao.batchUpdateGuests(weddingId, guests);
+            Logger.info(`Successfully updated batch guests`);
+            response.status(204).send();
+        } catch (error) {
+            Logger.error("Error updating batch guests", error);
+            response.status((error as CustomError).statusCode).send((error as CustomError).message);
+        }
+    }
+
     async deleteGuest(request: Request, response: Response, next: NextFunction) {
         try {
             Logger.info(`Deleting guest ${JSON.stringify(request.body)}`);
@@ -189,34 +204,32 @@ export class GuestController {
             Logger.info(`Received file: ${request.file.originalname}`);
             const { weddingId } = request.params;
 
-            let guests: Guest[] = [];
+            let guestLists: UploadGuestLists;
 
             const fileBuffer = request.file.buffer;
             const fileExtension = request.file.originalname.split('.').pop()?.toLowerCase();
 
-            console.log('FILE EXTENSION', fileExtension);
-
             if (fileExtension === 'csv') {
-                guests = await this.guestService.parseCSV(fileBuffer, weddingId);
+                guestLists = await this.guestService.parseCSV(fileBuffer, weddingId);
             } else if (fileExtension === 'xlsx' || fileExtension === 'xls') {
-                guests = await this.guestService.parseExcel(fileBuffer, weddingId);
+                guestLists = await this.guestService.parseExcel(fileBuffer, weddingId);
             } else {
                 Logger.error('Unsupported file format.');
                 return response.status(415).json({ error: 'Unsupported file format.' });
             }
 
-            if (guests.length === 0) {
+            if (!guestLists.createGuests.length && !guestLists.updateGuests.length) {
                 Logger.error('No guest data found in the file.');
                 return response.status(422).json({ error: 'No guest data found in the file.' });
             }
 
-            const validation: UploadValidation = await this.guestService.validateGuests(weddingId, guests);
-            if (validation.validatedGuests.length === 0 && validation.uploadIssues.size === 0) {
+            const validation: UploadValidation = await this.guestService.validateGuests(weddingId, guestLists);
+            if (!validation.uploadGuestLists.createGuests.length && !validation.uploadGuestLists.updateGuests.length && validation.uploadIssues.size === 0) {
                 Logger.error('No valid guest data to upload.');
                 return response.status(422).json({ error: 'No valid guest data to upload.' });
             }
 
-            Logger.info(`Successfully validated ${validation.validatedGuests.length + validation.uploadIssues.size} guests.`);
+            Logger.info(`Successfully validated ${validation.uploadGuestLists.createGuests.length + validation.uploadGuestLists.updateGuests.length + validation.uploadIssues.size} guests.`);
             response.status(200).json({ ...validation, uploadIssues: Object.fromEntries(validation.uploadIssues) });
         } catch (error) {
             Logger.error("Error validating guests", error);
@@ -225,6 +238,28 @@ export class GuestController {
             } else {
                 response.status(500).send('Internal Server Error');
             }
+        }
+    }
+
+    async downloadGuests(request: Request, response: Response, next: NextFunction) {
+        try {
+
+            const { weddingId } = request.params;
+            const guests = await this.guestDao.getAllGuests(weddingId);
+            if (!guests || guests.length === 0) {
+                return response.status(204).json({ message: 'No guests found' });
+            }
+
+            const csv = await this.guestService.generateCSVContent(guests);
+
+            response.attachment('guests.csv');
+            response.type('text/csv');
+
+            response.status(200).send(csv);
+
+        } catch (error) {
+            Logger.error("Error downloading csv", error);
+            response.status(500).send((error as CustomError).message);
         }
     }
 }

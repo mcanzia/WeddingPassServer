@@ -21,6 +21,8 @@ router.get('/hotel/:hotelId', authorizeRoles([Roles.EDITOR, Roles.ADMIN, Roles.R
 router.post('/', authorizeRoles([Roles.EDITOR, Roles.ADMIN, Roles.GUEST]), (req, res, next) => guestController.saveGuest(req, res, next));
 router.post('/batch', authorizeRoles([Roles.EDITOR, Roles.ADMIN]), (req, res, next) => guestController.batchCreateGuests(req, res, next));
 router.post('/upload', authorizeRoles([Roles.EDITOR, Roles.ADMIN]), upload.single('file'), (req, res, next) => guestController.uploadGuests(req, res, next));
+router.get('/download', authorizeRoles([Roles.EDITOR, Roles.ADMIN]), (req, res, next) => guestController.downloadGuests(req, res, next));
+router.put('/batch', authorizeRoles([Roles.EDITOR, Roles.ADMIN]), (req, res, next) => guestController.batchUpdateGuests(req, res, next));
 router.delete('/', authorizeRoles([Roles.EDITOR, Roles.ADMIN]), (req, res, next) => guestController.deleteGuest(req, res, next));
 router.delete('/batch', authorizeRoles([Roles.EDITOR, Roles.ADMIN]), (req, res, next) => guestController.batchDeleteGuests(req, res, next));
 

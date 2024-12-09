@@ -96,6 +96,16 @@ export class GuestService {
         }
     }
 
+    async batchUpdateGuests(guests: Array<Guest>) {
+        try {
+            const userAccessToken = await this.userStore.getAccessToken();
+            await this.guestController.batchUpdateGuests(userAccessToken, this.weddingRole, guests);
+            return;
+        } catch (error) {
+            throw error;
+        }
+    }
+
     async deleteGuest(guestToDelete: Guest) {
         try {
             const userAccessToken = await this.userStore.getAccessToken();
@@ -121,6 +131,15 @@ export class GuestService {
             const userAccessToken = await this.userStore.getAccessToken();
             const guestValidation = await this.guestController.guestFileUpload(userAccessToken, this.weddingRole, guestFile);
             return { ...guestValidation, uploadIssues: new Map(Object.entries(guestValidation.uploadIssues)) };
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    async guestFileDownload() {
+        try {
+            const userAccessToken = await this.userStore.getAccessToken();
+            await this.guestController.guestFileDownload(userAccessToken, this.weddingRole);
         } catch (error) {
             throw error;
         }

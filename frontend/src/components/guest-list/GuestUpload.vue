@@ -1,5 +1,6 @@
 <template>
     <div>
+        <Button @click="downloadUsers" class="ml-5">Download Users</Button>
         <div ref="dropZoneRef"
             class="flex flex-col max-w-md h-40 bg-gray-400/10 justify-center items-center my-6 rounded mx-5">
             <div font-bold mb2>
@@ -20,7 +21,8 @@
                 </CardDescription>
             </CardHeader>
             <CardContent>
-                <Table class="table-fixed" style="width: 100%; max-width: 500px;" v-if="guestValidation && guestValidation.uploadIssues.size > 0">
+                <Table class="table-fixed" style="width: 100%; max-width: 500px;"
+                    v-if="guestValidation && guestValidation.uploadIssues.size > 0">
                     <TableHeader>
                         <TableRow>
                             <TableHead class="w-1/2">Guest Name</TableHead>
@@ -74,9 +76,9 @@ import { storeToRefs } from 'pinia';
 const guestService = new GuestService();
 
 const notificationStore = useNotificationStore();
-const {setMessage} = notificationStore;
+const { setMessage } = notificationStore;
 const userStore = useUserStore();
-const {hasEditAuthority} = storeToRefs(userStore);
+const { hasEditAuthority } = storeToRefs(userStore);
 
 const dropZoneRef = ref<HTMLDivElement>()
 const guestValidation = ref<UploadValidation | null>();
@@ -106,10 +108,14 @@ onChange((files) => {
 });
 
 const validationAreaDescription = computed(() => {
+    const uploadCreateListSize = guestValidation.value?.uploadGuestLists.createGuests.length ?? 0;
+    const uploadUpdateListSize = guestValidation.value?.uploadGuestLists.updateGuests.length ?? 0;
     if (guestValidation.value && guestValidation.value.uploadIssues.size === 0) {
-        return 'Validation was successful for all rows. Please click continue to proceed with upload.';
+        return `Validation was successful for all rows. Please click continue to proceed with upload. 
+        Creating ${uploadCreateListSize} and Updating ${uploadUpdateListSize}.`;
     } else {
-        return `There were ${guestValidation.value?.validatedGuests.length} successfully validated guests. 
+        return `There were ${uploadCreateListSize! + uploadUpdateListSize!} successfully validated guests.
+        Creating ${uploadCreateListSize} and Updating ${uploadUpdateListSize}.
         Please see errors below. You can click continue to upload validated guests or click cancel to fix errors and reupload.`;
     }
 });
@@ -129,12 +135,24 @@ function cancelUpload() {
 }
 
 async function proceedWithUpload() {
-    if (guestValidation.value && guestValidation.value?.validatedGuests) {
-        await guestService.batchAddGuests(guestValidation.value.validatedGuests);
-        setMessage('Uploaded users successfully.', NotificationType.SUCCESS);
+    if (guestValidation.value && guestValidation.value?.uploadGuestLists) {
+        if (guestValidation.value?.uploadGuestLists.createGuests && guestValidation.value?.uploadGuestLists.createGuests.length) {
+            await guestService.batchAddGuests(guestValidation.value.uploadGuestLists.createGuests);
+
+        }
+
+        if (guestValidation.value?.uploadGuestLists.updateGuests && guestValidation.value?.uploadGuestLists.updateGuests.length) {
+            await guestService.batchUpdateGuests(guestValidation.value.uploadGuestLists.updateGuests);
+        }
         showValidationArea.value = false;
         guestValidation.value = null;
+        setMessage('Uploaded users successfully.', NotificationType.SUCCESS);
+
     }
+}
+
+function downloadUsers() {
+    guestService.guestFileDownload();
 }
 
 </script>

@@ -5,8 +5,9 @@ import { CustomError, DatabaseError, NoDataError } from '../util/error/CustomErr
 import { injectable } from 'inversify';
 import { Guest } from '../models/Guest';
 import { WeddingEvent } from '../models/WeddingEvent';
-import { CollectionReference, DocumentData, QuerySnapshot, QueryDocumentSnapshot, Timestamp } from 'firebase-admin/firestore';
+import { CollectionReference, DocumentData, QuerySnapshot, QueryDocumentSnapshot, Timestamp, DocumentSnapshot } from 'firebase-admin/firestore';
 import validator from 'validator';
+import Logger from '../util/logs/logger';
 
 @injectable()
 export class GuestDao {
@@ -389,10 +390,6 @@ export class GuestDao {
                 )
             );
 
-            if (allEventNames.length === 0) {
-                throw new DatabaseError("No events associated with the provided guests.");
-            }
-
             const fetchedEventsMap = await this.fetchEventsByNames(weddingId, allEventNames);
 
             for (const name of allEventNames) {
@@ -503,6 +500,72 @@ export class GuestDao {
             }
         } catch (error: any) {
             throw new DatabaseError('Could not batch delete guests: ' + error);
+        }
+    }
+
+    async batchUpdateGuests(weddingId: string, guests: Partial<Guest>[]): Promise<void> {
+        try {
+
+            const batchSize = 500;
+            for (let i = 0; i < guests.length; i += batchSize) {
+                const batch = db.batch();
+                const batchGuests = guests.slice(i, i + batchSize);
+
+                const docRefs = batchGuests
+                    .filter(guest => guest.id)
+                    .map(guest => this.guestsCollection.doc(guest.id!));
+
+                const docSnapshots: DocumentSnapshot<DocumentData>[] = await db.getAll(...docRefs);
+
+                for (let j = 0; j < docSnapshots.length; j++) {
+                    const docSnapshot = docSnapshots[j];
+                    const guest = batchGuests[j];
+
+                    if (!docSnapshot.exists) {
+                        Logger.warn(`Skipping update for non-existent guest with id: ${guest.id}`);
+                        continue;
+                    }
+
+                    if (guest.weddingId && guest.weddingId !== weddingId) {
+                        throw new CustomError(`Guest weddingId mismatch for guest id ${guest.id}`, 400);
+                    }
+
+                    const docRef = this.guestsCollection.doc(guest.id!);
+
+                    const updateData: { [key: string]: any } = {};
+                    this.flattenObject(guest, updateData);
+
+                    if (Object.keys(updateData).length > 0) {
+                        batch.update(docRef, updateData);
+                    } else {
+                        Logger.info(`No fields provided to update for guest id: ${guest.id}`);
+                    }
+                }
+
+                if (batch) {
+                    await batch.commit();
+                    Logger.info(`Committed batch updates for guests ${i + 1} to ${i + batchGuests.length}`);
+                } else {
+                    Logger.info(`No updates to commit for batch ${i + 1} to ${i + batchGuests.length}`);
+                }
+            }
+        } catch (error: any) {
+            throw new CustomError("Could not batch update guests: " + error.message, error.statusCode || 500);
+        }
+    }
+
+    private flattenObject(obj: any, result: { [key: string]: any }, parentKey: string = ''): void {
+        for (const [key, value] of Object.entries(obj)) {
+            if (value === undefined || value === null) {
+                continue;
+            }
+
+            const fullKey = parentKey ? `${parentKey}.${key}` : key;
+            if (typeof value === 'object' && !(value instanceof Timestamp) && !(value instanceof Array)) {
+                this.flattenObject(value, result, fullKey);
+            } else {
+                result[fullKey] = value;
+            }
         }
     }
 
