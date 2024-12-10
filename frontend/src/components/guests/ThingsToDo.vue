@@ -1,9 +1,16 @@
 <template>
 
 <Card class="w-[90vw] justify-self-center bg-[#fff7e7]">
-    <CardHeader class="flex flex-col items-center rounded-lg justify-self-center bg-[#fff7e7] w-[80vw] font-['Faculty_Glyphic']">
-        <div class="m-4 space-y-1 text-base">
+    <CardHeader class="flex flex-col items-center rounded-lg justify-self-center bg-[#fff7e7] w-[80vw]">
+        <div class="m-4 space-y-1">
+            <p class="font-bold text-2xl font-['Faculty_Glyphic']">Things To Do in Udaipur</p>
+        </div>
+        <div class="m-4 space-y-1">
             <p>There are a lot of great places to visit in Udaipur, but here are some of our favorites!</p>
+        </div>
+
+        <div class="mt-4 space-y-1">
+            <img src="/images/city-palace.jpg" alt="City Palace" class="mt-3 w-auto h-auto max-w-xs object-contain" />
         </div>
         <div class="m-4 space-y-1">
             <p class="font-bold text-lg">City Palace</p>
@@ -12,6 +19,9 @@
             <p class="text-base font-style: italic">Entry fee into the museum is ₹400 (rupees) for adults and ₹150 (rupees) for children 5-18 years old.</p>
         </div>
   
+        <div class="mt-4 space-y-1">
+            <img src="/images/bagore-ki-haveli.jpg" alt="Bagore Ki Haveli" class="mt-3 w-auto h-auto max-w-xs object-contain" />
+        </div>
         <div class="m-4 space-y-1">
             <p class="font-bold text-lg">Bagore Ki Haveli</p>
             <p class="text-base font-bold"> 📍Haveli, opp. Gangaur Ghat Marg, near Hotel, Hotel Gangaur Palace, Pichola, Udaipur, Rajasthan 313001, India </p>
@@ -20,6 +30,9 @@
             <p class="font-style: italic"> Dharodar Dance Show: For non-Indians, the show is ₹150(rupees) for adults and ₹75 (rupees) for children 5-12 years old. For Indian citizens and OCI Card holders, the entry fee into the museum is ₹90 (rupees) for adults and ₹45 (rupees) for children 5-12 years old. There is an additional charge of ₹150 (rupees) for each camera.</p>
         </div>
 
+        <div class="mt-4 space-y-1">
+            <img src="/images/shilpgram.jpg" alt="Shilpgram" class="mt-3 w-auto h-auto max-w-xs object-contain" />
+        </div>       
         <div class="m-4 space-y-1">
             <p class="font-bold text-lg">Shilpgram</p>
             <p class="text-base font-bold">📍Shilpgram, Udaipur, Bari, Rajasthan 313001, India</p>
@@ -28,13 +41,15 @@
             <p class="text-base font-style: italic">Entry fee is ₹50 (rupees) for non-Indians and ₹30 (rupees) for Indian citizens and OCI card holders.</p>
         </div>
 
+        <div class="mt-4 space-y-1">
+            <img src="/images/vintage-car-museum.jpg" alt="Vintage Car Museum" class="mt-3 w-auto h-auto max-w-xs object-contain" />
+        </div>
         <div class="m-4 space-y-1">
             <p class="font-bold text-lg">Vintage Car Museum at Fateh Vilas by Fateh Collection</p>
             <p class="text-base font-bold">📍Bhujra, Sisarma Road, Old City, Brahmpuri, Udaipur, Rajasthan 313001, India</p>
             <p class="text-base">A must-visit for car lovers! The Vintage and Classic Car Museum is a car museum with some of the rarest classic and vintage car collections. This museum is owned by Arvind Singh Mewar, the king of Mewar (where Udaipur is). The museum also houses some famous cars, including the 1934 Rolls Royce used by James Bond in Octopussy! Find more information here: www.hrhhotels.com/vintage-classic-car-collection.php</p>
             <p class="text-base font-style: italic">Entry fee into the museum is ₹400 (rupees) for adults and ₹250 (rupees) for children.</p>
         </div>
-      <img src="/images/engage.jpg" alt="Guest Home Picture" class="mt-3 w-auto h-auto max-w-xs object-contain" />
     </CardHeader>
     <CardContent>
 
