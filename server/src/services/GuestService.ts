@@ -131,7 +131,6 @@ export class GuestService {
         guest.weddingId = data['Wedding Id'];
         guest.name = (data['Name'] || '').trim();
         guest.email = (data['Email'] || '').trim();
-        guest.phone = this.cleanPhoneField(data['Phone']);
         guest.serialNumber = (data['Serial Number'] || '').trim();
         guest.groupNumber = Number(data['Party Number'] || -1);
         guest.dietaryRestrictions = (data['Dietary Restrictions'] || '').trim();
@@ -372,7 +371,6 @@ export class GuestService {
         { label: 'Name', value: 'name' },
         { label: 'Party Number', value: 'groupNumber' },
         { label: 'Email', value: 'email' },
-        { label: 'Phone', value: 'phone' },
         { label: 'Hotel', value: 'accommodation.hotel.name' },
         { label: 'Room Number', value: 'accommodation.roomNumber' },
         { label: 'Dietary Restrictions', value: 'dietaryRestrictions' },
