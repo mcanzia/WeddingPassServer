@@ -1,21 +1,12 @@
 <template>
   <div class="mx-4 mt-4">
-    <div class="inline-flex gap-4">
-      <Search
-        class="mb-4"
-        placeholder="Search for wedding..."
-        v-model="searchQuery"
-      />
+    <div class="inline-flex gap-4" v-if="!isGuest">
+      <Search class="mb-4" placeholder="Search for wedding..." v-model="searchQuery" />
       <Button @click="goToAddWedding">Create Wedding</Button>
     </div>
     <div v-if="allWeddingRoles.length">
-      <WeddingCard
-        class="cursor-pointer"
-        v-for="weddingRole in filteredWeddingRoles"
-        :wedding-role="weddingRole"
-        :key="weddingRole.wedding.id"
-        @click="selectWedding(weddingRole)"
-      />
+      <WeddingCard class="cursor-pointer" v-for="weddingRole in filteredWeddingRoles" :wedding-role="weddingRole"
+        :key="weddingRole.wedding.id" @click="selectWedding(weddingRole)" />
     </div>
   </div>
 </template>
@@ -33,7 +24,7 @@ import { useRouterHelper } from "@/util/composables/useRouterHelper";
 import { WeddingRole } from "@/models/WeddingRole";
 
 const userStore = useUserStore();
-const { localUser, selectedWeddingRole } = storeToRefs(userStore);
+const { localUser, selectedWeddingRole, isGuest } = storeToRefs(userStore);
 
 onMounted(() => {
   if (localUser.value) {

@@ -7,8 +7,6 @@
           <CardTitle class="text-2xl font-['Faculty_Glyphic']">
             {{ currentSurveyResponse.survey.title }}
           </CardTitle>
-          <Button @click="submitSurveyResponse" :disabled="currentSurveyResponse.submitted">{{ submitButtonText
-            }}</Button>
         </div>
         <div class="grid gap-2">
           <Label for="party-members">Party Members</Label>
@@ -46,6 +44,8 @@
               @update:modelValue="handleValueUpdate" class="my-0" />
           </div>
         </ScrollArea>
+        <Button @click="submitSurveyResponse" :disabled="currentSurveyResponse.submitted">{{ submitButtonText
+          }}</Button>
       </CardContent>
     </Card>
     <Loader v-else />

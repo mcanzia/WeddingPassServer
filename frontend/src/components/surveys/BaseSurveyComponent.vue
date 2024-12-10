@@ -10,7 +10,7 @@
     </SurveyComponentWrapper>
 
     <div class="flex flex-col gap-2 w-full px-4" v-else>
-      <Label class="font-bold text-lg">{{ componentDetails.label }}</Label>
+      <Label class="font-bold text-md">{{ componentDetails.label }}</Label>
       <Component :is="displayComponentComputed" v-model="modelValueComputed" v-bind="componentProps"
         :disabled="disabled" />
     </div>

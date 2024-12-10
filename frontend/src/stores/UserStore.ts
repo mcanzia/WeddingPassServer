@@ -37,7 +37,17 @@ export const useUserStore = defineStore('userStore', () => {
     const selectedWedding = computed(() => selectedWeddingRole.value?.wedding);
     const selectedRole = computed(() => selectedWeddingRole.value?.role);
     const loggedInGuest = computed(() => selectedWeddingRole.value?.guestId!);
-    const isGuest = computed(() => selectedWeddingRole.value?.role === Roles.GUEST);
+    const isGuest = computed(() => {
+        if (selectedWeddingRole.value) {
+            return selectedWeddingRole.value?.role === Roles.GUEST;
+        } else {
+            const guestRole = localUser.value?.weddingRoles.find(role => role.role === Roles.GUEST);
+            if (guestRole) {
+                return true;
+            }
+        }
+        return false;
+    });
     const hasNoRoles = computed(() => !localUser.value || !localUser.value.weddingRoles.length)
 
     // Actions
