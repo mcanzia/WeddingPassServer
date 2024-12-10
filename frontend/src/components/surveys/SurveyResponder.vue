@@ -43,9 +43,10 @@
               :disabled="currentSurveyResponse.submitted" :guest="currentSurveyResponse.guest"
               @update:modelValue="handleValueUpdate" class="my-0" />
           </div>
+          <Button class="w-full mt-2" @click="submitSurveyResponse" :disabled="currentSurveyResponse.submitted">{{
+            submitButtonText
+            }}</Button>
         </ScrollArea>
-        <Button @click="submitSurveyResponse" :disabled="currentSurveyResponse.submitted">{{ submitButtonText
-          }}</Button>
       </CardContent>
     </Card>
     <Loader v-else />
