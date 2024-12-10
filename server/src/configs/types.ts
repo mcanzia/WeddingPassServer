@@ -18,5 +18,6 @@ export const TYPES = {
     PendingGuestController: Symbol.for("PendingGuestController"),
     PendingGuestDao: Symbol.for("PendingGuestDao"),
     HotelController: Symbol.for("HotelController"),
-    HotelDao: Symbol.for("HotelDao")
+    HotelDao: Symbol.for("HotelDao"),
+    InviteDao: Symbol.for("InviteDao")
 };

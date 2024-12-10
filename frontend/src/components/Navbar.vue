@@ -1,7 +1,7 @@
 <template>
   <div class="border-none w-screen">
     <div class="flex h-16 w-screen items-center px-4">
-      <nav class="flex justify-between w-screen space-x-4 lg:space-x-6">
+      <nav class="flex justify-between w-screen space-x-4 lg:space-x-6" v-if="!hasNoRoles">
         <div :class="cn('flex items-center space-x-4 lg:space-x-6', $attrs.class ?? '')">
           <a @click="selectedWedding ? goToRouteSecured('home') : goToRoute('landing')"
             class="text-sm font-medium transition-colors hover:text-primary cursor-pointer">
@@ -15,7 +15,7 @@
         </div>
 
         <IconDropdown icon="person-circle-outline" :extra-text="userEmail" classes="hidden md:flex">
-          <DropdownMenuItem class="capitalize" v-if="selectedWedding" @click="goToRoute('weddings')">
+          <DropdownMenuItem class="capitalize" v-if="selectedWedding && !isGuest" @click="goToRoute('weddings')">
             <a class="text-sm font-medium text-muted-foreground transition-colors hover:text-primary cursor-pointer">
               <span>
                 <ion-icon name="sparkles-outline"></ion-icon>
@@ -30,7 +30,7 @@
           </DropdownMenuItem>
         </IconDropdown>
         <IconDropdown icon="menu" classes="block md:hidden">
-          <DropdownMenuItem class="capitalize" v-if="selectedWedding" @click="goToRoute('weddings')">
+          <DropdownMenuItem class="capitalize" v-if="selectedWedding && !isGuest" @click="goToRoute('weddings')">
             <a class="text-sm font-medium text-muted-foreground transition-colors hover:text-primary cursor-pointer">
               <span>
                 <ion-icon name="sparkles-outline"></ion-icon>
@@ -68,7 +68,7 @@ import { Roles } from "@/models/Roles";
 const { goToRoute, goToRouteSecured } = useRouterHelper();
 
 const userStore = useUserStore();
-const { userEmail, selectedWedding, selectedRole } = storeToRefs(userStore);
+const { userEmail, selectedWedding, selectedRole, isGuest, hasNoRoles } = storeToRefs(userStore);
 
 async function logout() {
   await userStore.logoutUser();

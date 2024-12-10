@@ -86,20 +86,22 @@
 } */
 
 .loader-image img {
-  display: block;
-  object-fit: cover;
-  animation: diagonal-wipe 5s infinite ease-in-out;
+    display: block;
+    object-fit: cover;
+    animation: diagonal-wipe 5s infinite ease-in-out;
 }
 
 @keyframes diagonal-wipe {
-  0% {
-    clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%);
-  }
-  50% {
-    clip-path: polygon(0% 0%, 0% 0%, 0% 0%, 0% 0%);
-  }
-  100% {
-    clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%);
-  }
+    0% {
+        clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%);
+    }
+
+    50% {
+        clip-path: polygon(0% 0%, 0% 0%, 0% 0%, 0% 0%);
+    }
+
+    100% {
+        clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%);
+    }
 }
 </style>

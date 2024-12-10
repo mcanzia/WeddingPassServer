@@ -20,6 +20,7 @@ import { PendingGuestDao } from '../dao/PendingGuestDao';
 import { PendingGuestController } from '../controllers/PendingGuestController';
 import { HotelController } from '../controllers/HotelController';
 import { HotelDao } from '../dao/HotelDao';
+import { InviteDao } from '../dao/InviteDao';
 
 const container = new Container();
 
@@ -42,6 +43,7 @@ container.bind<PendingGuestController>(TYPES.PendingGuestController).to(PendingG
 container.bind<PendingGuestDao>(TYPES.PendingGuestDao).to(PendingGuestDao);
 container.bind<HotelController>(TYPES.HotelController).to(HotelController);
 container.bind<HotelDao>(TYPES.HotelDao).to(HotelDao);
+container.bind<InviteDao>(TYPES.InviteDao).to(InviteDao);
 
 
 export { container };

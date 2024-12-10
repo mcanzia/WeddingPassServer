@@ -37,6 +37,8 @@ export const useUserStore = defineStore('userStore', () => {
     const selectedWedding = computed(() => selectedWeddingRole.value?.wedding);
     const selectedRole = computed(() => selectedWeddingRole.value?.role);
     const loggedInGuest = computed(() => selectedWeddingRole.value?.guestId!);
+    const isGuest = computed(() => selectedWeddingRole.value?.role === Roles.GUEST);
+    const hasNoRoles = computed(() => !localUser.value || !localUser.value.weddingRoles.length)
 
     // Actions
     function initializeAuthListener() {
@@ -146,7 +148,7 @@ export const useUserStore = defineStore('userStore', () => {
             localUser.value = null;
             selectedWeddingRole.value = null;
             Cookies.remove('selectedWeddingRole');
-            goToRoute('login');
+            goToRoute('login-router');
         } catch (error: any) {
             ErrorHandler.handleUserAuthError(user.value, error);
         }
@@ -325,6 +327,8 @@ export const useUserStore = defineStore('userStore', () => {
         selectedRole,
         selectedWedding,
         loggedInGuest,
+        isGuest,
+        hasNoRoles,
         // Actions
         initializeAuthListener,
         loadSelectedWeddingRole,

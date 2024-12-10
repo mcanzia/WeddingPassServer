@@ -7,11 +7,13 @@ import { InviteToken } from "../models/InviteToken";
 import { UserDao } from "../dao/UserDao";
 import { TYPES } from "../configs/types";
 import { Roles } from "../models/Roles";
+import { InviteDao } from "../dao/InviteDao";
+import shortid from 'shortid';
 
 @injectable()
 export class AuthService {
 
-    constructor(@inject(TYPES.UserDao) private userDao: UserDao) { }
+    constructor(@inject(TYPES.UserDao) private userDao: UserDao, @inject(TYPES.InviteDao) private inviteDao: InviteDao) { }
 
     static async validateAuthToken(bearer: any) {
         if (!bearer || !bearer.startsWith("Bearer ")) {
@@ -53,6 +55,26 @@ export class AuthService {
         }
     }
 
+    async generateInviteLinkShort(weddingRole: WeddingRole): Promise<InviteToken> {
+        try {
+            let token = shortid.generate();
+
+            let existingInvite = await this.inviteDao.getInvite(token);
+            while (existingInvite) {
+                token = shortid.generate();
+                existingInvite = await this.inviteDao.getInvite(token);
+            }
+
+            const inviteToken = new InviteToken(token, weddingRole);
+
+            await this.inviteDao.createInvite(inviteToken);
+
+            return inviteToken;
+        } catch (error) {
+            throw new CustomError('Error generating invite link: ' + error);
+        }
+    }
+
     async processInviteLink(token: string) {
         try {
             const secretKey: jwt.Secret | undefined = process.env.JWT_SECRET_KEY;
@@ -69,4 +91,29 @@ export class AuthService {
             throw error;
         }
     }
+
+    async processInviteLinkShort(token: string): Promise<WeddingRole | null> {
+        try {
+            const invite = await this.inviteDao.getInvite(token);
+            if (!invite) {
+                throw new AuthorizationError('Invite not found or has expired.');
+            }
+
+            const { weddingRole } = invite;
+
+            if (weddingRole) {
+                if (weddingRole.role !== Roles.GUEST) {
+                    this.inviteDao.deleteInvite(token);
+                }
+                return weddingRole;
+            }
+            return null;
+        } catch (error) {
+            if (error instanceof AuthorizationError) {
+                throw error;
+            }
+            throw new CustomError('Error processing invite link ' + error);
+        }
+    }
+
 }

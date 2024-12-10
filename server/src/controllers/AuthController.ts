@@ -159,7 +159,7 @@ export class AuthController {
         try {
             Logger.info(`Generating Invite Link`);
             const weddingRole: WeddingRole = request.body;
-            const inviteToken: InviteToken = await this.authService.generateInviteLink(weddingRole);
+            const inviteToken: InviteToken = await this.authService.generateInviteLinkShort(weddingRole);
             Logger.info(`Successfully created invite link for ${weddingRole.wedding.id}`);
             response.status(200).json(inviteToken);
         } catch (error) {
@@ -173,9 +173,14 @@ export class AuthController {
             Logger.info(`Processing Invite Link`);
             const inviteToken: InviteToken = request.body;
             const userId: string = response.locals.userAuth;
-            const weddingRole: WeddingRole = await this.authService.processInviteLink(inviteToken.token);
-            Logger.info(`Successfully processed invite link for ${userId}`);
-            response.status(200).send(weddingRole);
+            const weddingRole: WeddingRole | null = await this.authService.processInviteLinkShort(inviteToken.token);
+            if (weddingRole) {
+                Logger.info(`Successfully processed invite link for ${userId}`);
+                response.status(200).send(weddingRole);
+            } else {
+                Logger.info(`Invite link not found for ${userId}`);
+                response.status(204).send();
+            }
         } catch (error) {
             Logger.error("Error processing invite link", error);
             response.status((error as CustomError).statusCode).send((error as CustomError).message);

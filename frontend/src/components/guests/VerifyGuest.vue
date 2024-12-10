@@ -69,7 +69,7 @@ import { PendingGuest } from "@/models/PendingGuest";
 
 const userStore = useUserStore();
 const { selectedWeddingRole, localUser } = storeToRefs(userStore);
-const { updateUserDetails, addPendingGuest } = userStore;
+const { updateUserDetails, addPendingGuest, logoutUser } = userStore;
 const notificationStore = useNotificationStore();
 const { setMessage } = notificationStore;
 const { goToRouteSecured } = useRouterHelper();
@@ -151,8 +151,9 @@ async function confirmGuest() {
       status: GuestInviteStatus.PENDING
     } as PendingGuest;
     await addPendingGuest(pendingGuest);
-    SuccessHandler.showNotification("Invite Requested.");
     localStorage.removeItem("guestPhone");
+    logoutUser();
+    SuccessHandler.showNotification("Invite Requested. Please wait for admin to add you.");
   } else {
     ErrorHandler.displayGenericError();
   }
