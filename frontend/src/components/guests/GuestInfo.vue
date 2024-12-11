@@ -1,6 +1,6 @@
 <template>
     <div>
-        <Card class="w-[90vw] justify-self-center bg-inherit border-none" v-if="!loading">
+        <Card class="w-full justify-self-center bg-inherit border-none" v-if="!loading">
             <CardHeader class="flex flex-col items-center justify-center">
                 <CardTitle class="text-2xl uppercase italic">
                     Guests In Party

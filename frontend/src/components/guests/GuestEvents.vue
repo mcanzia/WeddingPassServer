@@ -1,8 +1,8 @@
 <template>
-    <Card class="w-[90vw] justify-self-center bg-[#fff7e7]">
+    <Card class="w-full justify-self-center bg-[#fff7e7]">
         <CardHeader class="flex flex-col items-center justify-center">
             <div class="m-4 space-y-1">
-            <p class="font-bold text-2xl font-['Faculty_Glyphic']">Event Details</p>
+                <p class="font-bold text-2xl font-['Faculty_Glyphic']">Event Details</p>
             </div>
             <p class="w-[75vw] text-center">Please visit this page closer to the wedding day to see event details
                 and access your personalized information for the wedding.</p>

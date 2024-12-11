@@ -1,9 +1,9 @@
 <template>
-  <Card class="w-[90vw] justify-self-center bg-[#fff7e7]">
+  <Card class="w-full justify-self-center bg-[#fff7e7]">
     <CardHeader class="flex flex-col items-center justify-center">
       <div class="m-4 space-y-1">
-            <p class="font-bold text-2xl font-['Faculty_Glyphic']">Welcome!</p>
-        </div>
+        <p class="font-bold text-2xl font-['Faculty_Glyphic']">Welcome!</p>
+      </div>
       <p class="w-[75vw] text-center">We are so excited to celebrate with you! We need your help
         with providing
         more details to help
