@@ -384,7 +384,7 @@ async function saveGuest() {
         } as Guest;
         const guestService = new GuestService();
         await guestService.saveGuest(newGuest);
-        setMessage('Added user.', NotificationType.SUCCESS);
+        setMessage('Updated user.', NotificationType.SUCCESS);
         close();
     } else {
         ErrorHandler.handleAuthorizationError();

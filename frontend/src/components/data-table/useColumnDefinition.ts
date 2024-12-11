@@ -265,18 +265,22 @@ export function useColumnDefinition() {
         if (isFlight(details)) {
             if (fieldName in details) {
                 const value = (details as Flight)[fieldName as keyof Flight];
-                const dateCheck = value ? new Date(value) : undefined;
-                if (dateCheck && !isNaN(dateCheck.getTime())) {
-                    return h('div', dateToString(dateCheck) || '');
+                if (fieldName === 'flightTime') {
+                    const dateCheck = value ? new Date(value) : undefined;
+                    if (dateCheck && !isNaN(dateCheck.getTime())) {
+                        return h('div', dateToString(dateCheck) || '');
+                    }
                 }
                 return h('div', String(value || ''));
             }
         } else if (isTrain(details)) {
             if (fieldName in details) {
                 const value = (details as Train)[fieldName as keyof Train];
-                const dateCheck = value ? new Date(value) : undefined;
-                if (dateCheck && !isNaN(dateCheck.getTime())) {
-                    return h('div', dateToString(dateCheck) || '');
+                if (fieldName === 'trainTime') {
+                    const dateCheck = value ? new Date(value) : undefined;
+                    if (dateCheck && !isNaN(dateCheck.getTime())) {
+                        return h('div', dateToString(dateCheck) || '');
+                    }
                 }
                 return h('div', String(value || ''));
             }
