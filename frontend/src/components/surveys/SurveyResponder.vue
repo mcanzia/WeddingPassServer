@@ -10,7 +10,7 @@
         </div>
         <div class="grid gap-2">
           <Label for="party-members">Party Members -
-            <span class="italics">{{ inProgressCount }} in progress, {{ completedCount }} completed.</span>
+            <span class="italic">{{ progressCountText }}</span>
           </Label>
           <div class="flex inline-flex gap-5">
             <SingleSelectDropdown v-model="currentPartyMemberComputed" :select-options="partyMemberNames"
@@ -127,6 +127,16 @@ const copyResponsesMemberComputed = computed({
   }
 });
 
+const progressCountText = computed(() => {
+  if (inProgressCount.value === 0) {
+    return 'All surveys completed.';
+  } else if (inProgressCount.value === 1) {
+    return `${inProgressCount.value} survey in progress, ${completedCount.value} completed.`;
+  } else {
+    return `${inProgressCount.value} surveys in progress, ${completedCount.value} completed.`;
+  }
+});
+
 const submitButtonText = computed(() => {
   if (currentSurveyResponse.value && currentSurveyResponse.value.submitted) {
     return 'Survey Submitted';
@@ -159,6 +169,12 @@ function copyResponses() {
 
 async function submitSurveyResponse() {
   currentSurveyResponse.value = { ...currentSurveyResponse.value, submitted: true } as SurveyResponse;
+  if (surveyResponses.value) {
+    const currentSurveyIndex = surveyResponses.value?.findIndex(response => response.responseId === currentSurveyResponse.value?.responseId);
+    if (currentSurveyIndex) {
+      surveyResponses.value[currentSurveyIndex] = currentSurveyResponse.value;
+    }
+  }
   await saveSurveyResponse();
   setMessage('Submitted survey response.', NotificationType.SUCCESS);
 }
