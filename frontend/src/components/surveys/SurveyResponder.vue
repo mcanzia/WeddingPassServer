@@ -9,7 +9,9 @@
           </CardTitle>
         </div>
         <div class="grid gap-2">
-          <Label for="party-members">Party Members</Label>
+          <Label for="party-members">Party Members -
+            <span class="italics">{{ inProgressCount }} in progress, {{ completedCount }} completed.</span>
+          </Label>
           <div class="flex inline-flex gap-5">
             <SingleSelectDropdown v-model="currentPartyMemberComputed" :select-options="partyMemberNames"
               id="party-members" class="w-full" />
@@ -45,7 +47,7 @@
           </div>
           <Button class="w-full mt-2" @click="submitSurveyResponse" :disabled="currentSurveyResponse.submitted">{{
             submitButtonText
-            }}</Button>
+          }}</Button>
         </ScrollArea>
       </CardContent>
     </Card>
@@ -76,7 +78,7 @@ import Loader from '../Loader.vue';
 import ConfirmAction from '@/components/data-table/ConfirmAction.vue';
 
 const surveyResponseStore = useSurveyResponseStore();
-const { surveyResponses, currentSurveyResponse, partyMembers, currentSurveyStatus } = storeToRefs(surveyResponseStore);
+const { surveyResponses, currentSurveyResponse, partyMembers, currentSurveyStatus, inProgressCount, completedCount } = storeToRefs(surveyResponseStore);
 const { updateComponentValue, fetchPartySurveyResponses, saveSurveyResponse } = surveyResponseStore;
 const notificationStore = useNotificationStore();
 const { setMessage } = notificationStore;

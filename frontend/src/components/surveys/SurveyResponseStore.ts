@@ -23,6 +23,18 @@ export const useSurveyResponseStore = defineStore('surveyResponseStore', () => {
         return currentSurveyResponse.value?.submitted ? 'Survey Submitted' : 'Survey In Progress';
     });
 
+    const completedCount = computed(() => {
+        if (surveyResponses.value) {
+            return surveyResponses.value.filter(response => response.submitted).length;
+        }
+    });
+
+    const inProgressCount = computed(() => {
+        if (surveyResponses.value) {
+            return surveyResponses.value.filter(response => !response.submitted).length;
+        }
+    });
+
     async function saveSurveyResponse() {
         if (currentSurveyResponse.value) {
             try {
@@ -143,6 +155,8 @@ export const useSurveyResponseStore = defineStore('surveyResponseStore', () => {
         currentSurveyResponse,
         partyMembers,
         currentSurveyStatus,
+        completedCount,
+        inProgressCount,
         //actions
         saveSurveyResponse,
         fetchPartySurveyResponses,
