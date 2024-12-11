@@ -94,11 +94,10 @@
                     (rupees) for children.</p>
             </div>
         </CardHeader>
-        <CardContent>
-
-        </CardContent>
     </Card>
 </template>
 
 <script setup lang="ts">
+import { Card, CardHeader } from '@/components/ui/card';
+
 </script>

@@ -1,7 +1,7 @@
 <template>
     <Card class="w-full justify-self-center bg-[#fff7e7]">
-        <CardHeader class="flex flex-col items-center rounded-lg justify-self-center bg-[#fff7e7] w-full">
-            <div class="m-4 space-y-1">
+        <CardHeader class="flex flex-col rounded-lg justify-self-center bg-[#fff7e7] w-full">
+            <div class="m-4 space-y-1 text-center">
                 <p class="font-bold text-2xl font-['Faculty_Glyphic']">Q&A</p>
             </div>
 
@@ -45,14 +45,15 @@
                     security. They are totally fine in checked bags. Here is a list of prohibited items:
                     www.aai.aero/en/airports/security-info/kullu-manali</p>
             </div>
-            <img src="/images/s-and-m.jpg" alt="Q&A Picture" class="mt-1 w-auto h-auto max-w-xs object-contain" />
+            <div class="justify-items-center">
+                <img src="/images/s-and-m.jpg" alt="Q&A Picture"
+                    class="mt-1 w-auto h-auto max-w-xs object-contain align-self-center" />
+            </div>
         </CardHeader>
-        <CardContent>
-
-        </CardContent>
     </Card>
 </template>
 
 
 <script setup lang="ts">
+import { Card, CardHeader } from '@/components/ui/card';
 </script>
