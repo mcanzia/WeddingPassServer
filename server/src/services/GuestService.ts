@@ -396,6 +396,8 @@ export class GuestService {
                 return processedGuest;
             });
 
+            Logger.info(`processed guests`, JSON.stringify(processedGuests));
+
             const opts = {
                 fields: this.csvFields,
                 header: true,
@@ -409,7 +411,6 @@ export class GuestService {
         } catch (error: any) {
             throw new CustomError(error.message, 500);
         }
-
     }
 
     private formatDateString(dateStr: string): string {
