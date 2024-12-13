@@ -124,6 +124,12 @@ const navbarRoutes = computed(() => {
       roles: [Roles.ADMIN, Roles.EDITOR, Roles.READONLY],
     },
     {
+      name: "Barcodes",
+      secured: true,
+      path: "barcode",
+      roles: [Roles.ADMIN, Roles.EDITOR],
+    },
+    {
       name: "Invite Users",
       secured: true,
       path: "invite-user",

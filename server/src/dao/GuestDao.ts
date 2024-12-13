@@ -78,7 +78,6 @@ export class GuestDao {
                 guestData.id = doc.id;
                 guestData.events = guestData.events.map((event: string) => events.get(event));
                 guestData.attendingEvents = guestData.attendingEvents.map((event: string) => events.get(event));
-                // this.setDateFields(guestData);
                 guests.push(guestData as Guest);
             });
 
@@ -108,7 +107,6 @@ export class GuestDao {
                 guestData.id = doc.id;
                 guestData.events = guestData.events.map((event: string) => events.get(event));
                 guestData.attendingEvents = guestData.attendingEvents.map((event: string) => events.get(event));
-                // this.setDateFields(guestData);
                 guests.push(guestData as Guest);
             });
 
@@ -138,7 +136,6 @@ export class GuestDao {
                 guestData.events = guestData.events.map((event: string) => events.get(event));
                 guestData.attendingEvents = guestData.attendingEvents.map((event: string) => events.get(event));
                 guestData.id = guestDoc.id;
-                // this.setDateFields(guestData);
             }
 
             return guestData as Guest;
@@ -168,7 +165,6 @@ export class GuestDao {
                 guestData.id = doc.id;
                 guestData.events = guestData.events.map((event: string) => events.get(event));
                 guestData.attendingEvents = guestData.attendingEvents.map((event: string) => events.get(event));
-                // this.setDateFields(guestData);
                 guests.push(guestData as Guest);
             });
 
@@ -209,7 +205,6 @@ export class GuestDao {
                 guestData.id = doc.id;
                 guestData.events = guestData.events.map((eventId: string) => events.get(eventId));
                 guestData.attendingEvents = guestData.attendingEvents.map((eventId: string) => events.get(eventId));
-                // this.setDateFields(guestData);
                 guests.push(guestData as Guest);
             });
 
@@ -244,7 +239,6 @@ export class GuestDao {
                 guestData.id = doc.id;
                 guestData.events = guestData.events.map((eventId: string) => events.get(eventId));
                 guestData.attendingEvents = guestData.attendingEvents.map((eventId: string) => events.get(eventId));
-                // this.setDateFields(guestData);
                 guests.push(guestData as Guest);
             });
 
@@ -279,7 +273,6 @@ export class GuestDao {
                 guestData.id = doc.id;
                 guestData.events = guestData.events.map((eventId: string) => events.get(eventId));
                 guestData.attendingEvents = guestData.attendingEvents.map((eventId: string) => events.get(eventId));
-                // this.setDateFields(guestData);
                 guests.push(guestData as Guest);
             });
 
@@ -312,7 +305,6 @@ export class GuestDao {
                 guestData.id = doc.id;
                 guestData.events = guestData.events.map((event: string) => events.get(event));
                 guestData.attendingEvents = guestData.attendingEvents.map((event: string) => events.get(event));
-                // this.setDateFields(guestData);
                 guests.push(guestData as Guest);
             });
 
@@ -342,7 +334,6 @@ export class GuestDao {
                 guestData.id = doc.id;
                 guestData.events = guestData.events.map((eventId: string) => events.get(eventId));
                 guestData.attendingEvents = guestData.attendingEvents.map((eventId: string) => events.get(eventId));
-                // this.setDateFields(guestData);
                 guests.push(guestData as Guest);
             });
 
@@ -363,7 +354,6 @@ export class GuestDao {
             guest.name = validator.escape(guest.name.trim());
             guest.email = validator.escape(guest.email.trim());
             guest.phone = validator.escape(guest.phone.trim());
-            // this.setTimestampFields(guest);
 
             const events = await this.getValidatedEvents(guest, weddingId, guest.events);
             const attendingEvents = await this.getValidatedEvents(guest, weddingId, guest.attendingEvents!);
@@ -428,7 +418,6 @@ export class GuestDao {
                     guest.email = validator.escape(guest.email.trim());
                     guest.phone = validator.escape(guest.phone.trim());
                     guest.attendingEvents = [];
-                    // this.setTimestampFields(guest);
                     batch.set(newGuestRef, guest);
                 });
 
@@ -592,53 +581,4 @@ export class GuestDao {
         return validatedEvents;
     }
 
-    setDateFields(guestData: DocumentData) {
-        if (guestData.arrival) {
-            if (guestData.arrival.flightTime) {
-                guestData.arrival.flightTime = guestData.arrival.flightTime.toDate();
-            }
-            if (guestData.arrival.trainTime) {
-                guestData.arrival.trainTime = guestData.arrival.trainTime.toDate();
-            }
-            if (guestData.arrival.busTime) {
-                guestData.arrival.busTime = guestData.arrival.busTime.toDate();
-            }
-        }
-        if (guestData.departure) {
-            if (guestData.departure.flightTime) {
-                guestData.departure.flightTime = guestData.departure.flightTime.toDate();
-            }
-            if (guestData.departure.trainTime) {
-                guestData.departure.trainTime = guestData.departure.trainTime.toDate();
-            }
-            if (guestData.departure.busTime) {
-                guestData.departure.busTime = guestData.departure.busTime.toDate();
-            }
-        }
-    }
-
-    setTimestampFields(guestData: any) {
-        if (guestData.arrival) {
-            if (guestData.arrival.flightTime) {
-                guestData.arrival.flightTime = Timestamp.fromDate(new Date(guestData.arrival.flightTime));
-            }
-            if (guestData.arrival.trainTime) {
-                guestData.arrival.trainTime = Timestamp.fromDate(new Date(guestData.arrival.trainTime));
-            }
-            if (guestData.arrival.busTime) {
-                guestData.arrival.busTime = Timestamp.fromDate(new Date(guestData.arrival.busTime));
-            }
-        }
-        if (guestData.departure) {
-            if (guestData.departure.flightTime) {
-                guestData.departure.flightTime = Timestamp.fromDate(new Date(guestData.departure.flightTime));
-            }
-            if (guestData.departure.trainTime) {
-                guestData.departure.trainTime = Timestamp.fromDate(new Date(guestData.departure.trainTime));
-            }
-            if (guestData.departure.busTime) {
-                guestData.departure.busTime = Timestamp.fromDate(new Date(guestData.departure.busTime));
-            }
-        }
-    }
 }

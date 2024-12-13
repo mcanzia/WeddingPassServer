@@ -23,6 +23,7 @@ import { Drinks } from "../models/Drinks";
 import { Parser } from 'json2csv';
 import { CustomError } from "../util/error/CustomError";
 import { UploadGuestLists } from "../models/UploadGuestLists";
+import { OtherTransport } from "../models/OtherTransport";
 
 @injectable()
 export class GuestService {
@@ -175,6 +176,10 @@ export class GuestService {
                 transportation = new Train(TransportationType.TRAIN);
                 break;
             }
+            case TransportationType.OTHER: {
+                transportation = new OtherTransport(TransportationType.OTHER);
+                break;
+            }
             default: {
                 return undefined;
             }
@@ -188,6 +193,10 @@ export class GuestService {
 
         if (transportation.type === TransportationType.TRAIN && data[`${prefix}.Date`] && data[`${prefix}.Time`]) {
             (transportation as any)['trainTime'] = this.combineDateTime(data[`${prefix}.Date`], data[`${prefix}.Time`]);
+        }
+
+        if (transportation.type === TransportationType.OTHER && data[`${prefix}.Date`] && data[`${prefix}.Time`]) {
+            (transportation as any)['time'] = this.combineDateTime(data[`${prefix}.Date`], data[`${prefix}.Time`]);
         }
 
         for (const [dataField, propName] of Object.entries(fieldsMapping)) {
@@ -311,65 +320,12 @@ export class GuestService {
         return null;
     }
 
-    // generateCSVContent(guests: Guest[]): string {
-
-    //     const csvHeaders = [
-    //         { label: 'Id', key: 'id' },
-    //         { label: 'Wedding Id', key: 'weddingId' },
-    //         { label: 'Name', key: 'name' },
-    //         { label: 'Party Number', key: 'groupNumber' },
-    //         { label: 'Email', key: 'email' },
-    //         { label: 'Phone', key: 'phone' },
-    //         { label: 'Hotel', key: 'accommodation.hotel.name' },
-    //         { label: 'Room Number', key: 'accommodation.roomNumber' },
-    //         { label: 'Dietary Restrictions', key: 'dietaryRestrictions' },
-    //         { label: 'Type of Drink', key: 'drinks.preferences' },
-    //         { label: 'Arrival Type', key: 'arrival.type' },
-    //         { label: 'Arr.Date', key: 'arrival.date' },
-    //         { label: 'Arr.Time', key: 'arrival.time' },
-    //         { label: 'Arr.Flight.Num', key: 'arrival.flightNumber' },
-    //         { label: 'Arr.Train.Num', key: 'arrival.trainNumber' },
-    //         { label: 'Departure Type', key: 'departure.type' },
-    //         { label: 'Dep.Date', key: 'departure.date' },
-    //         { label: 'Dep.Time', key: 'departure.time' },
-    //         { label: 'Dep.Flight.Num', key: 'departure.flightNumber' },
-    //         { label: 'Dep.Train.Num', key: 'departure.trainNumber' },
-    //     ];
-
-    //     const headerRow = csvHeaders.map(header => header.label).join(',') + '\n';
-
-    //     const dataRows = guests.map(guest => {
-    //         return csvHeaders.map(header => {
-    //             let value = '';
-    //             const delimiter = '.';
-    //             if (header.key.includes(delimiter)) {
-    //                 const splitIndex = header.key.indexOf(delimiter);
-    //                 const parentKey = header.key.slice(0, splitIndex);
-    //                 const childKey = header.key.slice(splitIndex + delimiter.length);
-    //                 if (parentKey === 'accommodation') {
-    //                     value = this.setAccommodation(guest, childKey);
-    //                 } else if (parentKey === 'drinks') {
-    //                     value = this.setDrinks(guest, childKey);
-    //                 } else if (parentKey === 'arrival') {
-    //                     value = this.setTransportation(guest, childKey, 'arrival');
-    //                 } else if (parentKey === 'departure') {
-    //                     value = this.setTransportation(guest, childKey, 'departure');
-    //                 }
-    //             } else {
-    //                 value = (guest as any)[header.key] ?? '';
-    //             }
-    //             return `"${String(value).replace(/"/g, '""')}"`;
-    //         }).join(',');
-    //     }).join('\n');
-
-    //     return headerRow + dataRows;
-    // }
-
     private csvFields = [
         { label: 'Id', value: 'id' },
         { label: 'Wedding Id', value: 'weddingId' },
         { label: 'Name', value: 'name' },
         { label: 'Party Number', value: 'groupNumber' },
+        { label: 'Serial Number', value: 'serialNumber' },
         { label: 'Email', value: 'email' },
         { label: 'Hotel', value: 'accommodation.hotel.name' },
         { label: 'Room Number', value: 'accommodation.roomNumber' },
@@ -399,7 +355,9 @@ export class GuestService {
                         ? guestArrival.flightTime.split('T')
                         : guestArrival.trainTime
                             ? guestArrival.trainTime.split('T')
-                            : ['', ''];
+                            : guestArrival.time
+                                ? guestArrival.time.split('T')
+                                : ['', ''];
                     processedGuest.arrival = {
                         ...guestArrival,
                         date: arrDate ? this.formatDateString(arrDate) : '',
@@ -414,7 +372,9 @@ export class GuestService {
                         ? guestDeparture.flightTime.split('T')
                         : guestDeparture.trainTime
                             ? guestDeparture.trainTime.split('T')
-                            : ['', ''];
+                            : guestDeparture.time
+                                ? guestDeparture.time.split('T')
+                                : ['', ''];
                     processedGuest.departure = {
                         ...guestDeparture,
                         date: depDate ? this.formatDateString(depDate) : '',
@@ -446,51 +406,6 @@ export class GuestService {
             throw new CustomError(error.message, 500);
         }
 
-    }
-
-    // setAccommodation(guest: Guest, key: string) {
-    //     if (guest.accommodation) {
-    //         if (key === 'hotel.name' && guest.accommodation.hotel) {
-    //             return guest.accommodation.hotel.name;
-    //         } else {
-    //             return (guest.accommodation as any)[key] ?? '';
-    //         }
-    //     }
-    //     return '';
-    // }
-
-    // setDrinks(guest: Guest, key: string) {
-    //     if (guest.drinks) {
-    //         return (guest.drinks as any)[key] ?? '';
-    //     }
-    //     return '';
-    // }
-
-    // setTransportation(guest: Guest, key: string, transportType: string) {
-    //     const transportation = transportType === 'arrival' ? guest.arrival : guest.departure;
-    //     if (!transportation) return '';
-
-    //     switch (transportation.type) {
-    //         case TransportationType.FLIGHT:
-    //         case TransportationType.TRAIN:
-    //             return this.handleTransportDateTime(transportation, key);
-    //         default:
-    //             return '';
-    //     }
-    // }
-
-    private handleTransportDateTime(transportation: Transportation, key: string) {
-        const timeField = transportation.type === TransportationType.FLIGHT ? 'flightTime' : 'trainTime';
-
-        if (key === 'date' || key === 'time') {
-            const timeValue = (transportation as any)[timeField] ?? '';
-            if (!timeValue) return '';
-
-            const [datePart, timePart] = timeValue.split('T');
-            return key === 'date' ? this.formatDateString(datePart) : timePart;
-        }
-
-        return (transportation as any)[key] ?? '';
     }
 
     private formatDateString(dateStr: string): string {

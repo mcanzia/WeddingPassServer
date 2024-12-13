@@ -18,7 +18,7 @@
           </div>
           <div class="grid gap-2" v-else>
             <Label for="otp">Enter One Time Password</Label>
-            <Input id="otp" type="number" v-model="otp" required />
+            <Input id="otp" v-model="otp" required />
           </div>
           <div id="recaptcha-container"></div>
           <Button type="submit" @click="handleSubmit" class="w-full">
