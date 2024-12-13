@@ -66,6 +66,16 @@ export class GuestController {
         }
     }
 
+    async getGuestBySerialNumber(userAuthToken: any, weddingRole: WeddingRole, serialNumber: string) {
+        try {
+            const requestUrl = `${RequestUtil.getAPIUrl()}/api/weddings/${weddingRole.wedding.id}/guests/serial/${serialNumber}`;
+            return await RequestUtil.apiRequest(requestUrl, RequestUtil.GETRequestParams(userAuthToken, weddingRole.role));
+        } catch (error: any) {
+            ErrorHandler.handleGetByIdError();
+            throw error;
+        }
+    }
+
     async saveGuest(userAuthToken: any, weddingRole: WeddingRole, guest: Guest) {
         try {
             const requestUrl = `${RequestUtil.getAPIUrl()}/api/weddings/${weddingRole.wedding.id}/guests`;

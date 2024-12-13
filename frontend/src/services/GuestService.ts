@@ -76,6 +76,16 @@ export class GuestService {
         }
     }
 
+    async getGuestBySerialNumber(serialNumber: string) {
+        try {
+            const userAccessToken = await this.userStore.getAccessToken();
+            const guest = await this.guestController.getGuestBySerialNumber(userAccessToken, this.weddingRole, serialNumber);
+            return guest;
+        } catch (error) {
+            throw error;
+        }
+    }
+
     async saveGuest(guestToSave: Guest) {
         try {
             const userAccessToken = await this.userStore.getAccessToken();

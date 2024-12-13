@@ -1,6 +1,13 @@
 <template>
     <div class="grid grid-cols-1 md:grid-cols-6 mt-5 mx-5 gap-5 max-h-screen">
         <Card class="w-full md:col-span-2 max-h-screen">
+            <CardContent>
+                <svg id="barcode"></svg>
+                <Separator />
+                <BarcodeScanner></BarcodeScanner>
+            </CardContent>
+        </Card>
+        <Card class="w-full md:col-span-2 max-h-screen">
             <CardHeader class="flex-none">
                 <CardTitle class="text-2xl">
                     Click guest to see barcode
@@ -15,13 +22,6 @@
                         <GuestCard :guest="guest" @click="showBarcode(guest)"></GuestCard>
                     </div>
                 </ScrollArea>
-            </CardContent>
-        </Card>
-        <Card class="w-full md:col-span-2 max-h-screen">
-            <CardContent>
-                <svg id="barcode"></svg>
-                <Separator />
-                <BarcodeScanner></BarcodeScanner>
             </CardContent>
         </Card>
     </div>
