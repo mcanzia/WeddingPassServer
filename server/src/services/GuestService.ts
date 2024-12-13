@@ -326,6 +326,7 @@ export class GuestService {
         { label: 'Name', value: 'name' },
         { label: 'Party Number', value: 'groupNumber' },
         { label: 'Serial Number', value: 'serialNumber' },
+        { label: 'Events', value: 'events' },
         { label: 'Email', value: 'email' },
         { label: 'Hotel', value: 'accommodation.hotel.name' },
         { label: 'Room Number', value: 'accommodation.roomNumber' },
@@ -389,6 +390,9 @@ export class GuestService {
                     };
                 }
 
+                if (guest.events && Array.isArray(guest.events)) {
+                    processedGuest.events = guest.events.map(event => event.name).join(', ');
+                }
                 return processedGuest;
             });
 
