@@ -396,8 +396,6 @@ export class GuestService {
                 return processedGuest;
             });
 
-            Logger.info(`processed guests`, JSON.stringify(processedGuests));
-
             const opts = {
                 fields: this.csvFields,
                 header: true,
