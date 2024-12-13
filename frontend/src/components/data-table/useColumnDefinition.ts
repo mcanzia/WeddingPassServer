@@ -11,11 +11,12 @@ import { Guest } from "@/models/Guest";
 import { ColumnDef } from "@tanstack/vue-table";
 import { TransportationType } from "@/models/TransportationType";
 import { Transportation } from "@/models/Transportation";
-import { isFlight, isTrain } from "@/models/TransportationTypeGuard";
+import { isFlight, isOther, isTrain } from "@/models/TransportationTypeGuard";
 import { useDateUtils } from "@/components/common/useDateUtils";
 import { Drinks } from "@/models/Drinks";
 import { Accommodation } from "@/models/Accommodation";
 import { Hotel } from "@/models/Hotel";
+import { OtherTransport } from "@/models/OtherTransport";
 
 export function useColumnDefinition() {
 
@@ -97,6 +98,9 @@ export function useColumnDefinition() {
                         case TransportationType.TRAIN:
                             arrivalType = TransportationType.TRAIN;
                             break;
+                        case TransportationType.OTHER:
+                            arrivalType = TransportationType.OTHER;
+                            break;
                         default: {
                             arrivalType = 'N/A';
                         }
@@ -142,6 +146,15 @@ export function useColumnDefinition() {
                 },
             },
             {
+                accessorKey: 'arrivalTime',
+                header: ({ column }) => {
+                    return setHeaderDetails(column, 'Arrival Time');
+                },
+                cell: ({ row }) => {
+                    return getTransportationField(row.original.arrival, 'time');
+                },
+            },
+            {
                 accessorKey: 'departureType',
                 header: ({ column }) => {
                     return setHeaderDetails(column, 'Departure Type');
@@ -158,6 +171,9 @@ export function useColumnDefinition() {
                             break;
                         case TransportationType.TRAIN:
                             departureType = TransportationType.TRAIN.toUpperCase();
+                            break;
+                        case TransportationType.OTHER:
+                            departureType = TransportationType.OTHER.toUpperCase();
                             break;
                         default: {
                             departureType = 'N/A';
@@ -201,6 +217,15 @@ export function useColumnDefinition() {
                 },
                 cell: ({ row }) => {
                     return getTransportationField(row.original.departure, 'trainNumber');
+                },
+            },
+            {
+                accessorKey: 'departureTime',
+                header: ({ column }) => {
+                    return setHeaderDetails(column, 'Departure Time');
+                },
+                cell: ({ row }) => {
+                    return getTransportationField(row.original.departure, 'time');
                 },
             },
             {
@@ -277,6 +302,17 @@ export function useColumnDefinition() {
             if (fieldName in details) {
                 const value = (details as Train)[fieldName as keyof Train];
                 if (fieldName === 'trainTime') {
+                    const dateCheck = value ? new Date(value) : undefined;
+                    if (dateCheck && !isNaN(dateCheck.getTime())) {
+                        return h('div', dateToString(dateCheck) || '');
+                    }
+                }
+                return h('div', String(value || ''));
+            }
+        } else if (isOther(details)) {
+            if (fieldName in details) {
+                const value = (details as OtherTransport)[fieldName as keyof OtherTransport];
+                if (fieldName === 'time') {
                     const dateCheck = value ? new Date(value) : undefined;
                     if (dateCheck && !isNaN(dateCheck.getTime())) {
                         return h('div', dateToString(dateCheck) || '');

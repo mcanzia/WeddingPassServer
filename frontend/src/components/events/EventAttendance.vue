@@ -9,12 +9,18 @@
                     </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
-                    <DropdownMenuItem v-for="weddingEvent in weddingEvents" :key="weddingEvent.id"
-                        class="capitalize" @click="() => { openEvent(weddingEvent) }">
+                    <DropdownMenuItem v-for="weddingEvent in weddingEvents" :key="weddingEvent.id" class="capitalize"
+                        @click="() => { openEvent(weddingEvent) }">
                         {{ weddingEvent.name }}
                     </DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>
+            <BasicModal>
+                <template v-slot:trigger>
+                    <Button class="ml-3">Scan Barcode</Button>
+                </template>
+                <BarcodeScanner @decode="checkInWithBarcode"></BarcodeScanner>
+            </BasicModal>
             <EventGuests :wedding-event="selectedEvent!" v-if="selectedEvent" />
         </div>
         <Loader v-else />
@@ -36,10 +42,16 @@ import { EventService } from '@/services/EventService';
 import EventGuests from '@/components/events/EventGuests.vue';
 import { useRoute } from 'vue-router';
 import Loader from '@/components/Loader.vue';
-import {useRouterHelper} from '@/util/composables/useRouterHelper';
+import { useRouterHelper } from '@/util/composables/useRouterHelper';
+import BasicModal from '@/components/common/BasicModal.vue';
+import BarcodeScanner from '@/components/barcodes/BarcodeScanner.vue';
+import { GuestService } from '@/services/GuestService';
+import { Guest } from '@/models/Guest';
+import { ErrorHandler } from '@/util/error/ErrorHandler';
+import { SuccessHandler } from '@/util/SuccessHandler';
 
 const route = useRoute();
-const {goToRouteSecured, replaceRouteSecured} = useRouterHelper();
+const { goToRouteSecured, replaceRouteSecured } = useRouterHelper();
 
 const weddingEvents = ref<WeddingEvent[]>([]);
 const selectedEvent = ref<WeddingEvent | null>(null);
@@ -66,13 +78,13 @@ watch(
     () => route.query.event,
     (newEventId, oldEventId) => {
         if (newEventId !== oldEventId) {
-            const event : WeddingEvent | undefined = weddingEvents.value.find(event => event.id === newEventId);
+            const event: WeddingEvent | undefined = weddingEvents.value.find(event => event.id === newEventId);
             initializeEvent(event);
         }
     }
 );
 
-function initializeEvent(event : WeddingEvent | undefined) {
+function initializeEvent(event: WeddingEvent | undefined) {
     if (event) {
         selectedEvent.value = event;
     } else {
@@ -84,5 +96,30 @@ function initializeEvent(event : WeddingEvent | undefined) {
 function openEvent(wedEvent: WeddingEvent) {
     selectedEvent.value = wedEvent;
     goToRouteSecured('event-attendance', {}, { event: wedEvent.id });
+}
+
+async function checkInWithBarcode(serialNumber: string) {
+    try {
+
+        if (serialNumber) {
+            const guestService = new GuestService();
+            const guest: Guest = await guestService.getGuestBySerialNumber(serialNumber);
+            if (guest && guest.attendingEvents && selectedEvent.value) {
+                const alreadyCheckedIn = guest.attendingEvents.some(event => event.id === selectedEvent.value!.id);
+                if (alreadyCheckedIn) {
+                    SuccessHandler.showNotification(`Guest ${guest.name} is already checked in!`);
+                } else {
+                    guest.attendingEvents?.push(selectedEvent.value);
+                    await guestService.saveGuest(guest);
+                    SuccessHandler.showNotification(`Checked in: ${guest.name} for ${selectedEvent.value.name}`);
+                }
+            } else {
+                ErrorHandler.handleCustomError('Guest not found. Please search manually.');
+                return;
+            }
+        }
+    } catch (error: any) {
+        ErrorHandler.handleCustomError('Unexpected error occurred with handling guest. Please search manually.');
+    }
 }
 </script>

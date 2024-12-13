@@ -29,6 +29,7 @@ import GuestInfo from "@/components/guests/GuestInfo.vue";
 import HotelList from "@/components/hotels/HotelList.vue";
 import UpdateHotel from "@/components/hotels/UpdateHotel.vue";
 import GuestEvents from "@/components/guests/GuestEvents.vue";
+import BarcodeHandler from "@/components/barcodes/BarcodeHandler.vue";
 
 const routes = [
    {
@@ -52,6 +53,15 @@ const routes = [
       path: '/:weddingId/guests-upload',
       name: 'guests-upload',
       component: GuestUpload,
+      props: true,
+      meta: {
+         allowedRoles: [Roles.ADMIN]
+      }
+   },
+   {
+      path: '/:weddingId/barcode',
+      name: 'barcode',
+      component: BarcodeHandler,
       props: true,
       meta: {
          allowedRoles: [Roles.ADMIN]

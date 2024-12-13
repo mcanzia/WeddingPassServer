@@ -10,7 +10,7 @@
                 </CardDescription>
             </CardHeader>
             <CardContent>
-                <div class="grid grid-cols-3 gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div class="grid gap-4">
                         <div>
                             <Label for="guest-name">Guest Name</Label>
@@ -89,6 +89,18 @@
                         <div>
                             <Label for="dietary-restrictions">Dietary Restrictions</Label>
                             <Textarea id="dietary-restrictions" v-model="newUserForm.dietaryRestrictions"></Textarea>
+                        </div>
+                        <div>
+                            <Label for="will-drink-alcohol">Will Drink Alcohol</Label>
+                            <SingleSelectDropdown id="will-drink-alcohol" v-model="willDrinkAlcoholComputed"
+                                :selectOptions="['TRUE', 'FALSE']">
+                            </SingleSelectDropdown>
+                        </div>
+                        <div>
+                            <Label for="drink-preferences">Drink Preferences</Label>
+                            <SingleSelectDropdown id="drink-preferences" v-model="newUserForm.drinks.preferences"
+                                :selectOptions="drinkPreferences">
+                            </SingleSelectDropdown>
                         </div>
                     </div>
                 </div>
@@ -176,6 +188,9 @@ onMounted(async () => {
         if (editGuest.accommodation) {
             newUserForm.value.accommodation = editGuest.accommodation;
         }
+        if (editGuest.drinks) {
+            newUserForm.value.drinks = editGuest.drinks;
+        }
     }
     loading.value = false;
 });
@@ -196,18 +211,25 @@ const newUserForm = ref({
         flightNumber: '',
         trainTime: '',
         trainNumber: '',
+        time: ''
     },
     departure: {
         type: '',
         flightTime: '',
         flightNumber: '',
         trainTime: '',
-        trainNumber: ''
+        trainNumber: '',
+        time: ''
     },
     dietaryRestrictions: '',
     accommodation: {
         hotel: {} as Hotel,
         roomNumber: ''
+    },
+    drinks: {
+        willDrinkAlcohol: false,
+        preferences: '',
+        numberOfDrinks: undefined
     }
 });
 
@@ -225,6 +247,9 @@ const arrivalTimeComputed = computed({
                 case TransportationType.TRAIN: {
                     return newUserForm.value.arrival.trainTime;
                 }
+                case TransportationType.OTHER: {
+                    return newUserForm.value.arrival.time;
+                }
                 default: {
                     return ''
                 }
@@ -241,6 +266,10 @@ const arrivalTimeComputed = computed({
                 }
                 case TransportationType.TRAIN: {
                     newUserForm.value.arrival.trainTime = val;
+                    break;
+                }
+                case TransportationType.OTHER: {
+                    newUserForm.value.arrival.time = val;
                     break;
                 }
             }
@@ -324,6 +353,9 @@ const departureTimeComputed = computed({
                 case TransportationType.TRAIN: {
                     return newUserForm.value.departure.trainTime;
                 }
+                case TransportationType.OTHER: {
+                    return newUserForm.value.departure.time;
+                }
                 default: {
                     return ''
                 }
@@ -342,6 +374,10 @@ const departureTimeComputed = computed({
                     newUserForm.value.departure.trainTime = val;
                     break;
                 }
+                case TransportationType.OTHER: {
+                    newUserForm.value.departure.time = val;
+                    break;
+                }
             }
         }
     }
@@ -357,7 +393,8 @@ function clearArrivalTransport() {
         trainTime: '',
         trainNumber: '',
         flightNumber: '',
-        flightTime: ''
+        flightTime: '',
+        time: ''
     }
 }
 
@@ -371,7 +408,8 @@ function clearDepartureTransport() {
         trainTime: '',
         trainNumber: '',
         flightNumber: '',
-        flightTime: ''
+        flightTime: '',
+        time: ''
     }
 }
 
@@ -391,6 +429,19 @@ async function saveGuest() {
         close();
     }
 }
+
+const drinkPreferences = computed(() => {
+    return ['SCOTCH', 'RUM', 'GIN', 'BEER', 'WHITE WINE', 'RED WINE'];
+});
+
+const willDrinkAlcoholComputed = computed({
+    get() {
+        return String(newUserForm.value.drinks.willDrinkAlcohol).toUpperCase();
+    },
+    set(val) {
+        newUserForm.value.drinks.willDrinkAlcohol = !!val.toLowerCase();
+    }
+});
 
 function close() {
     goToRouteSecured('guests');

@@ -15,6 +15,8 @@ export const useSurveyResponseStore = defineStore('surveyResponseStore', () => {
     const surveyResponses = ref<SurveyResponse[]>();
     const currentSurveyResponse = ref<SurveyResponse>();
 
+    const timeFields = ['arrival:time', 'arrival:flightTime', 'arrival:trainTime', 'departure:time', 'departure:flightTime', 'departure:trainTime'];
+
     const partyMembers = computed(() => {
         return surveyResponses.value?.map(surveyResponse => surveyResponse.guest);
     });
@@ -71,7 +73,7 @@ export const useSurveyResponseStore = defineStore('surveyResponseStore', () => {
         for (const component of components) {
             if (component.infoLookupField) {
                 const fields = component.infoLookupField.split(':');
-                if (component.componentValue) {
+                if (component.componentValue || timeFields.includes(component.infoLookupField)) {
                     setGuestField(guest, fields, component.componentValue);
                 }
             }
