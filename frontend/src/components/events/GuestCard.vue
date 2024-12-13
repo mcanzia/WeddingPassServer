@@ -1,5 +1,5 @@
 <template>
-    <Card class="max-w-sm mx-auto" :class="{ 'bg-green-500': attendingEvent }">
+    <Card class="max-w-sm mx-auto" :class="{ 'bg-green-500': attendingEvent || submitted }">
         <CardContent class="py-5 px-4">
             <div class="grid grid-cols-[1fr_auto] items-center" v-if="guest">
                 <p class="text-sm font-medium leading-none">
@@ -21,6 +21,7 @@ import { Guest } from '@/models/Guest';
 const props = defineProps<{
     guest?: Guest;
     attendingEvent?: Boolean;
+    submitted?: Boolean;
 }>();
 
 </script>

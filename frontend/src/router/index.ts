@@ -30,6 +30,7 @@ import HotelList from "@/components/hotels/HotelList.vue";
 import UpdateHotel from "@/components/hotels/UpdateHotel.vue";
 import GuestEvents from "@/components/guests/GuestEvents.vue";
 import BarcodeHandler from "@/components/barcodes/BarcodeHandler.vue";
+import SurveyResponseTracking from "@/components/surveys/SurveyResponseTracking.vue";
 
 const routes = [
    {
@@ -132,6 +133,15 @@ const routes = [
       path: '/:weddingId/:surveyId',
       name: 'edit-survey',
       component: SurveyBuilder,
+      props: true,
+      meta: {
+         allowedRoles: [Roles.ADMIN, Roles.EDITOR]
+      }
+   },
+   {
+      path: '/:weddingId/:surveyId/tracker',
+      name: 'survey-tracker',
+      component: SurveyResponseTracking,
       props: true,
       meta: {
          allowedRoles: [Roles.ADMIN, Roles.EDITOR]

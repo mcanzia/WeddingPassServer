@@ -11,29 +11,20 @@
           </CardDescription>
         </div>
         <div>
+          <Button class="border-solid mr-3" @click="goToSurveyResponses">Responses</Button>
           <Toggle class="border-solid" @click="togglePreviewMode">Preview</Toggle>
         </div>
       </div>
     </CardHeader>
     <CardContent>
       <div class="grid gap-4">
-        <div
-            class="flex items-center space-x-2 mt-2"
-          >
-          <Switch
-              v-model:checked="surveyPublishedComputed"
-              id="published-toggle"
-            />
-            <Label for="published-toggle">{{ publishedToggleText }}</Label>
+        <div class="flex items-center space-x-2 mt-2">
+          <Switch v-model:checked="surveyPublishedComputed" id="published-toggle" />
+          <Label for="published-toggle">{{ publishedToggleText }}</Label>
         </div>
-        <div
-            class="flex items-center space-x-2 mt-2"
-          >
-          <Switch
-              v-model:checked="showPartyMemberSurveysComputed"
-              id="party-member-toggle"
-            />
-            <Label for="party-member-toggle">{{ showPartyMemberSurveysText }}</Label>
+        <div class="flex items-center space-x-2 mt-2">
+          <Switch v-model:checked="showPartyMemberSurveysComputed" id="party-member-toggle" />
+          <Label for="party-member-toggle">{{ showPartyMemberSurveysText }}</Label>
         </div>
         <div class="grid gap-2">
           <Label for="survey-name">Survey Name</Label>
@@ -323,5 +314,11 @@ function toggleEditableInfo(value: boolean) {
 function closeAddChildMode() {
   parentFieldId.value = null;
   parentTriggerField.value = null;
+}
+
+function goToSurveyResponses() {
+  if (survey.value) {
+    goToRouteSecured("survey-tracker", { surveyId: survey.value.id });
+  }
 }
 </script>
