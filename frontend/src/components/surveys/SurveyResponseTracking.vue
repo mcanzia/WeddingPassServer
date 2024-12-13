@@ -42,6 +42,8 @@ import debounce from 'lodash/debounce';
 import { Badge } from '@/components/ui/badge'
 import { SurveyResponse } from '@/models/SurveyResponse';
 import { SurveyResponseService } from '@/services/SurveyResponseService';
+import { Guest } from '@/models/Guest';
+import { GuestService } from '@/services/GuestService';
 
 const props = defineProps<{
     surveyId: string | null;
@@ -51,10 +53,13 @@ onMounted(async () => {
     if (props.surveyId) {
         const surveyResponseService = new SurveyResponseService();
         allSurveyResponses.value = await surveyResponseService.getAllSurveyResponses(props.surveyId);
+        const guestService = new GuestService();
+        allGuests.value = await guestService.getAllGuests();
     }
 });
 
 const allSurveyResponses = ref<SurveyResponse[]>([]);
+const allGuests = ref<Guest[]>();
 const searchQuery = ref('');
 const debouncedSearchQuery = ref('');
 const filterToggle = ref(undefined);
@@ -63,8 +68,27 @@ const updateSearchQuery = debounce((value: string) => {
     debouncedSearchQuery.value = value;
 }, 250);
 
+const mappedGuests = computed(() => {
+    if (allGuests.value) {
+        return allGuests.value.map(guest => {
+            const response = allSurveyResponses.value.find(response => response.guest.id === guest.id);
+            if (response) {
+                return {
+                    guest: guest,
+                    submitted: response.submitted
+                };
+            }
+            return {
+                guest: guest,
+                submitted: false
+            }
+        });
+    }
+    return [];
+})
+
 const filteredResponses = computed(() => {
-    let localResponses = allSurveyResponses.value;
+    let localResponses = mappedGuests.value;
 
     if (filterToggle.value && filterToggle.value === 'submitted') {
         localResponses = localResponses.filter(response => response.submitted);
@@ -84,11 +108,11 @@ watch(searchQuery, (newValue) => {
     updateSearchQuery(newValue);
 });
 
-function isGuestSubmitted(response: SurveyResponse) {
+function isGuestSubmitted(response: any) {
     return response.submitted;
 }
 
-function submittedText(response: SurveyResponse) {
+function submittedText(response: any) {
     return isGuestSubmitted(response) ? 'Submitted' : 'Not Submitted';
 }
 
