@@ -52,9 +52,10 @@ import ConfirmAction from '@/components/data-table/ConfirmAction.vue';
 
 const props = defineProps<{
   weddingEvent: WeddingEvent | null;
+  eventGuests: Guest[];
 }>();
 
-const allInvitedGuests = ref<Guest[]>([]);
+// const allInvitedGuests = ref<Guest[]>([]);
 const searchQuery = ref('');
 const debouncedSearchQuery = ref('');
 const filterToggle = ref(undefined);
@@ -68,7 +69,7 @@ const updateSearchQuery = debounce((value: string) => {
 }, 250);
 
 const filteredGuests = computed(() => {
-  let localGuests = allInvitedGuests.value;
+  let localGuests = props.eventGuests;
 
   if (filterToggle.value && filterToggle.value === 'attending') {
     localGuests = localGuests.filter(guest => guest.attendingEvents?.some(event => event.id === props.weddingEvent!.id));
@@ -83,13 +84,6 @@ const filteredGuests = computed(() => {
   }
   return localGuests;
 });
-
-watch(() => props.weddingEvent, async (newVal, oldVal) => {
-  if (newVal && newVal !== oldVal) {
-    const guestService = new GuestService();
-    allInvitedGuests.value = await guestService.getGuestsForEvent(newVal.id!);
-  }
-}, { immediate: true, deep: true });
 
 watch(searchQuery, (newValue) => {
   updateSearchQuery(newValue);
