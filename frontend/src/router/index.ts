@@ -31,6 +31,7 @@ import UpdateHotel from "@/components/hotels/UpdateHotel.vue";
 import GuestEvents from "@/components/guests/GuestEvents.vue";
 import BarcodeHandler from "@/components/barcodes/BarcodeHandler.vue";
 import SurveyResponseTracking from "@/components/surveys/SurveyResponseTracking.vue";
+import DrinkTracker from "@/components/drinks/DrinkTracker.vue";
 
 const routes = [
    {
@@ -115,6 +116,15 @@ const routes = [
       path: '/:weddingId/event-attendance',
       name: 'event-attendance',
       component: EventAttendance,
+      props: true,
+      meta: {
+         allowedRoles: [Roles.ADMIN, Roles.EDITOR, Roles.READONLY]
+      }
+   },
+   {
+      path: '/:weddingId/drinks',
+      name: 'drinks',
+      component: DrinkTracker,
       props: true,
       meta: {
          allowedRoles: [Roles.ADMIN, Roles.EDITOR, Roles.READONLY]

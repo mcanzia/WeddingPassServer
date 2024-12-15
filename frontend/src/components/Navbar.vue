@@ -130,6 +130,12 @@ const navbarRoutes = computed(() => {
       roles: [Roles.ADMIN, Roles.EDITOR],
     },
     {
+      name: "Drinks",
+      secured: true,
+      path: "drinks",
+      roles: [Roles.ADMIN, Roles.EDITOR, Roles.READONLY],
+    },
+    {
       name: "Invite Users",
       secured: true,
       path: "invite-user",
