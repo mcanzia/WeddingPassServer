@@ -4,6 +4,14 @@
             <CardContent>
                 <svg id="barcode"></svg>
                 <Separator />
+                <div class="mb-4 flex space-x-2" v-if="selectedGuest">
+                    <Button @click="downloadSVG" class="bg-blue-500 text-white px-4 py-2 rounded-md">
+                        Download SVG
+                    </Button>
+                    <Button @click="downloadPNG" class="bg-green-500 text-white px-4 py-2 rounded-md">
+                        Download PNG
+                    </Button>
+                </div>
                 <BarcodeScanner></BarcodeScanner>
             </CardContent>
         </Card>
@@ -40,6 +48,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import JsBarcode from 'jsbarcode';
 import { ErrorHandler } from '@/util/error/ErrorHandler';
 import BarcodeScanner from '@/components/barcodes/BarcodeScanner.vue';
+import Button from '@/components/ui/button/Button.vue';
+import { saveAs } from 'file-saver';
 
 onMounted(async () => {
     const guestService = new GuestService();
@@ -49,6 +59,7 @@ onMounted(async () => {
 const allGuests = ref<Guest[]>([]);
 const searchQuery = ref('');
 const debouncedSearchQuery = ref('');
+const selectedGuest = ref<Guest>();
 
 const updateSearchQuery = debounce((value: string) => {
     debouncedSearchQuery.value = value;
@@ -71,10 +82,83 @@ const filteredGuests = computed(() => {
 
 function showBarcode(guest: Guest) {
     if (guest.serialNumber) {
-        JsBarcode("#barcode", guest.serialNumber);
+        JsBarcode("#barcode", guest.serialNumber, {
+            displayValue: false,
+            height: 40,
+        });
+        selectedGuest.value = guest;
     } else {
         ErrorHandler.handleCustomError("Guest does not have a serial number associated with them");
     }
+}
+
+function downloadSVG() {
+    const svg = document.getElementById('barcode') as unknown as SVGElement;
+    if (!svg) {
+        ErrorHandler.handleCustomError("Barcode SVG not found");
+        return;
+    }
+
+    const serializer = new XMLSerializer();
+    let source = serializer.serializeToString(svg);
+
+    if (!source.match(/^<svg[^>]+xmlns="http:\/\/www\.w3\.org\/2000\/svg"/)) {
+        source = source.replace(/^<svg/, '<svg xmlns="http://www.w3.org/2000/svg"');
+    }
+    if (!source.match(/^<svg[^>]+"http:\/\/www\.w3\.org\/1999\/xlink"/)) {
+        source = source.replace(/^<svg/, '<svg xmlns:xlink="http://www.w3.org/1999/xlink"');
+    }
+
+    source = '<?xml version="1.0" standalone="no"?>\r\n' + source;
+
+    const url = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(source);
+
+    const downloadLink = document.createElement('a');
+    downloadLink.href = url;
+    downloadLink.download = `barcode-${selectedGuest.value?.serialNumber}.svg`;
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
+}
+
+function downloadPNG() {
+    const svg = document.getElementById('barcode') as unknown as SVGElement;
+    if (!svg) {
+        ErrorHandler.handleCustomError("Barcode SVG not found");
+        return;
+    }
+
+    const serializer = new XMLSerializer();
+    let source = serializer.serializeToString(svg);
+
+    if (!source.match(/^<svg[^>]+xmlns="http:\/\/www\.w3\.org\/2000\/svg"/)) {
+        source = source.replace(/^<svg/, '<svg xmlns="http://www.w3.org/2000/svg"');
+    }
+    if (!source.match(/^<svg[^>]+"http:\/\/www\.w3\.org\/1999\/xlink"/)) {
+        source = source.replace(/^<svg/, '<svg xmlns:xlink="http://www.w3.org/1999/xlink"');
+    }
+
+    source = '<?xml version="1.0" standalone="no"?>\r\n' + source;
+
+    const url = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(source);
+
+    const img = new Image();
+    img.onload = function () {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const context = canvas.getContext('2d');
+        if (!context) {
+            ErrorHandler.handleCustomError("Canvas context not available");
+            return;
+        }
+        context.drawImage(img, 0, 0);
+
+        const pngDataUrl = canvas.toDataURL('image/png');
+
+        saveAs(pngDataUrl, `barcode-${selectedGuest.value?.serialNumber}.png`);
+    };
+    img.src = url;
 }
 
 </script>

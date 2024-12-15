@@ -3,7 +3,7 @@ import { ErrorHandler } from "@/util/error/ErrorHandler";
 
 export class RequestUtil {
     static getAPIUrl() {
-        return import.meta.env.VITE_SERVER_API_URL ? import.meta.env.VITE_SERVER_API_URL : "http://localhost:7500";
+        return import.meta.env.VITE_SERVER_API_URL ? import.meta.env.VITE_SERVER_API_URL : "http://192.168.1.181:7500";
     }
 
     static GETRequestParams(userAuthToken: any, role?: string) {
