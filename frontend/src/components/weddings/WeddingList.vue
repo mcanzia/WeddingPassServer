@@ -1,6 +1,6 @@
 <template>
   <div class="mx-4 mt-4">
-    <div class="inline-flex gap-4" v-if="!isGuest">
+    <div class="inline-flex gap-4" v-if="!isGuest && !isTrio">
       <Search class="mb-4" placeholder="Search for wedding..." v-model="searchQuery" />
       <Button @click="goToAddWedding">Create Wedding</Button>
     </div>
@@ -24,7 +24,7 @@ import { useRouterHelper } from "@/util/composables/useRouterHelper";
 import { WeddingRole } from "@/models/WeddingRole";
 
 const userStore = useUserStore();
-const { localUser, selectedWeddingRole, isGuest } = storeToRefs(userStore);
+const { localUser, selectedWeddingRole, isGuest, isTrio } = storeToRefs(userStore);
 
 onMounted(() => {
   if (localUser.value) {

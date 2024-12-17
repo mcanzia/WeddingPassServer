@@ -91,13 +91,13 @@ const navbarRoutes = computed(() => {
       name: "Guest List",
       secured: true,
       path: "guests",
-      roles: [Roles.ADMIN, Roles.EDITOR, Roles.READONLY],
+      roles: [Roles.ADMIN, Roles.EDITOR, Roles.READONLY, Roles.TRIO],
     },
     {
       name: "Event Attendance",
       secured: true,
       path: "event-attendance",
-      roles: [Roles.ADMIN, Roles.EDITOR, Roles.READONLY],
+      roles: [Roles.ADMIN, Roles.EDITOR, Roles.READONLY, Roles.TRIO],
     },
     {
       name: "Guests Upload",
@@ -133,7 +133,7 @@ const navbarRoutes = computed(() => {
       name: "Drinks",
       secured: true,
       path: "drinks",
-      roles: [Roles.ADMIN, Roles.EDITOR, Roles.READONLY],
+      roles: [Roles.ADMIN, Roles.EDITOR, Roles.READONLY, Roles.TRIO],
     },
     {
       name: "Invite Users",

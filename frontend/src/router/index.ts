@@ -75,7 +75,7 @@ const routes = [
       component: AddGuest,
       props: true,
       meta: {
-         allowedRoles: [Roles.ADMIN, Roles.EDITOR]
+         allowedRoles: [Roles.ADMIN, Roles.EDITOR, Roles.TRIO]
       }
    },
    {
@@ -118,7 +118,7 @@ const routes = [
       component: EventAttendance,
       props: true,
       meta: {
-         allowedRoles: [Roles.ADMIN, Roles.EDITOR, Roles.READONLY]
+         allowedRoles: [Roles.ADMIN, Roles.EDITOR, Roles.READONLY, Roles.TRIO]
       }
    },
    {
@@ -127,7 +127,7 @@ const routes = [
       component: DrinkTracker,
       props: true,
       meta: {
-         allowedRoles: [Roles.ADMIN, Roles.EDITOR, Roles.READONLY]
+         allowedRoles: [Roles.ADMIN, Roles.EDITOR, Roles.READONLY, Roles.TRIO]
       }
    },
    {

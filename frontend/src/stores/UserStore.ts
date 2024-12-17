@@ -48,6 +48,18 @@ export const useUserStore = defineStore('userStore', () => {
         }
         return false;
     });
+
+    const isTrio = computed(() => {
+        if (selectedWeddingRole.value) {
+            return selectedWeddingRole.value?.role === Roles.TRIO;
+        } else {
+            const guestRole = localUser.value?.weddingRoles.find(role => role.role === Roles.TRIO);
+            if (guestRole) {
+                return true;
+            }
+        }
+        return false;
+    });
     const hasNoRoles = computed(() => !localUser.value || !localUser.value.weddingRoles.length)
 
     // Actions
@@ -339,6 +351,7 @@ export const useUserStore = defineStore('userStore', () => {
         loggedInGuest,
         isGuest,
         hasNoRoles,
+        isTrio,
         // Actions
         initializeAuthListener,
         loadSelectedWeddingRole,
