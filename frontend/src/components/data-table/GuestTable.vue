@@ -41,7 +41,7 @@
           </ConfirmAction>
         </div>
 
-        <div class="flex items-center mt-2 md:mt-0 w-full md:w-auto" v-if="hasEditAuthority">
+        <div class="flex items-center mt-2 md:mt-0 w-full md:w-auto" v-if="hasEditAuthority || isTrio">
           <Button variant="secondary" class="w-full md:w-auto" @click="goToUpdateGuest(false)" v-if="showEditButton">
             Edit Selected Guest
           </Button>
