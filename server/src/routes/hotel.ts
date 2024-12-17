@@ -8,8 +8,8 @@ import { Roles } from '../models/Roles';
 const router = express.Router({ mergeParams: true });
 const hotelController = container.get<HotelController>(TYPES.HotelController);
 
-router.get('/', authorizeRoles([Roles.EDITOR, Roles.ADMIN, Roles.READONLY]), (req, res, next) => hotelController.getHotels(req, res, next));
-router.get('/id/:hotelId', authorizeRoles([Roles.EDITOR, Roles.ADMIN, Roles.READONLY]), (req, res, next) => hotelController.getHotelbyId(req, res, next));
+router.get('/', authorizeRoles([Roles.EDITOR, Roles.ADMIN, Roles.READONLY, Roles.TRIO]), (req, res, next) => hotelController.getHotels(req, res, next));
+router.get('/id/:hotelId', authorizeRoles([Roles.EDITOR, Roles.ADMIN, Roles.READONLY, Roles.TRIO]), (req, res, next) => hotelController.getHotelbyId(req, res, next));
 router.post('/', authorizeRoles([Roles.EDITOR, Roles.ADMIN]), (req, res, next) => hotelController.saveHotel(req, res, next));
 router.post('/batch', authorizeRoles([Roles.EDITOR, Roles.ADMIN]), (req, res, next) => hotelController.batchCreateHotels(req, res, next));
 router.delete('/', authorizeRoles([Roles.EDITOR, Roles.ADMIN]), (req, res, next) => hotelController.deleteHotel(req, res, next));
