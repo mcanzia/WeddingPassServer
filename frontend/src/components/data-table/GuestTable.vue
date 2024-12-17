@@ -28,7 +28,7 @@
           <SingleSelectDropdown v-model="viewModeComputed" :selectOptions="viewModeOptions"></SingleSelectDropdown>
         </div>
 
-        <div class="flex gap-2 items-center mt-2 md:mt-0 w-full md:w-auto" v-if="hasEditAuthority">
+        <div class="flex gap-2 items-center mt-2 md:mt-0 w-full md:w-auto" v-if="hasEditAuthority || isTrio">
           <Button variant="outline" class="w-full md:w-auto" @click="goToUpdateGuest(true)">
             Add Guest
           </Button>
@@ -161,7 +161,7 @@ const { goToRouteSecured } = useRouterHelper();
 const notificationStore = useNotificationStore();
 const { setMessage } = notificationStore;
 const userStore = useUserStore();
-const { hasEditAuthority } = storeToRefs(userStore);
+const { hasEditAuthority, isTrio } = storeToRefs(userStore);
 const { columnDefs } = useColumnDefinition();
 const { viewModeColumnVisibility } = useColumnVisibility();
 
@@ -219,7 +219,7 @@ const table = useVueTable({
 });
 
 const showDeleteButton = computed(() => {
-  return Object.keys(rowSelection.value).length > 0;
+  return !isTrio.value && Object.keys(rowSelection.value).length > 0;
 });
 
 const showEditButton = computed(() => {

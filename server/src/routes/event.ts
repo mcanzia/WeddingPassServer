@@ -8,12 +8,12 @@ import { Roles } from '../models/Roles';
 const router = express.Router({ mergeParams: true });
 const eventController = container.get<EventController>(TYPES.EventController);
 
-router.get('/', authorizeRoles([Roles.EDITOR, Roles.ADMIN, Roles.READONLY]), (req, res, next) => eventController.getEvents(req, res, next));
-router.get('/id/:eventId', authorizeRoles([Roles.EDITOR, Roles.ADMIN, Roles.READONLY]), (req, res, next) => eventController.getEventbyId(req, res, next));
-router.get('/name/:eventName', authorizeRoles([Roles.EDITOR, Roles.ADMIN, Roles.READONLY]), (req, res, next) => eventController.getEventbyName(req, res, next));
-router.post('/', authorizeRoles([Roles.EDITOR, Roles.ADMIN]), (req, res, next) => eventController.createEvent(req, res, next));
-router.post('/batch', authorizeRoles([Roles.EDITOR, Roles.ADMIN]), (req, res, next) => eventController.batchCreateEvents(req, res, next));
-router.put('/:eventId', authorizeRoles([Roles.EDITOR, Roles.ADMIN]), (req, res, next) => eventController.updateEvent(req, res, next));
+router.get('/', authorizeRoles([Roles.EDITOR, Roles.ADMIN, Roles.READONLY, Roles.TRIO]), (req, res, next) => eventController.getEvents(req, res, next));
+router.get('/id/:eventId', authorizeRoles([Roles.EDITOR, Roles.ADMIN, Roles.READONLY, Roles.TRIO]), (req, res, next) => eventController.getEventbyId(req, res, next));
+router.get('/name/:eventName', authorizeRoles([Roles.EDITOR, Roles.ADMIN, Roles.READONLY, Roles.TRIO]), (req, res, next) => eventController.getEventbyName(req, res, next));
+router.post('/', authorizeRoles([Roles.EDITOR, Roles.ADMIN, Roles.TRIO]), (req, res, next) => eventController.createEvent(req, res, next));
+router.post('/batch', authorizeRoles([Roles.EDITOR, Roles.ADMIN, Roles.TRIO]), (req, res, next) => eventController.batchCreateEvents(req, res, next));
+router.put('/:eventId', authorizeRoles([Roles.EDITOR, Roles.ADMIN, Roles.TRIO]), (req, res, next) => eventController.updateEvent(req, res, next));
 router.delete('/', authorizeRoles([Roles.EDITOR, Roles.ADMIN]), (req, res, next) => eventController.deleteEvent(req, res, next));
 router.delete('/batch', authorizeRoles([Roles.EDITOR, Roles.ADMIN]), (req, res, next) => eventController.batchDeleteEvents(req, res, next));
 
