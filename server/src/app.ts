@@ -20,21 +20,21 @@ app.use(compression());
 app.set('trust proxy', 1);
 app.use(cors());
 const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 200 // limit each IP to 100 requests per 15 minutes
+  windowMs: 60 * 1000, // 15 minutes
+  max: 500 // limit each IP to 100 requests per 15 minutes
 });
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
 app.use(limiter);
 
 // User Authorization
-app.use(async (request : Request, response : Response, next : NextFunction) => {
+app.use(async (request: Request, response: Response, next: NextFunction) => {
   try {
     const userDetails = await AuthService.validateAuthToken(request.headers.authorization);
     response.locals.userAuth = userDetails.uid;
     response.locals.userRole = request.headers.userrole;
     next();
-  } catch(error) {
+  } catch (error) {
     Logger.error("Authorization attempt failed");
     return response.status(403).json({ error: 'User is not authorized to perform this action' });
   }
@@ -47,7 +47,7 @@ app.use(express.static(path.join(__dirname, '../public')));
 app.use('/api', routes);
 
 //Error Handling
-app.use((error : CustomError, request : Request, response : Response, next : NextFunction) => {
+app.use((error: CustomError, request: Request, response: Response, next: NextFunction) => {
   ErrorHandler.handleError(error, response);
 });
 
