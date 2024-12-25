@@ -103,7 +103,7 @@ const navbarRoutes = computed(() => {
       name: "Guests Upload",
       secured: true,
       path: "guests-upload",
-      roles: [Roles.ADMIN, Roles.EDITOR],
+      roles: [Roles.ADMIN, Roles.EDITOR, Roles.TRIO],
     },
     {
       name: "Surveys",

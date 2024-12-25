@@ -50,9 +50,9 @@ watch(errorMessage, (val) => {
 watch(successMessage, (val) => {
   if (val) {
     toast({
-      title: "Success",
+      title: val.title ?? "Success",
       description: val.message,
-      variant: "success",
+      variant: val.variant || "success",
       class: "text-white"
     });
     resetSuccess();

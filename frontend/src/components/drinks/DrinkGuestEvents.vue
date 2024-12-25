@@ -12,15 +12,13 @@
                 <div v-if="filteredGuests.length === 0">No Guests</div>
                 <div v-else v-for="guest in filteredGuests" :key="guest.id">
                     <GuestCard :guest="guest">
-                        <ConfirmAction alert-title="Set number of drinks for guest"
-                            @on-confirm="updateDrinkCount(guest, drinkCount)">
+                        <div class="flex inline-flex">
+                            <IconButton icon="remove-outline" @click="decrementDrinkCount(guest)"></IconButton>
                             <Badge class="cursor-pointer">
-                                {{ guest.drinks?.numberOfDrinks ?? 0 }}
+                                {{ getGuestDrinkCount(guest)?.numberOfDrinks ?? 0 }}
                             </Badge>
-                            <template v-slot:content>
-                                <Input v-model="drinkCountComputed" type="number" min="0"></Input>
-                            </template>
-                        </ConfirmAction>
+                            <IconButton icon="add-outline" @click="incrementDrinkCount(guest)"></IconButton>
+                        </div>
                     </GuestCard>
                 </div>
             </CardContent>
@@ -40,9 +38,9 @@ import debounce from 'lodash/debounce';
 import { Badge } from '@/components/ui/badge'
 import { GuestService } from '@/services/GuestService';
 import { SuccessHandler } from '@/util/SuccessHandler';
-import ConfirmAction from '@/components/data-table/ConfirmAction.vue';
-import Input from '@/components/ui/input/Input.vue';
 import { ErrorHandler } from '@/util/error/ErrorHandler';
+import IconButton from '@/components/common/IconButton.vue';
+import { DrinkCount } from '@/models/DrinkCount';
 
 const props = defineProps<{
     weddingEvent: WeddingEvent | null;
@@ -51,17 +49,6 @@ const props = defineProps<{
 
 const searchQuery = ref('');
 const debouncedSearchQuery = ref('');
-
-const drinkCount = ref<number>(0);
-
-const drinkCountComputed = computed({
-    get() {
-        return drinkCount.value;
-    },
-    set(val) {
-        drinkCount.value = val;
-    }
-})
 
 const eventNameComputed = computed(() => {
     return props.weddingEvent ? props.weddingEvent.name : 'Event';
@@ -80,7 +67,7 @@ const filteredGuests = computed(() => {
         );
     }
 
-    return guests;
+    return guests.sort((a, b) => getGuestDrinkCount(b)?.numberOfDrinks! - getGuestDrinkCount(a)?.numberOfDrinks!);
 });
 
 
@@ -88,17 +75,48 @@ watch(searchQuery, (newValue) => {
     updateSearchQuery(newValue);
 });
 
-async function updateDrinkCount(guest: Guest, count: number) {
+function getGuestDrinkCount(guest: Guest) {
+    if (guest && guest.drinks && guest.drinks.drinkCount && props.weddingEvent) {
+        return guest.drinks.drinkCount.find(drinkCount => drinkCount.event.id === props.weddingEvent?.id);
+    }
+}
+
+async function updateDrinkCount(guest: Guest, increment: boolean) {
     if (guest && guest.drinks && props.weddingEvent) {
-        guest.drinks.numberOfDrinks = Number(count) || 0;
+        let count = 0;
+        if (!guest.drinks.drinkCount) {
+            guest.drinks.drinkCount = [];
+        }
+        if (!guest.drinks.drinkCount.some(drinkCount => drinkCount.event.id === props.weddingEvent?.id)) {
+            guest.drinks.drinkCount.push(new DrinkCount(0, props.weddingEvent));
+        }
+        guest.drinks.drinkCount.map(drinkCount => {
+            if (drinkCount.event.id === props.weddingEvent?.id) {
+                count = increment ? Number(drinkCount.numberOfDrinks) + 1 : drinkCount.numberOfDrinks > 0 ? Number(drinkCount.numberOfDrinks) - 1 : 0;
+                drinkCount.numberOfDrinks = count;
+            }
+            return drinkCount;
+        });
 
         const guestService = new GuestService();
         await guestService.saveGuest(guest);
 
-        SuccessHandler.showNotification(`${guest.name} has had ${guest.drinks.numberOfDrinks} drink(s).`);
+        if (count >= 4) {
+            SuccessHandler.showNotification(`${guest.name} has had ${count} drink(s).`, 'Alert', 'destructive');
+        } else {
+            SuccessHandler.showNotification(`${guest.name} has had ${count} drink(s).`);
+        }
     } else {
         ErrorHandler.handleCustomError('Guest not found or invalid event.');
     }
+}
+
+function decrementDrinkCount(guest: Guest) {
+    updateDrinkCount(guest, false);
+}
+
+function incrementDrinkCount(guest: Guest) {
+    updateDrinkCount(guest, true);
 }
 
 

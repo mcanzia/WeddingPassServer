@@ -1,7 +1,7 @@
 <template>
     <div>
         <Button @click="downloadUsers" class="ml-5">Download Users</Button>
-        <div ref="dropZoneRef"
+        <div v-if="!isTrio" ref="dropZoneRef"
             class="flex flex-col max-w-md h-40 bg-gray-400/10 justify-center items-center my-6 rounded mx-5">
             <div font-bold mb2>
                 Drop Excel or CSV file here
@@ -11,7 +11,7 @@
                 Choose file
             </Button>
         </div>
-        <Card class="mx-auto max-w-sm" v-if="showValidationArea">
+        <Card class="mx-auto max-w-sm" v-if="showValidationArea && !isTrio">
             <CardHeader>
                 <CardTitle class="text-2xl">
                     Upload Validation
@@ -78,7 +78,7 @@ const guestService = new GuestService();
 const notificationStore = useNotificationStore();
 const { setMessage } = notificationStore;
 const userStore = useUserStore();
-const { hasEditAuthority } = storeToRefs(userStore);
+const { hasEditAuthority, isTrio } = storeToRefs(userStore);
 
 const dropZoneRef = ref<HTMLDivElement>()
 const guestValidation = ref<UploadValidation | null>();
