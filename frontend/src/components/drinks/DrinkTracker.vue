@@ -43,6 +43,7 @@ import { ErrorHandler } from '@/util/error/ErrorHandler';
 import { SuccessHandler } from '@/util/SuccessHandler';
 import BarcodeModal from '@/components/barcodes/BarcodeModal.vue';
 import DrinkGuestEvents from '@/components/drinks/DrinkGuestEvents.vue';
+import { DrinkCount } from '@/models/DrinkCount';
 
 const route = useRoute();
 const { goToRouteSecured, replaceRouteSecured } = useRouterHelper();
@@ -98,26 +99,32 @@ watch(() => selectedEvent.value, async (newVal, oldVal) => {
 }, { immediate: true, deep: true });
 
 async function incrementDrinkCount(guest: Guest) {
-    try {
-        if (guest && guest.drinks && selectedEvent.value) {
-            if (!guest.drinks.numberOfDrinks) {
-                guest.drinks.numberOfDrinks = 0;
-            }
-            guest.drinks.numberOfDrinks = Number(guest.drinks.numberOfDrinks) + 1;
-            const guestService = new GuestService();
-            await guestService.saveGuest(guest);
-            const guestIndex = eventGuests.value.findIndex(eventGuest => eventGuest.id === guest.id);
-            if (guestIndex) {
-                console.log('UPDATED', guest);
-                eventGuests.value[guestIndex] = guest;
-            }
-            SuccessHandler.showNotification(`${guest.name} has had ${guest.drinks.numberOfDrinks} drinks`);
-        } else {
-            ErrorHandler.handleCustomError('Guest not found');
-            return;
+    if (guest && guest.drinks && selectedEvent.value) {
+        let count = 0;
+        if (!guest.drinks.drinkCount) {
+            guest.drinks.drinkCount = [];
         }
-    } catch (error: any) {
-        ErrorHandler.handleCustomError('Unexpected error occurred with handling guest');
+        if (!guest.drinks.drinkCount.some(drinkCount => drinkCount.event.id === selectedEvent.value?.id)) {
+            guest.drinks.drinkCount.push(new DrinkCount(0, selectedEvent.value));
+        }
+        guest.drinks.drinkCount.map(drinkCount => {
+            if (drinkCount.event.id === selectedEvent.value?.id) {
+                count = Number(drinkCount.numberOfDrinks) + 1;
+                drinkCount.numberOfDrinks = count;
+            }
+            return drinkCount;
+        });
+
+        const guestService = new GuestService();
+        await guestService.saveGuest(guest);
+
+        if (count >= 4) {
+            SuccessHandler.showNotification(`${guest.name} has had ${count} drink(s).`, 'Alert', 'destructive');
+        } else {
+            SuccessHandler.showNotification(`${guest.name} has had ${count} drink(s).`);
+        }
+    } else {
+        ErrorHandler.handleCustomError('Guest not found or invalid event.');
     }
 }
 

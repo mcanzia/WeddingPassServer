@@ -1,12 +1,14 @@
+import { DrinkCount } from "@/models/DrinkCount";
+
 export class Drinks {
 
-    willDrinkAlcohol?: Boolean;
+    willDrinkAlcohol: boolean;
     preferences: string;
-    numberOfDrinks?: number;
+    drinkCount: Array<DrinkCount>;
 
-    constructor(preferences: string, numberOfDrinks?: number, willDrinkAlcohol?: Boolean) {
+    constructor(willDrinkAlcohol: boolean, preferences: string, drinkCount: Array<DrinkCount>) {
         this.willDrinkAlcohol = willDrinkAlcohol;
         this.preferences = preferences;
-        this.numberOfDrinks = numberOfDrinks;
+        this.drinkCount = drinkCount;
     }
 }
