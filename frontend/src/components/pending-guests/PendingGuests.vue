@@ -51,7 +51,7 @@ import { GuestInviteStatus } from '@/models/GuestInviteStatus';
 import { PendingGuestService } from '@/services/PendingGuestService';
 import { Guest } from '@/models/Guest';
 import { GuestService } from '@/services/GuestService';
-import GuestCard from '@/components/events/GuestCard.vue';
+import GuestCard from '@/components/subevents/GuestCard.vue';
 import Search from '@/components/Search.vue';
 import { debounce } from 'lodash';
 import { ScrollArea } from "@/components/ui/scroll-area";

@@ -1,13 +1,13 @@
 export class Hotel {
 
     id: string;
-    weddingId: string;
+    eventId: string;
     name: string;
     location: string;
 
-    constructor(id: string, weddingId: string, name: string, location: string) {
+    constructor(id: string, eventId: string, name: string, location: string) {
         this.id = id;
-        this.weddingId = weddingId;
+        this.eventId = eventId;
         this.name = name;
         this.location = location;
     }

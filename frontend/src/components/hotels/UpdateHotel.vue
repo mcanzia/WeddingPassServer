@@ -51,7 +51,7 @@ const { goToRouteSecured } = useRouterHelper();
 const notificationStore = useNotificationStore();
 const { setMessage } = notificationStore;
 const userStore = useUserStore();
-const { hasEditAuthority, selectedWedding } = storeToRefs(userStore);
+const { hasEditAuthority, selectedEvent } = storeToRefs(userStore);
 
 const route = useRoute();
 const hotelId = route.params.hotelId as string;
@@ -60,7 +60,7 @@ const loading = ref(false);
 
 const hotelForm = ref({
     id: '',
-    weddingId: '',
+    eventId: '',
     name: '',
     location: '',
 });
@@ -77,7 +77,7 @@ onMounted(async () => {
         }
 
         hotelForm.value.id = hotelId;
-        hotelForm.value.weddingId = editHotel.weddingId;
+        hotelForm.value.eventId = editHotel.eventId;
         hotelForm.value.name = editHotel.name;
         hotelForm.value.location = editHotel.location;
         loading.value = false;
@@ -88,7 +88,7 @@ async function saveHotel() {
     if (hasEditAuthority) {
         const hotelToUpdate = {
             ...hotelForm.value,
-            weddingId: selectedWedding.value?.id!,
+            eventId: selectedEvent.value?.id!,
         } as Hotel
         const hotelService = new HotelService();
         await hotelService.saveHotel(hotelToUpdate);

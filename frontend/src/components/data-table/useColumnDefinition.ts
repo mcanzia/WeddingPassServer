@@ -4,9 +4,9 @@ import { ArrowUpDown } from "lucide-vue-next";
 import { Flight } from "@/models/Flight";
 import { Bus } from "@/models/Bus";
 import { Train } from "@/models/Train";
-import { WeddingEvent } from "@/models/WeddingEvent";
+import { SubEvent } from "@/models/SubEvent";
 import { Checkbox } from "@/components/ui/checkbox";
-import EventCircle from '@/components/data-table/EventCircle.vue';
+import SubEventCircle from '@/components/data-table/SubEventCircle.vue';
 import { Guest } from "@/models/Guest";
 import { ColumnDef } from "@tanstack/vue-table";
 import { TransportationType } from "@/models/TransportationType";
@@ -68,14 +68,14 @@ export function useColumnDefinition() {
                 cell: ({ row }) => h('div', { class: 'lowercase whitespace-nowrap text-center' }, row.getValue('phone')),
             },
             {
-                accessorKey: 'events',
+                accessorKey: 'subEvents',
                 header: ({ column }) => {
-                    return setHeaderDetails(column, 'Events');
+                    return setHeaderDetails(column, 'SubEvents');
                 },
                 cell: ({ row }) => {
-                    const events: WeddingEvent[] = row.getValue('events') || [];
-                    const circles = events.sort((a, b) => a.order - b.order).map(event =>
-                        h(EventCircle, { event, key: event.id })
+                    const subEvents: SubEvent[] = row.getValue('subEvents') || [];
+                    const circles = subEvents.sort((a, b) => a.order - b.order).map(subEvent =>
+                        h(SubEventCircle, { subEvent, key: subEvent.id })
                     );
                     return h('div', { class: 'flex gap-1 whitespace-nowrap text-center' }, circles);
                 },
@@ -295,7 +295,7 @@ export function useColumnDefinition() {
                     return setHeaderDetails(column, 'Number of Drinks');
                 },
                 accessorFn: (row: Guest) => {
-                    return row.drinks?.numberOfDrinks ?? 0;
+                    return row.drinks?.drinkCount ?? 0;
                 },
                 cell: ({ row }) => {
                     return getDrinksField(row.original.drinks, 'numberOfDrinks');
@@ -421,11 +421,11 @@ export function useColumnDefinition() {
         return h('div', String(value) ?? defaultVal ?? '');
     }
 
-    function getEventsDisplay(events: WeddingEvent[]) {
-        if (events.length) {
-            return events.sort((a, b) => a.order - b.order).map(event => event.name).join(', ');
+    function getSubEventsDisplay(subEvents: SubEvent[]) {
+        if (subEvents.length) {
+            return subEvents.sort((a, b) => a.order - b.order).map(subEvent => subEvent.name).join(', ');
         }
-        return 'Not Attending Events'
+        return 'Not Attending SubEvents'
     }
 
     const partyColumnDefs = computed(() => {
@@ -456,13 +456,13 @@ export function useColumnDefinition() {
                 },
             },
             {
-                accessorKey: 'events',
+                accessorKey: 'subEvents',
                 header: ({ column }) => {
-                    return setHeaderDetails(column, 'Events');
+                    return setHeaderDetails(column, 'SubEvents');
                 },
                 cell: ({ row }) => {
-                    const events: WeddingEvent[] = row.getValue('events') || [];
-                    return h('div', { class: 'flex gap-1 whitespace-nowrap text-center' }, getEventsDisplay(events));
+                    const subEvents: SubEvent[] = row.getValue('subEvents') || [];
+                    return h('div', { class: 'flex gap-1 whitespace-nowrap text-center' }, getSubEventsDisplay(subEvents));
                 },
             },
         ]

@@ -87,7 +87,7 @@ watch(searchQuery, (newValue) => {
 
 async function goToEditSurvey(surveyToEdit: Survey | null) {
   if (!props.adminMode) {
-    // const newSurvey : Survey = new Survey(surveyToEdit?.id!, surveyToEdit?.weddingId!, surveyToEdit?.title!, surveyToEdit?.surveyComponents!, surveyToEdit?.published!);
+    // const newSurvey : Survey = new Survey(surveyToEdit?.id!, surveyToEdit?.eventId!, surveyToEdit?.title!, surveyToEdit?.surveyComponents!, surveyToEdit?.published!);
     goToCompleteSurvey(surveyToEdit!);
     return;
   }

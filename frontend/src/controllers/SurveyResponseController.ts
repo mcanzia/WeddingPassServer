@@ -2,89 +2,89 @@ import { ErrorHandler } from "@/util/error/ErrorHandler";
 import { Survey } from "@/models/Survey";
 import { RequestUtil } from "@/controllers/RequestUtil";
 import { ObjectType } from "@/models/ObjectType";
-import { WeddingRole } from "@/models/WeddingRole";
+import { EventRole } from "@/models/EventRole";
 import { SurveyResponse } from "@/models/SurveyResponse";
 
 export class SurveyResponseController {
 
-    getSurveyBaseUrl(weddingRole: WeddingRole) {
-        return `${RequestUtil.getAPIUrl()}/api/weddings/${weddingRole.wedding.id}/surveys`;
+    getSurveyBaseUrl(eventRole: EventRole) {
+        return `${RequestUtil.getAPIUrl()}/api/events/${eventRole.event.id}/surveys`;
     }
 
-    async getAllSurveyResponses(userAuthToken: any, weddingRole: WeddingRole, surveyId: string) {
+    async getAllSurveyResponses(userAuthToken: any, eventRole: EventRole, surveyId: string) {
         try {
-            const requestUrl = `${this.getSurveyBaseUrl(weddingRole)}/${surveyId}/response`;
-            return await RequestUtil.apiRequest(requestUrl, RequestUtil.GETRequestParams(userAuthToken, weddingRole.role));
+            const requestUrl = `${this.getSurveyBaseUrl(eventRole)}/${surveyId}/response`;
+            return await RequestUtil.apiRequest(requestUrl, RequestUtil.GETRequestParams(userAuthToken, eventRole.role));
         } catch (error: any) {
             ErrorHandler.handleGetAllError<Survey>(userAuthToken, ObjectType.SURVEY, error);
             throw error;
         }
     }
 
-    async getAllSurveyResponsesForGuest(userAuthToken: any, weddingRole: WeddingRole, guestId: string) {
+    async getAllSurveyResponsesForGuest(userAuthToken: any, eventRole: EventRole, guestId: string) {
         try {
-            const requestUrl = `${this.getSurveyBaseUrl(weddingRole)}/response/${guestId}`;
-            return await RequestUtil.apiRequest(requestUrl, RequestUtil.GETRequestParams(userAuthToken, weddingRole.role));
+            const requestUrl = `${this.getSurveyBaseUrl(eventRole)}/response/${guestId}`;
+            return await RequestUtil.apiRequest(requestUrl, RequestUtil.GETRequestParams(userAuthToken, eventRole.role));
         } catch (error: any) {
             ErrorHandler.handleGetAllError<Survey>(userAuthToken, ObjectType.SURVEY, error);
             throw error;
         }
     }
 
-    async getSurveyResponseById(userAuthToken: any, weddingRole: WeddingRole, surveyId: string, surveyResponseId: string) {
+    async getSurveyResponseById(userAuthToken: any, eventRole: EventRole, surveyId: string, surveyResponseId: string) {
         try {
-            const requestUrl = `${this.getSurveyBaseUrl(weddingRole)}/${surveyId}/response/id/${surveyResponseId}`;
-            return await RequestUtil.apiRequest(requestUrl, RequestUtil.GETRequestParams(userAuthToken, weddingRole.role));
+            const requestUrl = `${this.getSurveyBaseUrl(eventRole)}/${surveyId}/response/id/${surveyResponseId}`;
+            return await RequestUtil.apiRequest(requestUrl, RequestUtil.GETRequestParams(userAuthToken, eventRole.role));
         } catch (error: any) {
             ErrorHandler.handleGetByIdError();
             throw error;
         }
     }
 
-    async getSurveyResponseByGuest(userAuthToken: any, weddingRole: WeddingRole, surveyId: string, guestId: string) {
+    async getSurveyResponseByGuest(userAuthToken: any, eventRole: EventRole, surveyId: string, guestId: string) {
         try {
-            const requestUrl = `${this.getSurveyBaseUrl(weddingRole)}/${surveyId}/response/guest/${guestId}`;
-            return await RequestUtil.apiRequest(requestUrl, RequestUtil.GETRequestParams(userAuthToken, weddingRole.role));
+            const requestUrl = `${this.getSurveyBaseUrl(eventRole)}/${surveyId}/response/guest/${guestId}`;
+            return await RequestUtil.apiRequest(requestUrl, RequestUtil.GETRequestParams(userAuthToken, eventRole.role));
         } catch (error: any) {
             ErrorHandler.handleGetByIdError();
             throw error;
         }
     }
 
-    async saveSurveyResponse(userAuthToken: any, weddingRole: WeddingRole, surveyResponse: SurveyResponse) {
+    async saveSurveyResponse(userAuthToken: any, eventRole: EventRole, surveyResponse: SurveyResponse) {
         try {
-            const requestUrl = `${this.getSurveyBaseUrl(weddingRole)}/${surveyResponse.survey.id}/response`;
-            return await RequestUtil.apiRequest(requestUrl, RequestUtil.POSTRequestParams(userAuthToken, surveyResponse, weddingRole.role));
+            const requestUrl = `${this.getSurveyBaseUrl(eventRole)}/${surveyResponse.survey.id}/response`;
+            return await RequestUtil.apiRequest(requestUrl, RequestUtil.POSTRequestParams(userAuthToken, surveyResponse, eventRole.role));
         } catch (error: any) {
             ErrorHandler.handleAddError<SurveyResponse>(userAuthToken, ObjectType.SURVEY_RESPONSE, surveyResponse, error);
             throw error;
         }
     }
 
-    async initializeSurveysForParty(userAuthToken: any, weddingRole: WeddingRole, guestId: string, survey: Survey) {
+    async initializeSurveysForParty(userAuthToken: any, eventRole: EventRole, guestId: string, survey: Survey) {
         try {
-            const requestUrl = `${this.getSurveyBaseUrl(weddingRole)}/${survey.id}/response/party/${guestId}`;
-            return await RequestUtil.apiRequest(requestUrl, RequestUtil.PUTRequestParams(userAuthToken, survey, weddingRole.role));
+            const requestUrl = `${this.getSurveyBaseUrl(eventRole)}/${survey.id}/response/party/${guestId}`;
+            return await RequestUtil.apiRequest(requestUrl, RequestUtil.PUTRequestParams(userAuthToken, survey, eventRole.role));
         } catch (error: any) {
             ErrorHandler.handleUpdateError(ObjectType.SURVEY_RESPONSE);
             throw error;
         }
     }
 
-    async fetchPartySurveyResponses(userAuthToken: any, weddingRole: WeddingRole, surveyId: string, guestId: string) {
+    async fetchPartySurveyResponses(userAuthToken: any, eventRole: EventRole, surveyId: string, guestId: string) {
         try {
-            const requestUrl = `${this.getSurveyBaseUrl(weddingRole)}/${surveyId}/response/party/${guestId}`;
-            return await RequestUtil.apiRequest(requestUrl, RequestUtil.GETRequestParams(userAuthToken, weddingRole.role));
+            const requestUrl = `${this.getSurveyBaseUrl(eventRole)}/${surveyId}/response/party/${guestId}`;
+            return await RequestUtil.apiRequest(requestUrl, RequestUtil.GETRequestParams(userAuthToken, eventRole.role));
         } catch (error: any) {
             ErrorHandler.handleUpdateError(ObjectType.SURVEY_RESPONSE);
             throw error;
         }
     }
 
-    async deleteSurveyResponse(userAuthToken: any, weddingRole: WeddingRole, surveyId: string, surveyResponse: SurveyResponse) {
+    async deleteSurveyResponse(userAuthToken: any, eventRole: EventRole, surveyId: string, surveyResponse: SurveyResponse) {
         try {
-            const requestUrl = `${this.getSurveyBaseUrl(weddingRole)}/${surveyId}/response`;
-            return await RequestUtil.apiRequest(requestUrl, RequestUtil.DELETERequestParams(userAuthToken, surveyResponse, weddingRole.role));
+            const requestUrl = `${this.getSurveyBaseUrl(eventRole)}/${surveyId}/response`;
+            return await RequestUtil.apiRequest(requestUrl, RequestUtil.DELETERequestParams(userAuthToken, surveyResponse, eventRole.role));
         } catch (error: any) {
             ErrorHandler.handleDeleteError<SurveyResponse>(ObjectType.SURVEY_RESPONSE);
             throw error;

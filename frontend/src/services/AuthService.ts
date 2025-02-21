@@ -1,19 +1,19 @@
 import { AuthController } from '@/controllers/AuthController';
 import { InviteToken } from '@/models/InviteToken';
 import { User } from '@/models/User';
-import { WeddingRole } from '@/models/WeddingRole';
+import { EventRole } from '@/models/EventRole';
 import { useUserStore } from '@/stores/UserStore';
 
 export class AuthService {
 
     private authController: AuthController;
     private userStore: any;
-    private weddingRole: WeddingRole;
+    private eventRole: EventRole;
 
     constructor() {
         this.authController = new AuthController();
         this.userStore = useUserStore();
-        this.weddingRole = this.userStore.selectedWeddingRole;
+        this.eventRole = this.userStore.selectedEventRole;
     }
 
     async getAllUsers() {
@@ -67,7 +67,7 @@ export class AuthService {
         }
     }
 
-    async setUserRole(userId: string, role: WeddingRole) {
+    async setUserRole(userId: string, role: EventRole) {
         try {
             const userAccessToken = await this.userStore.getAccessToken();
             await this.authController.setUserRole(userAccessToken, userId, role);
@@ -77,25 +77,25 @@ export class AuthService {
         }
     }
 
-    async addUser(userToAdd: User) {
+    async saveUser(userToAdd: User) {
         try {
             const userAccessToken = await this.userStore.getAccessToken();
-            const user = await this.authController.addUser(userAccessToken, userToAdd);
+            const user = await this.authController.saveUser(userAccessToken, userToAdd);
             return user;
         } catch (error) {
             throw error;
         }
     }
 
-    async updateUser(user: User) {
-        try {
-            const userAccessToken = await this.userStore.getAccessToken();
-            await this.authController.updateUser(userAccessToken, user);
-            return;
-        } catch (error) {
-            throw error;
-        }
-    }
+    // async updateUser(user: User) {
+    //     try {
+    //         const userAccessToken = await this.userStore.getAccessToken();
+    //         await this.authController.updateUser(userAccessToken, user);
+    //         return;
+    //     } catch (error) {
+    //         throw error;
+    //     }
+    // }
 
     async deleteUser(userToDelete: User) {
         try {
@@ -107,10 +107,10 @@ export class AuthService {
         }
     }
 
-    async generateInviteLink(newWeddingRole: WeddingRole) {
+    async generateInviteLink(newEventRole: EventRole) {
         try {
             const userAccessToken = await this.userStore.getAccessToken();
-            const inviteLink = await this.authController.generateInviteLink(userAccessToken, newWeddingRole, this.weddingRole);
+            const inviteLink = await this.authController.generateInviteLink(userAccessToken, newEventRole, this.eventRole);
             return inviteLink;
         } catch (error) {
             throw error;
@@ -120,17 +120,17 @@ export class AuthService {
     async processInvite(token: InviteToken) {
         try {
             const userAccessToken = await this.userStore.getAccessToken();
-            const weddingRole = await this.authController.processInvite(userAccessToken, token);
-            return weddingRole;
+            const eventRole = await this.authController.processInvite(userAccessToken, token);
+            return eventRole;
         } catch (error) {
             throw error;
         }
     }
 
-    async addUserToWedding(weddingRole: WeddingRole) {
+    async addUserToEvent(eventRole: EventRole) {
         try {
             const userAccessToken = await this.userStore.getAccessToken();
-            await this.authController.addUserToWedding(userAccessToken, weddingRole);
+            await this.authController.addUserToEvent(userAccessToken, eventRole);
             return;
         } catch (error) {
             throw error;

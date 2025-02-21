@@ -1,59 +1,27 @@
 <template>
-  <div
-    class="flex-1 mt-5 h-screen w-screen"
-    v-if="selectedWedding"
-  >
+  <div class="flex-1 mt-5 h-screen w-screen" v-if="selectedEvent">
     <Card class="mx-auto max-w-sm">
       <CardHeader>
         <CardTitle class="text-2xl">
-          Invite User to {{ selectedWedding.name }}
+          Invite User to {{ selectedEvent.name }}
         </CardTitle>
         <Separator />
       </CardHeader>
       <CardContent>
         <Label>User Role:</Label>
-        <RadioGroup
-          class="mt-2"
-          v-model="selectedRole"
-          default-value="editor"
-        >
-          <div
-            class="flex items-center space-x-2"
-            v-for="role in availableRoles"
-            :key="role"
-          >
-            <RadioGroupItem
-              :id="`radio-${role}`"
-              :value="role"
-            />
+        <RadioGroup class="mt-2" v-model="selectedRole" default-value="editor">
+          <div class="flex items-center space-x-2" v-for="role in availableRoles" :key="role">
+            <RadioGroupItem :id="`radio-${role}`" :value="role" />
             <Label :for="`radio-${role}`">{{ startCase(role) }}</Label>
           </div>
         </RadioGroup>
-        <Button
-          class="mt-5"
-          @click="generateInviteLink"
-        >Generate Invite Link</Button>
-        <div
-          v-if="inviteLink"
-          class="mt-4"
-        >
+        <Button class="mt-5" @click="generateInviteLink">Generate Invite Link</Button>
+        <div v-if="inviteLink" class="mt-4">
           <Label>Invite Link:</Label>
           <div class="flex items-center mt-2">
-            <Input
-              id="invite-link"
-              type="text"
-              v-model="inviteLink"
-              readonly
-              class="flex-1 p-2 border rounded"
-            />
-            <Button
-              @click="copyInviteLink"
-              class="ml-2"
-            >
-              <ion-icon
-                name="copy"
-                class="w-5 h-5 mr-1"
-              ></ion-icon>
+            <Input id="invite-link" type="text" v-model="inviteLink" readonly class="flex-1 p-2 border rounded" />
+            <Button @click="copyInviteLink" class="ml-2">
+              <ion-icon name="copy" class="w-5 h-5 mr-1"></ion-icon>
               {{ copied ? 'Copied!' : 'Copy' }}
             </Button>
           </div>
@@ -74,13 +42,13 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { computed, ref } from "vue";
 import { AuthService } from "@/services/AuthService";
-import { WeddingRole } from "@/models/WeddingRole";
+import { EventRole } from "@/models/EventRole";
 import { InviteToken } from "@/models/InviteToken";
 import { Roles } from "@/models/Roles";
 import { startCase } from "lodash";
 
 const authService = new AuthService();
-const { selectedWedding } = storeToRefs(useUserStore());
+const { selectedEvent } = storeToRefs(useUserStore());
 
 const inviteLink = ref<string | null>(null);
 const selectedRole = ref("editor");
@@ -91,12 +59,12 @@ const availableRoles = computed(() => {
 });
 
 async function generateInviteLink() {
-  const weddingRole: WeddingRole = new WeddingRole(
+  const eventRole: EventRole = new EventRole(
     selectedRole.value,
-    selectedWedding.value!
+    selectedEvent.value!
   );
   const inviteToken: InviteToken = await authService.generateInviteLink(
-    weddingRole
+    eventRole
   );
   const baseUrl = window.location.origin;
   if (selectedRole.value === Roles.GUEST) {

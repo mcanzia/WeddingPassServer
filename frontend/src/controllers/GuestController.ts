@@ -2,144 +2,144 @@ import { ErrorHandler } from "@/util/error/ErrorHandler";
 import { Guest } from "@/models/Guest";
 import { RequestUtil } from "@/controllers/RequestUtil";
 import { ObjectType } from "@/models/ObjectType";
-import { WeddingRole } from "@/models/WeddingRole";
+import { EventRole } from "@/models/EventRole";
 
 export class GuestController {
 
-    async getAllGuests(userAuthToken: any, weddingRole: WeddingRole) {
+    async getAllGuests(userAuthToken: any, eventRole: EventRole) {
         try {
-            const requestUrl = `${RequestUtil.getAPIUrl()}/api/weddings/${weddingRole.wedding.id}/guests`;
-            return await RequestUtil.apiRequest(requestUrl, RequestUtil.GETRequestParams(userAuthToken, weddingRole.role));
+            const requestUrl = `${RequestUtil.getAPIUrl()}/api/events/${eventRole.event.id}/guests`;
+            return await RequestUtil.apiRequest(requestUrl, RequestUtil.GETRequestParams(userAuthToken, eventRole.role));
         } catch (error: any) {
             ErrorHandler.handleGetAllError<Guest>(userAuthToken, ObjectType.GUEST, error);
             throw error;
         }
     }
 
-    async getGuestById(userAuthToken: any, weddingRole: WeddingRole, guestId: string) {
+    async getGuestById(userAuthToken: any, eventRole: EventRole, guestId: string) {
         try {
-            const requestUrl = `${RequestUtil.getAPIUrl()}/api/weddings/${weddingRole.wedding.id}/guests/id/${guestId}`;
-            return await RequestUtil.apiRequest(requestUrl, RequestUtil.GETRequestParams(userAuthToken, weddingRole.role));
+            const requestUrl = `${RequestUtil.getAPIUrl()}/api/events/${eventRole.event.id}/guests/id/${guestId}`;
+            return await RequestUtil.apiRequest(requestUrl, RequestUtil.GETRequestParams(userAuthToken, eventRole.role));
         } catch (error: any) {
             ErrorHandler.handleGetByIdError();
             throw error;
         }
     }
 
-    async getGuestsForEvent(userAuthToken: any, weddingRole: WeddingRole, eventId: string) {
+    async getGuestsForSubEvent(userAuthToken: any, eventRole: EventRole, subEventId: string) {
         try {
-            const requestUrl = `${RequestUtil.getAPIUrl()}/api/weddings/${weddingRole.wedding.id}/guests/event/${eventId}`;
-            return await RequestUtil.apiRequest(requestUrl, RequestUtil.GETRequestParams(userAuthToken, weddingRole.role));
+            const requestUrl = `${RequestUtil.getAPIUrl()}/api/events/${eventRole.event.id}/guests/subevent/${subEventId}`;
+            return await RequestUtil.apiRequest(requestUrl, RequestUtil.GETRequestParams(userAuthToken, eventRole.role));
         } catch (error: any) {
             ErrorHandler.handleGetByIdError();
             throw error;
         }
     }
 
-    async fetchPartyMembers(userAuthToken: any, weddingRole: WeddingRole, guestId: string) {
+    async fetchPartyMembers(userAuthToken: any, eventRole: EventRole, guestId: string) {
         try {
-            const requestUrl = `${RequestUtil.getAPIUrl()}/api/weddings/${weddingRole.wedding.id}/guests/party/${guestId}`;
-            return await RequestUtil.apiRequest(requestUrl, RequestUtil.GETRequestParams(userAuthToken, weddingRole.role));
+            const requestUrl = `${RequestUtil.getAPIUrl()}/api/events/${eventRole.event.id}/guests/party/${guestId}`;
+            return await RequestUtil.apiRequest(requestUrl, RequestUtil.GETRequestParams(userAuthToken, eventRole.role));
         } catch (error: any) {
             ErrorHandler.handleGetByIdError();
             throw error;
         }
     }
 
-    async getGuestsByPhone(userAuthToken: any, weddingRole: WeddingRole, guestPhone: string) {
+    async getGuestsByPhone(userAuthToken: any, eventRole: EventRole, guestPhone: string) {
         try {
-            const requestUrl = `${RequestUtil.getAPIUrl()}/api/weddings/${weddingRole.wedding.id}/guests/phone/${guestPhone}`;
-            return await RequestUtil.apiRequest(requestUrl, RequestUtil.GETRequestParams(userAuthToken, weddingRole.role));
+            const requestUrl = `${RequestUtil.getAPIUrl()}/api/events/${eventRole.event.id}/guests/phone/${guestPhone}`;
+            return await RequestUtil.apiRequest(requestUrl, RequestUtil.GETRequestParams(userAuthToken, eventRole.role));
         } catch (error: any) {
             ErrorHandler.handleGetByIdError();
             throw error;
         }
     }
 
-    async getGuestsByEmail(userAuthToken: any, weddingRole: WeddingRole, guestEmail: string) {
+    async getGuestsByEmail(userAuthToken: any, eventRole: EventRole, guestEmail: string) {
         try {
-            const requestUrl = `${RequestUtil.getAPIUrl()}/api/weddings/${weddingRole.wedding.id}/guests/email/${guestEmail}`;
-            return await RequestUtil.apiRequest(requestUrl, RequestUtil.GETRequestParams(userAuthToken, weddingRole.role));
+            const requestUrl = `${RequestUtil.getAPIUrl()}/api/events/${eventRole.event.id}/guests/email/${guestEmail}`;
+            return await RequestUtil.apiRequest(requestUrl, RequestUtil.GETRequestParams(userAuthToken, eventRole.role));
         } catch (error: any) {
             ErrorHandler.handleGetByIdError();
             throw error;
         }
     }
 
-    async getGuestBySerialNumber(userAuthToken: any, weddingRole: WeddingRole, serialNumber: string) {
+    async getGuestBySerialNumber(userAuthToken: any, eventRole: EventRole, serialNumber: string) {
         try {
-            const requestUrl = `${RequestUtil.getAPIUrl()}/api/weddings/${weddingRole.wedding.id}/guests/serial/${serialNumber}`;
-            return await RequestUtil.apiRequest(requestUrl, RequestUtil.GETRequestParams(userAuthToken, weddingRole.role));
+            const requestUrl = `${RequestUtil.getAPIUrl()}/api/events/${eventRole.event.id}/guests/serial/${serialNumber}`;
+            return await RequestUtil.apiRequest(requestUrl, RequestUtil.GETRequestParams(userAuthToken, eventRole.role));
         } catch (error: any) {
             ErrorHandler.handleGetByIdError();
             throw error;
         }
     }
 
-    async saveGuest(userAuthToken: any, weddingRole: WeddingRole, guest: Guest) {
+    async saveGuest(userAuthToken: any, eventRole: EventRole, guest: Guest) {
         try {
-            const requestUrl = `${RequestUtil.getAPIUrl()}/api/weddings/${weddingRole.wedding.id}/guests`;
-            return await RequestUtil.apiRequest(requestUrl, RequestUtil.POSTRequestParams(userAuthToken, guest, weddingRole.role));
+            const requestUrl = `${RequestUtil.getAPIUrl()}/api/events/${eventRole.event.id}/guests`;
+            return await RequestUtil.apiRequest(requestUrl, RequestUtil.POSTRequestParams(userAuthToken, guest, eventRole.role));
         } catch (error: any) {
             ErrorHandler.handleAddError<Guest>(userAuthToken, ObjectType.GUEST, guest, error);
             throw error;
         }
     }
 
-    async batchAddGuests(userAuthToken: any, weddingRole: WeddingRole, guests: Array<Guest>) {
+    async batchAddGuests(userAuthToken: any, eventRole: EventRole, guests: Array<Guest>) {
         try {
-            const requestUrl = `${RequestUtil.getAPIUrl()}/api/weddings/${weddingRole.wedding.id}/guests/batch`;
-            return await RequestUtil.apiRequest(requestUrl, RequestUtil.POSTRequestParams(userAuthToken, guests, weddingRole.role));
+            const requestUrl = `${RequestUtil.getAPIUrl()}/api/events/${eventRole.event.id}/guests/batch`;
+            return await RequestUtil.apiRequest(requestUrl, RequestUtil.POSTRequestParams(userAuthToken, guests, eventRole.role));
         } catch (error: any) {
             ErrorHandler.handleBatchAddError<Guest>(userAuthToken, ObjectType.GUEST, guests, error);
             throw error;
         }
     }
 
-    async batchUpdateGuests(userAuthToken: any, weddingRole: WeddingRole, guests: Array<Guest>) {
+    async batchUpdateGuests(userAuthToken: any, eventRole: EventRole, guests: Array<Guest>) {
         try {
-            const requestUrl = `${RequestUtil.getAPIUrl()}/api/weddings/${weddingRole.wedding.id}/guests/batch`;
-            return await RequestUtil.apiRequest(requestUrl, RequestUtil.PUTRequestParams(userAuthToken, guests, weddingRole.role));
+            const requestUrl = `${RequestUtil.getAPIUrl()}/api/events/${eventRole.event.id}/guests/batch`;
+            return await RequestUtil.apiRequest(requestUrl, RequestUtil.PUTRequestParams(userAuthToken, guests, eventRole.role));
         } catch (error: any) {
             ErrorHandler.handleBatchUpdateError<Guest>(userAuthToken, ObjectType.GUEST, guests, error);
             throw error;
         }
     }
 
-    async deleteGuest(userAuthToken: any, weddingRole: WeddingRole, guest: Guest) {
+    async deleteGuest(userAuthToken: any, eventRole: EventRole, guest: Guest) {
         try {
-            const requestUrl = `${RequestUtil.getAPIUrl()}/api/weddings/${weddingRole.wedding.id}/guests`;
-            return await RequestUtil.apiRequest(requestUrl, RequestUtil.DELETERequestParams(userAuthToken, guest, weddingRole.role));
+            const requestUrl = `${RequestUtil.getAPIUrl()}/api/events/${eventRole.event.id}/guests`;
+            return await RequestUtil.apiRequest(requestUrl, RequestUtil.DELETERequestParams(userAuthToken, guest, eventRole.role));
         } catch (error: any) {
             ErrorHandler.handleDeleteError<Guest>(ObjectType.GUEST);
             throw error;
         }
     }
 
-    async batchDeleteGuests(userAuthToken: any, weddingRole: WeddingRole, guests: Array<Guest>) {
+    async batchDeleteGuests(userAuthToken: any, eventRole: EventRole, guests: Array<Guest>) {
         try {
-            const requestUrl = `${RequestUtil.getAPIUrl()}/api/weddings/${weddingRole.wedding.id}/guests/batch`;
-            return await RequestUtil.apiRequest(requestUrl, RequestUtil.DELETERequestParams(userAuthToken, guests, weddingRole.role));
+            const requestUrl = `${RequestUtil.getAPIUrl()}/api/events/${eventRole.event.id}/guests/batch`;
+            return await RequestUtil.apiRequest(requestUrl, RequestUtil.DELETERequestParams(userAuthToken, guests, eventRole.role));
         } catch (error: any) {
             ErrorHandler.handleBatchDeleteError<Guest>(ObjectType.GUEST);
             throw error;
         }
     }
 
-    async guestFileUpload(userAuthToken: any, weddingRole: WeddingRole, file: File) {
+    async guestFileUpload(userAuthToken: any, eventRole: EventRole, file: File) {
         try {
-            const requestUrl = `${RequestUtil.getAPIUrl()}/api/weddings/${weddingRole.wedding.id}/guests/upload`;
-            return await RequestUtil.apiRequest(requestUrl, RequestUtil.FileUploadRequestParams(userAuthToken, file, weddingRole.role));
+            const requestUrl = `${RequestUtil.getAPIUrl()}/api/events/${eventRole.event.id}/guests/upload`;
+            return await RequestUtil.apiRequest(requestUrl, RequestUtil.FileUploadRequestParams(userAuthToken, file, eventRole.role));
         } catch (error: any) {
             ErrorHandler.handleGuestUploadError();
             throw error;
         }
     }
 
-    async guestFileDownload(userAuthToken: any, weddingRole: WeddingRole) {
+    async guestFileDownload(userAuthToken: any, eventRole: EventRole) {
         try {
-            const requestUrl = `${RequestUtil.getAPIUrl()}/api/weddings/${weddingRole.wedding.id}/guests/download`;
-            const blob = await RequestUtil.csvRequest(requestUrl, RequestUtil.FileDownloadRequestParams(userAuthToken, weddingRole.role));
+            const requestUrl = `${RequestUtil.getAPIUrl()}/api/events/${eventRole.event.id}/guests/download`;
+            const blob = await RequestUtil.csvRequest(requestUrl, RequestUtil.FileDownloadRequestParams(userAuthToken, eventRole.role));
 
             if (!blob) {
                 return;

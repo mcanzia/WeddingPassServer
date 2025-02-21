@@ -38,7 +38,7 @@
 <script setup lang="ts">
 import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card';
 import Search from '@/components/Search.vue';
-import GuestCard from '@/components/events/GuestCard.vue';
+import GuestCard from '@/components/subevents/GuestCard.vue';
 import { Separator } from '@/components/ui/separator';
 import { ref, onMounted, watch, computed } from 'vue';
 import { Guest } from '@/models/Guest';

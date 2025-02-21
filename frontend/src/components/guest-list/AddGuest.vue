@@ -30,12 +30,11 @@
                                 :preferred-countries="['IN', 'US', 'IT', 'GB', 'JP', 'CA']" />
                         </div>
                         <div>
-                            <Label for="events">Events</Label>
+                            <Label for="events">Sub Events</Label>
                             <ToggleGroup type="multiple" variant="outline" class="grid grid-cols-2 sm:grid-cols-3 gap-2"
-                                v-model="newUserForm.events">
-                                <ToggleGroupItem v-for="weddingEvent in weddingEvents" :value="weddingEvent.id!"
-                                    :key="weddingEvent.id">
-                                    {{ weddingEvent.name }}
+                                v-model="newUserForm.subEvents">
+                                <ToggleGroupItem v-for="subEvent in subEvents" :value="subEvent.id!" :key="subEvent.id">
+                                    {{ subEvent.name }}
                                 </ToggleGroupItem>
                             </ToggleGroup>
                         </div>
@@ -122,8 +121,8 @@ import { Label } from '@/components/ui/label';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { ref, onMounted, computed } from 'vue';
 import { GuestService } from '@/services/GuestService';
-import { EventService } from '@/services/EventService';
-import { WeddingEvent } from '@/models/WeddingEvent';
+import { SubEventService } from '@/services/SubEventService';
+import { SubEvent } from '@/models/SubEvent';
 import { Guest } from '@/models/Guest';
 import { useNotificationStore } from '@/stores/NotificationStore';
 import { NotificationType } from '@/models/NotificationType';
@@ -145,19 +144,19 @@ const { goToRouteSecured } = useRouterHelper();
 const notificationStore = useNotificationStore();
 const { setMessage } = notificationStore;
 const userStore = useUserStore();
-const { hasEditAuthority, selectedWedding } = storeToRefs(userStore);
+const { hasEditAuthority, selectedEvent } = storeToRefs(userStore);
 
 const route = useRoute();
 const guestId = route.params.guestId as string;
 
 const loading = ref(false);
-const weddingEvents = ref<WeddingEvent[]>([]);
+const subEvents = ref<SubEvent[]>([]);
 const hotels = ref<Hotel[]>([]);
 
 onMounted(async () => {
     loading.value = true;
-    const eventService = new EventService();
-    weddingEvents.value = await eventService.getAllEvents();
+    const subEventService = new SubEventService();
+    subEvents.value = await subEventService.getAllSubEvents();
     const hotelService = new HotelService();
     hotels.value = await hotelService.getAllHotels();
     if (guestId) {
@@ -170,14 +169,14 @@ onMounted(async () => {
         }
 
         newUserForm.value.id = guestId;
-        newUserForm.value.weddingId = editGuest.weddingId;
+        newUserForm.value.eventId = editGuest.eventId;
         newUserForm.value.name = editGuest.name;
         newUserForm.value.groupNumber = editGuest.groupNumber;
         newUserForm.value.email = editGuest.email;
         newUserForm.value.phone = editGuest.phone;
         newUserForm.value.serialNumber = editGuest.serialNumber;
-        newUserForm.value.events = editGuest.events.map((event: { id: any; }) => event.id);
-        newUserForm.value.attendingEvents = editGuest.attendingEvents;
+        newUserForm.value.subEvents = editGuest.subEvents.map((subEvent: { id: any; }) => subEvent.id);
+        newUserForm.value.attendingSubEvents = editGuest.attendingSubEvents;
         newUserForm.value.dietaryRestrictions = editGuest.dietaryRestrictions;
         if (editGuest.arrival) {
             newUserForm.value.arrival = editGuest.arrival;
@@ -197,14 +196,14 @@ onMounted(async () => {
 
 const newUserForm = ref({
     id: '',
-    weddingId: '',
+    eventId: '',
     groupNumber: 0,
     name: '',
     email: '',
     phone: '',
     serialNumber: '',
-    events: [],
-    attendingEvents: [],
+    subEvents: [],
+    attendingSubEvents: [],
     arrival: {
         type: '',
         flightTime: '',
@@ -229,7 +228,7 @@ const newUserForm = ref({
     drinks: {
         willDrinkAlcohol: false,
         preferences: '',
-        numberOfDrinks: undefined
+        drinkCount: []
     }
 });
 
@@ -417,8 +416,8 @@ async function saveGuest() {
     if (hasEditAuthority) {
         const newGuest = {
             ...newUserForm.value,
-            weddingId: selectedWedding.value?.id!,
-            events: newUserForm.value.events.map(eventId => weddingEvents.value.find(wedEvent => wedEvent.id === eventId) as WeddingEvent),
+            eventId: selectedEvent.value?.id!,
+            subEvents: newUserForm.value.subEvents.map(subEventId => subEvents.value.find(subEvent => subEvent.id === subEventId) as SubEvent),
         } as Guest;
         const guestService = new GuestService();
         await guestService.saveGuest(newGuest);

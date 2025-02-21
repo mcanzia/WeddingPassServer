@@ -8,11 +8,9 @@ import { CollectionReference, DocumentData, QuerySnapshot, QueryDocumentSnapshot
 export class WeddingDao {
 
     private weddingsCollection: CollectionReference<DocumentData>;
-    private usersCollection: CollectionReference<DocumentData>;
 
     constructor() {
         this.weddingsCollection = db.collection('weddings');
-        this.usersCollection = db.collection('users');
     }
 
     async getAllWeddings(): Promise<Array<Wedding>> {
