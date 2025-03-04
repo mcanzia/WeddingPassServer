@@ -18,16 +18,17 @@ func NewEventService(repository EventRepository) EventService {
 	converter := NewEventConverter()
 	base := common.BaseService[*Event, *EventDTO]{
 		Repository: repository,
-		ConvertToDAO: func(event *EventDTO) (*Event, error) {
+		ConvertToDAO: func(event *EventDTO) (*Event, *common.CustomError) {
 			return converter.ConvertEventToDAO(event)
 		},
-		ConvertToDTO: func(rawEvent *Event) (*EventDTO, error) {
+		ConvertToDTO: func(rawEvent *Event) (*EventDTO, *common.CustomError) {
 			return converter.ConvertEventToDTO(rawEvent)
 		},
 	}
 	return &eventService{
-		BaseService: base,
-		Converter:   converter,
+		BaseService:     base,
+		EventRepository: repository,
+		Converter:       converter,
 	}
 }
 

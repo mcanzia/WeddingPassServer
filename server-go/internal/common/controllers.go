@@ -21,6 +21,14 @@ func (bc *BaseController[T]) RespondWithJSON(context *gin.Context, code int, pay
 	context.JSON(code, payload)
 }
 
+func (bc *BaseController[T]) RespondWithCSV(context *gin.Context, code int, payload string, filename string) {
+	context.Header("Content-Disposition", fmt.Sprintf("attachment; filename=%s", filename))
+	context.Header("Content-Type", "text/csv")
+	context.Header("Content-Length", fmt.Sprint(len(payload)))
+
+	context.String(code, payload)
+}
+
 func (bc *BaseController[T]) NewInstance() (T, error) {
 	var zero T
 	typ := reflect.TypeOf(zero)
@@ -60,7 +68,11 @@ func (bc *BaseController[T]) GetAll(context *gin.Context, lookupKeys ...string) 
 		bc.RespondWithError(context, http.StatusInternalServerError, err.Error())
 		return
 	}
-	bc.RespondWithJSON(context, http.StatusOK, items)
+	if len(items) == 0 {
+		bc.RespondWithJSON(context, http.StatusNoContent, items)
+	} else {
+		bc.RespondWithJSON(context, http.StatusOK, items)
+	}
 }
 
 func (bc *BaseController[T]) GetByID(context *gin.Context, lookupKeys ...string) {
@@ -68,6 +80,10 @@ func (bc *BaseController[T]) GetByID(context *gin.Context, lookupKeys ...string)
 
 	user, err := bc.Service.GetByID(filters)
 	if err != nil {
+		if err.Code == 204 {
+			bc.RespondWithJSON(context, http.StatusNoContent, nil)
+			return
+		}
 		logger.Global.Error(err.Error())
 		bc.RespondWithError(context, http.StatusInternalServerError, err.Error())
 		return
@@ -89,9 +105,9 @@ func (bc *BaseController[T]) Save(context *gin.Context, lookupKeys ...string) {
 		return
 	}
 
-	createdItem, err := bc.Service.Save(filters, itemToCreate)
-	if err != nil {
-		bc.RespondWithError(context, http.StatusInternalServerError, err.Error())
+	createdItem, saveError := bc.Service.Save(filters, itemToCreate)
+	if saveError != nil {
+		bc.RespondWithError(context, http.StatusInternalServerError, saveError.Error())
 		return
 	}
 

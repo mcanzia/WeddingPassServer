@@ -29,14 +29,18 @@ func (src *SurveyResponseController) GetSurveyResponsesForGuest(c *gin.Context, 
 		src.BaseController.RespondWithError(c, http.StatusNotFound, err.Error())
 		return
 	}
-	src.BaseController.RespondWithJSON(c, http.StatusOK, surveyResponses)
+	if len(surveyResponses) == 0 {
+		src.BaseController.RespondWithJSON(c, http.StatusNoContent, surveyResponses)
+	} else {
+		src.BaseController.RespondWithJSON(c, http.StatusOK, surveyResponses)
+	}
 }
 
 func (src *SurveyResponseController) GetSurveyResponseForGuest(c *gin.Context, lookupKeys ...string) {
 	filters := common.GetFiltersFromContext(c, lookupKeys...)
 	surveyResponse, err := src.SurveyResponseService.GetSurveyResponseForGuest(filters)
 	if err != nil {
-		src.BaseController.RespondWithError(c, http.StatusNotFound, err.Error())
+		src.BaseController.RespondWithError(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 	src.BaseController.RespondWithJSON(c, http.StatusOK, surveyResponse)
@@ -53,18 +57,26 @@ func (src *SurveyResponseController) InitializeSurveyResponsesForParty(c *gin.Co
 
 	surveyResponses, err := src.SurveyResponseService.InitializeSurveyResponsesForParty(filters, survey)
 	if err != nil {
-		src.BaseController.RespondWithError(c, http.StatusNotFound, err.Error())
+		src.BaseController.RespondWithError(c, http.StatusInternalServerError, err.Error())
 		return
 	}
-	src.BaseController.RespondWithJSON(c, http.StatusOK, surveyResponses)
+	if len(surveyResponses) == 0 {
+		src.BaseController.RespondWithJSON(c, http.StatusNoContent, surveyResponses)
+	} else {
+		src.BaseController.RespondWithJSON(c, http.StatusOK, surveyResponses)
+	}
 }
 
 func (src *SurveyResponseController) GetSurveyResponsesForParty(c *gin.Context, lookupKeys ...string) {
 	filters := common.GetFiltersFromContext(c, lookupKeys...)
 	surveyResponses, err := src.SurveyResponseService.GetSurveyResponsesForParty(filters)
 	if err != nil {
-		src.BaseController.RespondWithError(c, http.StatusNotFound, err.Error())
+		src.BaseController.RespondWithError(c, http.StatusInternalServerError, err.Error())
 		return
 	}
-	src.BaseController.RespondWithJSON(c, http.StatusOK, surveyResponses)
+	if len(surveyResponses) == 0 {
+		src.BaseController.RespondWithJSON(c, http.StatusNoContent, surveyResponses)
+	} else {
+		src.BaseController.RespondWithJSON(c, http.StatusOK, surveyResponses)
+	}
 }

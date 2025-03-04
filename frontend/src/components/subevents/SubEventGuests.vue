@@ -17,9 +17,9 @@
         <Separator />
       </CardHeader>
       <CardContent class="flex-1 overflow-y-auto">
-        <div v-if="filteredGuests.length === 0">No Guests</div>
+        <div v-if="noGuests">No Guests</div>
         <div v-else v-for="guest in filteredGuests" :key="guest.id">
-          <GuestCard :guest="guest" :attending-event="isGuestAttendingSubEvent(guest)">
+          <GuestCard :guest="guest" :attending-sub-event="isGuestAttendingSubEvent(guest)">
             <ConfirmAction alert-title="Do you want to remove Checked In status for this guest?"
               @on-confirm="removeAttending(guest)" v-if="isGuestAttendingSubEvent(guest)">
               <Badge class="cursor-pointer">
@@ -52,7 +52,7 @@ import ConfirmAction from '@/components/data-table/ConfirmAction.vue';
 
 const props = defineProps<{
   subEvent: SubEvent | null;
-  subEventGuests: Guest[];
+  subEventGuests: Guest[] | null;
 }>();
 
 // const allInvitedGuests = ref<Guest[]>([]);
@@ -69,7 +69,7 @@ const updateSearchQuery = debounce((value: string) => {
 }, 250);
 
 const filteredGuests = computed(() => {
-  let localGuests = props.subEventGuests;
+  let localGuests = props.subEventGuests ?? [];
 
   if (filterToggle.value && filterToggle.value === 'attending') {
     localGuests = localGuests.filter(guest => guest.attendingSubEvents?.some(subEvent => subEvent.id === props.subEvent!.id));
@@ -85,6 +85,10 @@ const filteredGuests = computed(() => {
   return localGuests;
 });
 
+const noGuests = computed(() => {
+  return !filteredGuests.value || filteredGuests.value.length === 0
+});
+
 watch(searchQuery, (newValue) => {
   updateSearchQuery(newValue);
 });
@@ -95,7 +99,10 @@ function isGuestAttendingSubEvent(guest: Guest) {
 
 async function addAttending(guest: Guest) {
   const guestService = new GuestService();
-  guest.attendingSubEvents?.push(props.subEvent!);
+  if (!guest.attendingSubEvents) {
+    guest.attendingSubEvents = [];
+  }
+  guest.attendingSubEvents.push(props.subEvent!);
   await guestService.saveGuest(guest);
 }
 

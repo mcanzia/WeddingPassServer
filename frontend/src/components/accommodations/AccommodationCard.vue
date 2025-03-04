@@ -1,15 +1,15 @@
 <template>
     <Card class="max-w-sm mx-auto">
         <CardContent class="py-5 px-4">
-            <div class="grid grid-cols-[1fr_auto] items-center" v-if="hotel">
+            <div class="grid grid-cols-[1fr_auto] items-center" v-if="accommodation">
                 <div>
-                    <h1 class="text-md font-bold">{{ hotel.name }}</h1>
+                    <h1 class="text-md font-bold">{{ accommodation.name }}</h1>
                     <div class="ml-6 mt-2">
-                        <h2 class="text-sm">Address: {{ hotel.location }}</h2>
+                        <h2 class="text-sm">Address: {{ accommodation.location }}</h2>
                     </div>
                 </div>
                 <div class="justify-self-end">
-                    <IconButton icon="pencil-outline" @click="editHotel"></IconButton>
+                    <IconButton icon="pencil-outline" @click="editAccommodation"></IconButton>
                 </div>
             </div>
         </CardContent>
@@ -19,17 +19,17 @@
 <script setup lang="ts">
 import { cn } from '@/lib/utils';
 import { Card, CardContent } from '@/components/ui/card';
-import { Hotel } from '@/models/Hotel';
+import { Accommodation } from '@/models/Accommodation';
 import IconButton from '@/components/common/IconButton.vue';
 
 const props = defineProps<{
-    hotel?: Hotel;
+    accommodation?: Accommodation;
 }>();
 
-const emits = defineEmits(['editHotel']);
+const emits = defineEmits(['editAccommodation']);
 
-function editHotel() {
-    emits('editHotel');
+function editAccommodation() {
+    emits('editAccommodation');
 }
 
 </script>

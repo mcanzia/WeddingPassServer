@@ -60,7 +60,7 @@ export class GuestService {
         try {
             const userAccessToken = await this.userStore.getAccessToken();
             const guests = await this.guestController.getGuestsByPhone(userAccessToken, this.eventRole, guestPhone);
-            return guests;
+            return guests ?? [];
         } catch (error) {
             throw error;
         }
@@ -70,7 +70,7 @@ export class GuestService {
         try {
             const userAccessToken = await this.userStore.getAccessToken();
             const guests = await this.guestController.getGuestsByEmail(userAccessToken, this.eventRole, guestEmail);
-            return guests;
+            return guests ?? [];
         } catch (error) {
             throw error;
         }

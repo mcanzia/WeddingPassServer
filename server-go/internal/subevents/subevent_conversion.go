@@ -1,5 +1,7 @@
 package subevents
 
+import "weddingpass/server/internal/common"
+
 type SubEventConverter struct {
 }
 
@@ -7,7 +9,7 @@ func NewSubEventConverter() *SubEventConverter {
 	return &SubEventConverter{}
 }
 
-func (sec *SubEventConverter) ConvertSubEventToDTO(raw *SubEvent) (*SubEventDTO, error) {
+func (sec *SubEventConverter) ConvertSubEventToDTO(raw *SubEvent) (*SubEventDTO, *common.CustomError) {
 	dto := &SubEventDTO{
 		Id:      raw.Id,
 		EventId: raw.EventId,
@@ -17,7 +19,7 @@ func (sec *SubEventConverter) ConvertSubEventToDTO(raw *SubEvent) (*SubEventDTO,
 	return dto, nil
 }
 
-func (sec *SubEventConverter) ConvertSubEventToDAO(dto *SubEventDTO) (*SubEvent, error) {
+func (sec *SubEventConverter) ConvertSubEventToDAO(dto *SubEventDTO) (*SubEvent, *common.CustomError) {
 	se := &SubEvent{
 		Id:      dto.Id,
 		EventId: dto.EventId,

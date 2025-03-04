@@ -26,12 +26,14 @@ import ThingsToDo from "@/components/guests/ThingsToDo.vue";
 import PendingGuests from "@/components/pending-guests/PendingGuests.vue";
 import LoginDirect from "@/components/LoginDirect.vue";
 import GuestInfo from "@/components/guests/GuestInfo.vue";
-import HotelList from "@/components/hotels/HotelList.vue";
-import UpdateHotel from "@/components/hotels/UpdateHotel.vue";
+import AccommodationList from "@/components/accommodations/AccommodationList.vue";
+import UpdateAccommodation from "@/components/accommodations/UpdateAccommodation.vue";
 import GuestEvents from "@/components/guests/GuestEvents.vue";
 import BarcodeHandler from "@/components/barcodes/BarcodeHandler.vue";
 import SurveyResponseTracking from "@/components/surveys/SurveyResponseTracking.vue";
 import DrinkTracker from "@/components/drinks/DrinkTracker.vue";
+import SubEventList from "@/components/subevents/SubEventList.vue";
+import UpdateSubEvent from "@/components/subevents/UpdateSubEvent.vue";
 
 const routes = [
    {
@@ -158,21 +160,39 @@ const routes = [
       }
    },
    {
-      path: '/:eventId/hotels',
-      name: 'hotels',
-      component: HotelList,
+      path: '/:eventId/accommodations',
+      name: 'accommodations',
+      component: AccommodationList,
       props: true,
       meta: {
          allowedRoles: [Roles.ADMIN, Roles.EDITOR, Roles.READONLY]
       }
    },
    {
-      path: '/:eventId/edit-hotel/:hotelId?',
-      name: 'edit-hotel',
-      component: UpdateHotel,
+      path: '/:eventId/edit-accommodation/:accommodationId?',
+      name: 'edit-accommodation',
+      component: UpdateAccommodation,
+      props: true,
+      meta: {
+         allowedRoles: [Roles.ADMIN, Roles.EDITOR]
+      }
+   },
+   {
+      path: '/:eventId/sub-events',
+      name: 'sub-events',
+      component: SubEventList,
       props: true,
       meta: {
          allowedRoles: [Roles.ADMIN, Roles.EDITOR, Roles.READONLY]
+      }
+   },
+   {
+      path: '/:eventId/edit-sub-event/:subEventId?',
+      name: 'edit-sub-event',
+      component: UpdateSubEvent,
+      props: true,
+      meta: {
+         allowedRoles: [Roles.ADMIN, Roles.EDITOR]
       }
    },
    {

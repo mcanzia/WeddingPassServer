@@ -118,9 +118,15 @@ const navbarRoutes = computed(() => {
       roles: [Roles.ADMIN, Roles.EDITOR],
     },
     {
-      name: "Hotels",
+      name: "Accommodations",
       secured: true,
-      path: "hotels",
+      path: "accommodations",
+      roles: [Roles.ADMIN, Roles.EDITOR, Roles.READONLY],
+    },
+    {
+      name: "Sub Events",
+      secured: true,
+      path: "sub-events",
       roles: [Roles.ADMIN, Roles.EDITOR, Roles.READONLY],
     },
     {

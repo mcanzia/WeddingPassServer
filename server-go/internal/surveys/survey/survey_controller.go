@@ -29,5 +29,9 @@ func (ec *SurveyController) GetPublishedSurveys(c *gin.Context, lookupKeys ...st
 		ec.BaseController.RespondWithError(c, http.StatusNotFound, err.Error())
 		return
 	}
-	ec.BaseController.RespondWithJSON(c, http.StatusOK, surveys)
+	if len(surveys) == 0 {
+		ec.BaseController.RespondWithJSON(c, http.StatusNoContent, surveys)
+	} else {
+		ec.BaseController.RespondWithJSON(c, http.StatusOK, surveys)
+	}
 }

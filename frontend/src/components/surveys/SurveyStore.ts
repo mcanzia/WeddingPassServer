@@ -214,6 +214,9 @@ export const useSurveyStore = defineStore('surveyStore', () => {
         if (hasEditAuthority && survey.value) {
             const surveyService = new SurveyService();
             const updatedSurvey = await surveyService.saveSurvey(survey.value);
+            if (!updatedSurvey.surveyComponents) {
+                updatedSurvey.surveyComponents = [];
+            }
             survey.value = updatedSurvey;
             setMessage('Saved survey.', NotificationType.SUCCESS);
             savedStatus.value = true;
@@ -225,6 +228,9 @@ export const useSurveyStore = defineStore('surveyStore', () => {
     async function fetchSurvey(surveyId: string) {
         const surveyService = new SurveyService();
         survey.value = await surveyService.getSurveyById(surveyId);
+        if (survey.value && !survey.value.surveyComponents) {
+            survey.value.surveyComponents = [];
+        }
         if (survey.value && survey.value.surveyComponents) {
             survey.value.surveyComponents = survey.value.surveyComponents.sort((a, b) => a.order! - b.order!);
         }

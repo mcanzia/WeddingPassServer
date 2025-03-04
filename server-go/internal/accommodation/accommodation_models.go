@@ -1,81 +1,35 @@
 package accommodation
 
-type Accommodation interface {
-	GetID() string
-	GetEventId() string
-	GetType() string
+type Accommodation struct {
+	Id         string `firestore:"id"`
+	EventId    string `firestore:"eventId"`
+	Type       string `firestore:"type"`
+	RoomNumber string `firestore:"roomNumber"`
+	Name       string `firestore:"name"`
+	Location   string `firestore:"location"`
 }
 
-type BaseAccommodation struct {
-	Id      string `json:"id"`
-	EventId string `json:"eventId"`
-	Type    string `json:"type"`
+func NewAccommodationInstance() *Accommodation {
+	return &Accommodation{}
 }
 
-func NewBaseAccommodationInstance() *BaseAccommodation {
-	return &BaseAccommodation{}
+func (a *Accommodation) SetID(id string) {
+	a.Id = id
 }
 
-func (b BaseAccommodation) GetId() string {
-	return b.Id
+func (a *Accommodation) GetID() string {
+	return a.Id
 }
 
-func (b BaseAccommodation) GetEventId() string {
-	return b.EventId
-}
-
-func (b BaseAccommodation) GetType() string {
-	return b.Type
-}
-
-type BaseAccommodationDTO struct {
-	Id      string `json:"id"`
-	EventId string `json:"eventId"`
-	Type    string `json:"type"`
-}
-
-func NewBaseAccommodationDTOInstance() *BaseAccommodationDTO {
-	return &BaseAccommodationDTO{}
-}
-
-func (b BaseAccommodationDTO) GetId() string {
-	return b.Id
-}
-
-func (b BaseAccommodationDTO) GetEventId() string {
-	return b.EventId
-}
-
-func (b BaseAccommodationDTO) GetType() string {
-	return b.Type
-}
-
-type Hotel struct {
-	BaseAccommodation
+type AccommodationDTO struct {
+	Id         string `json:"id"`
+	EventId    string `json:"eventId"`
+	Type       string `json:"type"`
 	RoomNumber string `json:"roomNumber"`
 	Name       string `json:"name"`
 	Location   string `json:"location"`
 }
 
-func NewHotelInstance() *Hotel {
-	return &Hotel{}
-}
-
-func (h *Hotel) SetID(id string) {
-	h.Id = id
-}
-
-func (h *Hotel) GetID() string {
-	return h.Id
-}
-
-type HotelDTO struct {
-	BaseAccommodationDTO
-	RoomNumber string `json:"roomNumber"`
-	Name       string `json:"name"`
-	Location   string `json:"location"`
-}
-
-func NewHotelDTOInstance() *HotelDTO {
-	return &HotelDTO{}
+func NewAccommodationDTOInstance() *AccommodationDTO {
+	return &AccommodationDTO{}
 }

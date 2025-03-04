@@ -8,7 +8,7 @@ export class GuestController {
 
     async getAllGuests(userAuthToken: any, eventRole: EventRole) {
         try {
-            const requestUrl = `${RequestUtil.getAPIUrl()}/api/events/${eventRole.event.id}/guests`;
+            const requestUrl = `${RequestUtil.getAPIUrl()}/api/events/${eventRole.event.id}/guests/`;
             return await RequestUtil.apiRequest(requestUrl, RequestUtil.GETRequestParams(userAuthToken, eventRole.role));
         } catch (error: any) {
             ErrorHandler.handleGetAllError<Guest>(userAuthToken, ObjectType.GUEST, error);
@@ -78,7 +78,7 @@ export class GuestController {
 
     async saveGuest(userAuthToken: any, eventRole: EventRole, guest: Guest) {
         try {
-            const requestUrl = `${RequestUtil.getAPIUrl()}/api/events/${eventRole.event.id}/guests`;
+            const requestUrl = `${RequestUtil.getAPIUrl()}/api/events/${eventRole.event.id}/guests/`;
             return await RequestUtil.apiRequest(requestUrl, RequestUtil.POSTRequestParams(userAuthToken, guest, eventRole.role));
         } catch (error: any) {
             ErrorHandler.handleAddError<Guest>(userAuthToken, ObjectType.GUEST, guest, error);
@@ -108,7 +108,7 @@ export class GuestController {
 
     async deleteGuest(userAuthToken: any, eventRole: EventRole, guest: Guest) {
         try {
-            const requestUrl = `${RequestUtil.getAPIUrl()}/api/events/${eventRole.event.id}/guests`;
+            const requestUrl = `${RequestUtil.getAPIUrl()}/api/events/${eventRole.event.id}/guests/`;
             return await RequestUtil.apiRequest(requestUrl, RequestUtil.DELETERequestParams(userAuthToken, guest, eventRole.role));
         } catch (error: any) {
             ErrorHandler.handleDeleteError<Guest>(ObjectType.GUEST);

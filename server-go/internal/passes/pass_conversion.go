@@ -1,5 +1,7 @@
 package passes
 
+import "weddingpass/server/internal/common"
+
 type PassConverter struct {
 }
 
@@ -7,7 +9,7 @@ func NewPassConverter() *PassConverter {
 	return &PassConverter{}
 }
 
-func (pc *PassConverter) ConvertPassToDTO(rawPass *Pass) (*PassDTO, error) {
+func (pc *PassConverter) ConvertPassToDTO(rawPass *Pass) (*PassDTO, *common.CustomError) {
 	dto := &PassDTO{
 		Id:           rawPass.Id,
 		Name:         rawPass.Name,
@@ -16,7 +18,7 @@ func (pc *PassConverter) ConvertPassToDTO(rawPass *Pass) (*PassDTO, error) {
 	return dto, nil
 }
 
-func (pc *PassConverter) ConvertPassToDAO(dto *PassDTO) (*Pass, error) {
+func (pc *PassConverter) ConvertPassToDAO(dto *PassDTO) (*Pass, *common.CustomError) {
 	pass := &Pass{
 		Id:           dto.Id,
 		Name:         dto.Name,

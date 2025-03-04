@@ -5,9 +5,9 @@ import (
 )
 
 type Drinks struct {
-	WillDrinkAlcohol bool         `json:"willDrinkAlcohol"`
-	Preferences      []string     `json:"preferences"`
-	DrinkCount       []DrinkCount `json:"drinkCount"`
+	WillDrinkAlcohol bool         `firestore:"willDrinkAlcohol"`
+	Preferences      []string     `firestore:"preferences"`
+	DrinkCount       []DrinkCount `firestore:"drinkCount"`
 }
 
 func NewDrinksInstance() *Drinks {
@@ -25,8 +25,8 @@ func NewDrinksDTOInstance() *DrinksDTO {
 }
 
 type DrinkCount struct {
-	NumberOfDrinks int                `json:"numberOfDrinks"`
-	SubEvent       subevents.SubEvent `json:"subEvent"`
+	NumberOfDrinks int                `firestore:"numberOfDrinks"`
+	SubEvent       subevents.SubEvent `firestore:"subEvent"`
 }
 
 func NewDrinkCountInstance() *DrinkCount {

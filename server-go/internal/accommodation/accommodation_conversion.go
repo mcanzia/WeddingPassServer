@@ -1,5 +1,7 @@
 package accommodation
 
+import "weddingpass/server/internal/common"
+
 type AccommodationConverter struct {
 }
 
@@ -7,42 +9,27 @@ func NewAccommodationConverter() *AccommodationConverter {
 	return &AccommodationConverter{}
 }
 
-func (ac *AccommodationConverter) ConvertBaseAccommodationToDTO(ba BaseAccommodation) BaseAccommodationDTO {
-	return BaseAccommodationDTO{
-		Id:      ba.Id,
-		EventId: ba.EventId,
-		Type:    ba.Type,
+func (ac *AccommodationConverter) ConvertAccommodationToDTO(raw *Accommodation) (*AccommodationDTO, *common.CustomError) {
+	accommodationDTO := AccommodationDTO{
+		Id:         raw.Id,
+		EventId:    raw.EventId,
+		Type:       raw.Type,
+		RoomNumber: raw.RoomNumber,
+		Name:       raw.Name,
+		Location:   raw.Location,
 	}
+
+	return &accommodationDTO, nil
 }
 
-func (ac *AccommodationConverter) ConvertBaseAccommodationToDAO(ba BaseAccommodationDTO) BaseAccommodation {
-	return BaseAccommodation{
-		Id:      ba.Id,
-		EventId: ba.EventId,
-		Type:    ba.Type,
+func (ac *AccommodationConverter) ConvertAccommodationToDAO(accommodationDTO *AccommodationDTO) (*Accommodation, *common.CustomError) {
+	accommodation := Accommodation{
+		Id:         accommodationDTO.Id,
+		EventId:    accommodationDTO.EventId,
+		Type:       accommodationDTO.Type,
+		RoomNumber: accommodationDTO.RoomNumber,
+		Name:       accommodationDTO.Name,
+		Location:   accommodationDTO.Location,
 	}
-}
-
-func (ac *AccommodationConverter) ConvertHotelToDAO(hotel *HotelDTO) (*Hotel, error) {
-	baseDAO := ac.ConvertBaseAccommodationToDAO(hotel.BaseAccommodationDTO)
-
-	dao := &Hotel{
-		BaseAccommodation: baseDAO,
-		RoomNumber:        hotel.RoomNumber,
-		Name:              hotel.Name,
-		Location:          hotel.Location,
-	}
-	return dao, nil
-}
-
-func (ac *AccommodationConverter) ConvertHotelToDTO(rawHotel *Hotel) (*HotelDTO, error) {
-	baseDTO := ac.ConvertBaseAccommodationToDTO(rawHotel.BaseAccommodation)
-
-	dto := &HotelDTO{
-		BaseAccommodationDTO: baseDTO,
-		RoomNumber:           rawHotel.RoomNumber,
-		Name:                 rawHotel.Name,
-		Location:             rawHotel.Location,
-	}
-	return dto, nil
+	return &accommodation, nil
 }

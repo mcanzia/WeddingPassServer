@@ -1,6 +1,9 @@
 package common
 
-import "fmt"
+import (
+	"errors"
+	"fmt"
+)
 
 type CustomError struct {
 	Code    int
@@ -10,16 +13,25 @@ type CustomError struct {
 
 func (e *CustomError) Error() string {
 	if e.Err != nil {
-		return fmt.Sprintf("%s: %v", e.Message, e.Err)
+		return fmt.Errorf("%s: %w", e.Message, e.Err).Error()
 	}
 	return e.Message
 }
 
-func (e *CustomError) Unwrap() error {
-	return e.Err
+func (e *CustomError) ErrorCode() int {
+	return e.Code
 }
 
-func NewCustomError(code int, message string, err error) error {
+func (e *CustomError) Unwrap() error {
+	return errors.Unwrap(e.Err)
+}
+
+func IsCustomError(err error) bool {
+	var customErr *CustomError
+	return errors.As(err, &customErr)
+}
+
+func NewCustomError(code int, message string, err error) *CustomError {
 	return &CustomError{
 		Code:    code,
 		Message: message,

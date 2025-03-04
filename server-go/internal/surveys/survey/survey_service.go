@@ -8,7 +8,7 @@ import (
 
 type SurveyService interface {
 	common.IBaseService[*surveys_models.SurveyDTO]
-	GetPublishedSurveys(params map[string]string) ([]*surveys_models.SurveyDTO, error)
+	GetPublishedSurveys(params map[string]string) ([]*surveys_models.SurveyDTO, *common.CustomError)
 }
 
 type surveyService struct {
@@ -17,24 +17,25 @@ type surveyService struct {
 	Converter        *surveys_models.SurveyConverter
 }
 
-func NewSurveyService(repository SurveyRepository, guestConverter *guests.GuestConverter) SurveyService {
-	converter := surveys_models.NewSurveyConverter(guestConverter)
+func NewSurveyService(repository SurveyRepository, guestConverter *guests.GuestConverter, guestService guests.GuestService) SurveyService {
+	converter := surveys_models.NewSurveyConverter(guestConverter, guestService)
 	base := common.BaseService[*surveys_models.Survey, *surveys_models.SurveyDTO]{
 		Repository: repository,
-		ConvertToDAO: func(survey *surveys_models.SurveyDTO) (*surveys_models.Survey, error) {
+		ConvertToDAO: func(survey *surveys_models.SurveyDTO) (*surveys_models.Survey, *common.CustomError) {
 			return converter.ConvertSurveyToDAO(survey)
 		},
-		ConvertToDTO: func(rawSurvey *surveys_models.Survey) (*surveys_models.SurveyDTO, error) {
+		ConvertToDTO: func(rawSurvey *surveys_models.Survey) (*surveys_models.SurveyDTO, *common.CustomError) {
 			return converter.ConvertSurveyToDTO(rawSurvey)
 		},
 	}
 	return &surveyService{
-		BaseService: base,
-		Converter:   converter,
+		BaseService:      base,
+		SurveyRepository: repository,
+		Converter:        converter,
 	}
 }
 
-func (s *surveyService) GetPublishedSurveys(params map[string]string) ([]*surveys_models.SurveyDTO, error) {
+func (s *surveyService) GetPublishedSurveys(params map[string]string) ([]*surveys_models.SurveyDTO, *common.CustomError) {
 	rawSurveys, err := s.SurveyRepository.GetPublishedSurveys(params)
 	if err != nil {
 		return nil, err

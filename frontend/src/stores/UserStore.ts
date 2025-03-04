@@ -214,6 +214,9 @@ export const useUserStore = defineStore('userStore', () => {
                 const userEventRole: EventRole = await authService.processInvite(inviteToken);
 
                 // Check if event role already exists
+                if (!localUser.value.eventRoles) {
+                    localUser.value.eventRoles = [];
+                }
                 const existingEventRole = localUser.value.eventRoles.some(
                     (role) => role.event.id === userEventRole.event.id && role.role === userEventRole.role
                 );

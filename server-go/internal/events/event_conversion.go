@@ -1,5 +1,7 @@
 package events
 
+import "weddingpass/server/internal/common"
+
 type EventConverter struct {
 }
 
@@ -7,7 +9,7 @@ func NewEventConverter() *EventConverter {
 	return &EventConverter{}
 }
 
-func (ec *EventConverter) ConvertEventToDAO(event *EventDTO) (*Event, error) {
+func (ec *EventConverter) ConvertEventToDAO(event *EventDTO) (*Event, *common.CustomError) {
 	dao := &Event{
 		Id:       event.Id,
 		Name:     event.Name,
@@ -19,7 +21,7 @@ func (ec *EventConverter) ConvertEventToDAO(event *EventDTO) (*Event, error) {
 	return dao, nil
 }
 
-func (ec *EventConverter) ConvertEventToDTO(rawEvent *Event) (*EventDTO, error) {
+func (ec *EventConverter) ConvertEventToDTO(rawEvent *Event) (*EventDTO, *common.CustomError) {
 	dto := &EventDTO{
 		Id:       rawEvent.Id,
 		Name:     rawEvent.Name,

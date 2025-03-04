@@ -1,22 +1,23 @@
 package surveys_models
 
 import (
-	"fmt"
-
+	"weddingpass/server/internal/common"
 	"weddingpass/server/internal/guests"
 )
 
 type SurveyConverter struct {
 	GuestConverter *guests.GuestConverter
+	GuestService   guests.GuestService
 }
 
-func NewSurveyConverter(guestConverter *guests.GuestConverter) *SurveyConverter {
+func NewSurveyConverter(guestConverter *guests.GuestConverter, guestService guests.GuestService) *SurveyConverter {
 	return &SurveyConverter{
 		GuestConverter: guestConverter,
+		GuestService:   guestService,
 	}
 }
 
-func (sc *SurveyConverter) ConvertSurveyToDAO(surveyDto *SurveyDTO) (*Survey, error) {
+func (sc *SurveyConverter) ConvertSurveyToDAO(surveyDto *SurveyDTO) (*Survey, *common.CustomError) {
 	survey := &Survey{
 		Id:                     surveyDto.Id,
 		EventId:                surveyDto.EventId,
@@ -27,14 +28,14 @@ func (sc *SurveyConverter) ConvertSurveyToDAO(surveyDto *SurveyDTO) (*Survey, er
 	for _, compDto := range surveyDto.SurveyComponents {
 		comp, err := sc.ConvertSurveyComponentToDAO(&compDto)
 		if err != nil {
-			return nil, fmt.Errorf("ConvertSurveyToDAO: failed to convert survey component: %w", err)
+			return nil, err
 		}
 		survey.SurveyComponents = append(survey.SurveyComponents, *comp)
 	}
 	return survey, nil
 }
 
-func (sc *SurveyConverter) ConvertSurveyToDTO(raw *Survey) (*SurveyDTO, error) {
+func (sc *SurveyConverter) ConvertSurveyToDTO(raw *Survey) (*SurveyDTO, *common.CustomError) {
 	dto := &SurveyDTO{
 		Id:                     raw.Id,
 		EventId:                raw.EventId,
@@ -45,14 +46,14 @@ func (sc *SurveyConverter) ConvertSurveyToDTO(raw *Survey) (*SurveyDTO, error) {
 	for _, comp := range raw.SurveyComponents {
 		compDTO, err := sc.ConvertSurveyComponentToDTO(&comp)
 		if err != nil {
-			return nil, fmt.Errorf("ConvertSurveyToDTO: failed to convert survey component: %w", err)
+			return nil, err
 		}
 		dto.SurveyComponents = append(dto.SurveyComponents, *compDTO)
 	}
 	return dto, nil
 }
 
-func (sc *SurveyConverter) ConvertSurveyComponentToDAO(surveyComponentDto *SurveyComponentDTO) (*SurveyComponent, error) {
+func (sc *SurveyConverter) ConvertSurveyComponentToDAO(surveyComponentDto *SurveyComponentDTO) (*SurveyComponent, *common.CustomError) {
 	surveyComponent := &SurveyComponent{
 		Id:              surveyComponentDto.Id,
 		Label:           surveyComponentDto.Label,
@@ -67,14 +68,14 @@ func (sc *SurveyConverter) ConvertSurveyComponentToDAO(surveyComponentDto *Surve
 	for _, trigDTO := range surveyComponentDto.SurveyTriggers {
 		trig, err := sc.ConvertSurveyTriggerToDAO(&trigDTO)
 		if err != nil {
-			return nil, fmt.Errorf("ConvertSurveyComponentToDAO: failed to convert survey trigger: %w", err)
+			return nil, err
 		}
 		surveyComponent.SurveyTriggers = append(surveyComponent.SurveyTriggers, *trig)
 	}
 	return surveyComponent, nil
 }
 
-func (sc *SurveyConverter) ConvertSurveyComponentToDTO(raw *SurveyComponent) (*SurveyComponentDTO, error) {
+func (sc *SurveyConverter) ConvertSurveyComponentToDTO(raw *SurveyComponent) (*SurveyComponentDTO, *common.CustomError) {
 	dto := &SurveyComponentDTO{
 		Id:              raw.Id,
 		Label:           raw.Label,
@@ -89,17 +90,17 @@ func (sc *SurveyConverter) ConvertSurveyComponentToDTO(raw *SurveyComponent) (*S
 	for _, trig := range raw.SurveyTriggers {
 		trigDTO, err := sc.ConvertSurveyTriggerToDTO(&trig)
 		if err != nil {
-			return nil, fmt.Errorf("ConvertSurveyComponentToDTO: failed to convert survey trigger: %w", err)
+			return nil, err
 		}
 		dto.SurveyTriggers = append(dto.SurveyTriggers, *trigDTO)
 	}
 	return dto, nil
 }
 
-func (sc *SurveyConverter) ConvertSurveyTriggerToDAO(surveyTriggerDto *SurveyTriggerDTO) (*SurveyTrigger, error) {
+func (sc *SurveyConverter) ConvertSurveyTriggerToDAO(surveyTriggerDto *SurveyTriggerDTO) (*SurveyTrigger, *common.CustomError) {
 	surveyComponent, err := sc.ConvertSurveyComponentToDAO(&surveyTriggerDto.Child)
 	if err != nil {
-		return nil, fmt.Errorf("ConvertSurveyTriggerToDAO: failed to convert child component: %w", err)
+		return nil, err
 	}
 	surveyTrigger := &SurveyTrigger{
 		TriggerField: surveyTriggerDto.TriggerField,
@@ -108,10 +109,10 @@ func (sc *SurveyConverter) ConvertSurveyTriggerToDAO(surveyTriggerDto *SurveyTri
 	return surveyTrigger, nil
 }
 
-func (sc *SurveyConverter) ConvertSurveyTriggerToDTO(raw *SurveyTrigger) (*SurveyTriggerDTO, error) {
+func (sc *SurveyConverter) ConvertSurveyTriggerToDTO(raw *SurveyTrigger) (*SurveyTriggerDTO, *common.CustomError) {
 	childDTO, err := sc.ConvertSurveyComponentToDTO(&raw.Child)
 	if err != nil {
-		return nil, fmt.Errorf("ConvertSurveyTriggerToDTO: failed to convert child component: %w", err)
+		return nil, err
 	}
 	dto := &SurveyTriggerDTO{
 		TriggerField: raw.TriggerField,
@@ -120,38 +121,36 @@ func (sc *SurveyConverter) ConvertSurveyTriggerToDTO(raw *SurveyTrigger) (*Surve
 	return dto, nil
 }
 
-func (sc *SurveyConverter) ConvertSurveyResponseToDAO(surveyResponseDto *SurveyResponseDTO) (*SurveyResponse, error) {
+func (sc *SurveyConverter) ConvertSurveyResponseToDAO(surveyResponseDto *SurveyResponseDTO) (*SurveyResponse, *common.CustomError) {
 
 	survey, err := sc.ConvertSurveyToDAO(&surveyResponseDto.Survey)
 	if err != nil {
-		return nil, fmt.Errorf("ConvertSurveyResponseToDAO: failed to convert survey: %w", err)
-	}
-
-	guest, err := sc.GuestConverter.ConvertGuestToDAO(&surveyResponseDto.Guest)
-	if err != nil {
-		return nil, fmt.Errorf("ConvertSurveyResponseToDAO: failed to convert guest: %w", err)
+		return nil, err
 	}
 
 	surveyResponse := &SurveyResponse{
 		ResponseId: surveyResponseDto.ResponseId,
 		Survey:     *survey,
-		Guest:      *guest,
+		Guest:      surveyResponseDto.Guest.Id,
 		UpdatedAt:  surveyResponseDto.UpdatedAt,
 		Submitted:  surveyResponseDto.Submitted,
 	}
 	return surveyResponse, nil
 }
 
-func (sc *SurveyConverter) ConvertSurveyResponseToDTO(raw *SurveyResponse) (*SurveyResponseDTO, error) {
+func (sc *SurveyConverter) ConvertSurveyResponseToDTO(raw *SurveyResponse) (*SurveyResponseDTO, *common.CustomError) {
 
 	surveyDTO, err := sc.ConvertSurveyToDTO(&raw.Survey)
 	if err != nil {
-		return nil, fmt.Errorf("ConvertSurveyResponseToDTO: failed to convert survey: %w", err)
+		return nil, err
 	}
 
-	guestDTO, err := sc.GuestConverter.ConvertGuestToDTO(&raw.Guest)
+	params := make(map[string]string)
+	params["eventId"] = raw.Survey.EventId
+	params["id"] = raw.Guest
+	guestDTO, err := sc.GuestService.GetByID(params)
 	if err != nil {
-		return nil, fmt.Errorf("ConvertSurveyResponseToDTO: failed to convert guest: %w", err)
+		return nil, err
 	}
 
 	dto := &SurveyResponseDTO{

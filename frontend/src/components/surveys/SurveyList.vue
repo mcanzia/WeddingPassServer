@@ -94,6 +94,7 @@ async function goToEditSurvey(surveyToEdit: Survey | null) {
   if (!surveyToEdit) {
     survey.value = {
       title: "New Survey",
+      eventId: userStore.selectedEvent?.id,
       surveyComponents: [],
       published: false,
       showPartyMemberSurveys: false

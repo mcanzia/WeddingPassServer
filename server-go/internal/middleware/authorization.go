@@ -37,7 +37,7 @@ func AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		userRole := c.GetHeader("userrole")
+		userRole := c.GetHeader("User-Role")
 
 		c.Set("userAuth", userDetails.UID)
 		c.Set("userRole", userRole)

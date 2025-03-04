@@ -3,10 +3,10 @@ package users
 import "weddingpass/server/internal/events"
 
 type User struct {
-	Id         string      `json:"id"`
-	Email      string      `json:"email"`
-	Phone      string      `json:"phone"`
-	EventRoles []EventRole `json:"eventRoles"`
+	Id         string      `firestore:"id"`
+	Email      string      `firestore:"email"`
+	Phone      string      `firestore:"phone"`
+	EventRoles []EventRole `firestore:"eventRoles"`
 }
 
 func NewUserInstance() *User {
@@ -33,9 +33,9 @@ func NewUserDTOInstance() *UserDTO {
 }
 
 type EventRole struct {
-	Role    string `json:"role"`
-	Event   string `json:"event"`
-	GuestId string `json:"guestId"`
+	Role    string `firestore:"role"`
+	Event   string `firestore:"event"`
+	GuestId string `firestore:"guestId"`
 }
 
 func NewEventRoleInstance() *EventRole {
@@ -53,13 +53,22 @@ func NewEventRoleDTOInstance() *EventRoleDTO {
 }
 
 type InviteToken struct {
-	Token     string    `json:"token"`
-	EventRole EventRole `json:"eventRole"`
-	GuestId   string    `json:"guestId"`
+	Id        string    `firestore:"id"`
+	Token     string    `firestore:"token"`
+	EventRole EventRole `firestore:"eventRole"`
+	GuestId   string    `firestore:"guestId"`
 }
 
 func NewInviteTokenInstance() *InviteToken {
 	return &InviteToken{}
+}
+
+func (i *InviteToken) SetID(id string) {
+	i.Id = id
+}
+
+func (i *InviteToken) GetID() string {
+	return i.Id
 }
 
 type InviteTokenDTO struct {

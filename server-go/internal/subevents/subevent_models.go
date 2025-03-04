@@ -1,10 +1,10 @@
 package subevents
 
 type SubEvent struct {
-	Id      string `json:"id"`
-	EventId string `json:"eventId"`
-	Name    string `json:"name"`
-	Order   int    `json:"order"`
+	Id      string `firestore:"id"`
+	EventId string `firestore:"eventId"`
+	Name    string `firestore:"name"`
+	Order   int    `firestore:"order"`
 }
 
 func NewSubEventInstance() *SubEvent {

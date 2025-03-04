@@ -3,24 +3,24 @@
         <Card class="mx-auto max-w-sm" v-if="!loading">
             <CardHeader>
                 <CardTitle class="text-2xl">
-                    Hotel Details
+                    Sub Event Details
                 </CardTitle>
                 <CardDescription>
-                    Enter hotel details below
+                    Enter sub event details below
                 </CardDescription>
             </CardHeader>
             <CardContent>
                 <div class="grid gap-4">
                     <div class="grid gap-2">
-                        <Label for="hotel-name">Hotel Name</Label>
-                        <Input id="hotel-name" type="text" v-model="hotelForm.name" required />
+                        <Label for="sub-event-name">Sub Event Name</Label>
+                        <Input id="sub-event-name" type="text" v-model="subEventForm.name" required />
                     </div>
                     <div class="grid gap-2">
-                        <Label for="hotel-location">Address</Label>
-                        <Input id="hotel-location" type="text" v-model="hotelForm.location" required />
+                        <Label for="sub-event-order">Sub Event Order</Label>
+                        <Input id="sub-event-order" type="number" v-model="subEventForm.order" required />
                     </div>
                     <div class="inline-flex gap-4 justify-end">
-                        <Button @click="saveHotel">Save</Button>
+                        <Button @click="saveSubEvent">Save</Button>
                         <Button @click="close" variant="outline">Cancel</Button>
                     </div>
                 </div>
@@ -43,8 +43,8 @@ import { useUserStore } from '@/stores/UserStore';
 import { storeToRefs } from 'pinia';
 import { useRouterHelper } from '@/util/composables/useRouterHelper';
 import Loader from '@/components/Loader.vue';
-import { Hotel } from '@/models/Hotel';
-import { HotelService } from '@/services/HotelService';
+import { SubEvent } from '@/models/SubEvent';
+import { SubEventService } from '@/services/SubEventService';
 import { useRoute } from 'vue-router';
 
 const { goToRouteSecured } = useRouterHelper();
@@ -54,45 +54,44 @@ const userStore = useUserStore();
 const { hasEditAuthority, selectedEvent } = storeToRefs(userStore);
 
 const route = useRoute();
-const hotelId = route.params.hotelId as string;
+const subEventId = route.params.subEventId as string;
 
 const loading = ref(false);
 
-const hotelForm = ref({
+const subEventForm = ref({
     id: '',
     eventId: '',
     name: '',
-    location: '',
+    order: 0
 });
 
 onMounted(async () => {
-    if (hotelId) {
+    if (subEventId) {
         loading.value = true;
 
-        const hotelService = new HotelService();
-        const editHotel = await hotelService.getHotelById(hotelId);
+        const subEventService = new SubEventService();
+        const editSubEvent = await subEventService.getSubEventById(subEventId);
 
-        if (!editHotel) {
-            console.log('Target hotel not found');
+        if (!editSubEvent) {
+            console.log('Target sub event not found');
         }
 
-        hotelForm.value.id = hotelId;
-        hotelForm.value.eventId = editHotel.eventId;
-        hotelForm.value.name = editHotel.name;
-        hotelForm.value.location = editHotel.location;
+        subEventForm.value.id = subEventId;
+        subEventForm.value.eventId = editSubEvent.eventId;
+        subEventForm.value.name = editSubEvent.name;
         loading.value = false;
     }
 });
 
-async function saveHotel() {
+async function saveSubEvent() {
     if (hasEditAuthority) {
-        const hotelToUpdate = {
-            ...hotelForm.value,
+        const subEventToUpdate = {
+            ...subEventForm.value,
             eventId: selectedEvent.value?.id!,
-        } as Hotel
-        const hotelService = new HotelService();
-        await hotelService.saveHotel(hotelToUpdate);
-        setMessage('Updated hotel.', NotificationType.SUCCESS);
+        } as SubEvent
+        const subEventService = new SubEventService();
+        await subEventService.saveSubEvent(subEventToUpdate);
+        setMessage('Updated sub event.', NotificationType.SUCCESS);
         close();
     } else {
         ErrorHandler.handleAuthorizationError();
@@ -101,7 +100,7 @@ async function saveHotel() {
 }
 
 function close() {
-    goToRouteSecured('hotels');
+    goToRouteSecured('sub-events');
 }
 
 

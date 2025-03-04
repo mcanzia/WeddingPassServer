@@ -43,13 +43,15 @@ func (uc *UserController) GetUserByEmail(c *gin.Context, lookupKeys ...string) {
 }
 
 func (uc *UserController) GenerateInviteLink(c *gin.Context, lookupKeys ...string) {
+	filters := common.GetFiltersFromContext(c, lookupKeys...)
+
 	var eventRole EventRoleDTO
 	if err := c.ShouldBindJSON(&eventRole); err != nil {
 		uc.BaseController.RespondWithError(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	inviteToken, err := uc.UserService.GenerateInviteLink(&eventRole)
+	inviteToken, err := uc.UserService.GenerateInviteLink(filters, &eventRole)
 
 	if err != nil {
 		uc.BaseController.RespondWithError(c, http.StatusNotFound, err.Error())
@@ -71,7 +73,7 @@ func (uc *UserController) ProcessInvite(c *gin.Context, lookupKeys ...string) {
 	eventRole, err := uc.UserService.ProcessInvite(filters, &inviteToken)
 
 	if err != nil {
-		uc.BaseController.RespondWithError(c, http.StatusNotFound, err.Error())
+		uc.BaseController.RespondWithError(c, http.StatusBadRequest, err.Error())
 		return
 	}
 	uc.BaseController.RespondWithJSON(c, http.StatusOK, eventRole)

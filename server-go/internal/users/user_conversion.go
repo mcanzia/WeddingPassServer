@@ -17,7 +17,7 @@ func NewUserConverter(repo events.EventRepository, eventConverter *events.EventC
 	}
 }
 
-func (uc *UserConverter) ConvertUserToDAO(userDTO *UserDTO) (*User, error) {
+func (uc *UserConverter) ConvertUserToDAO(userDTO *UserDTO) (*User, *common.CustomError) {
 	user := &User{
 		Id:    userDTO.Id,
 		Email: userDTO.Email,
@@ -35,7 +35,7 @@ func (uc *UserConverter) ConvertUserToDAO(userDTO *UserDTO) (*User, error) {
 	return user, nil
 }
 
-func (uc *UserConverter) ConvertUserToDTO(rawUser *User) (*UserDTO, error) {
+func (uc *UserConverter) ConvertUserToDTO(rawUser *User) (*UserDTO, *common.CustomError) {
 	dto := &UserDTO{
 		Id:    rawUser.Id,
 		Email: rawUser.Email,
@@ -53,7 +53,7 @@ func (uc *UserConverter) ConvertUserToDTO(rawUser *User) (*UserDTO, error) {
 	return dto, nil
 }
 
-func (uc *UserConverter) ConvertEventRoleToDAO(eventRoleDTO *EventRoleDTO) (*EventRole, error) {
+func (uc *UserConverter) ConvertEventRoleToDAO(eventRoleDTO *EventRoleDTO) (*EventRole, *common.CustomError) {
 	eventRole := &EventRole{
 		Role:    eventRoleDTO.Role,
 		GuestId: eventRoleDTO.GuestId,
@@ -63,7 +63,7 @@ func (uc *UserConverter) ConvertEventRoleToDAO(eventRoleDTO *EventRoleDTO) (*Eve
 	return eventRole, nil
 }
 
-func (uc *UserConverter) ConvertEventRoleToDTO(rawEventRole *EventRole) (*EventRoleDTO, error) {
+func (uc *UserConverter) ConvertEventRoleToDTO(rawEventRole *EventRole) (*EventRoleDTO, *common.CustomError) {
 	eventParams := map[string]string{"id": rawEventRole.Event}
 	rawEvent, err := uc.EventRepo.GetByID(eventParams)
 	if err != nil {
@@ -82,7 +82,7 @@ func (uc *UserConverter) ConvertEventRoleToDTO(rawEventRole *EventRole) (*EventR
 	return &dtoEventRole, nil
 }
 
-func (uc *UserConverter) ConvertInviteTokenToDAO(inviteTokenDTO *InviteTokenDTO) (*InviteToken, error) {
+func (uc *UserConverter) ConvertInviteTokenToDAO(inviteTokenDTO *InviteTokenDTO) (*InviteToken, *common.CustomError) {
 
 	eventRole, err := uc.ConvertEventRoleToDAO(&inviteTokenDTO.EventRole)
 	if err != nil {
@@ -98,7 +98,7 @@ func (uc *UserConverter) ConvertInviteTokenToDAO(inviteTokenDTO *InviteTokenDTO)
 	return inviteToken, nil
 }
 
-func (uc *UserConverter) ConvertInviteTokenToDTO(rawInviteToken *InviteToken) (*InviteTokenDTO, error) {
+func (uc *UserConverter) ConvertInviteTokenToDTO(rawInviteToken *InviteToken) (*InviteTokenDTO, *common.CustomError) {
 	eventRoleDTO, err := uc.ConvertEventRoleToDTO(&rawInviteToken.EventRole)
 	if err != nil {
 		return nil, err

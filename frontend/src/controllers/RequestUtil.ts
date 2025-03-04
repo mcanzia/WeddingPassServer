@@ -12,7 +12,7 @@ export class RequestUtil {
             method: RequestType.GET,
             headers: {
                 'Authorization': bearer,
-                ...(role && { 'UserRole': role }),
+                ...(role && { 'User-Role': role }),
             }
         }
     }
@@ -24,7 +24,7 @@ export class RequestUtil {
             headers: {
                 'Authorization': bearer,
                 'Content-Type': 'application/json',
-                ...(role && { 'UserRole': role }),
+                ...(role && { 'User-Role': role }),
             },
             body: JSON.stringify(body)
         }
@@ -40,7 +40,7 @@ export class RequestUtil {
             method: RequestType.POST,
             headers: {
                 'Authorization': bearer,
-                ...(role && { 'UserRole': role }),
+                ...(role && { 'User-Role': role }),
             },
             body: formData
         }
@@ -53,7 +53,7 @@ export class RequestUtil {
             method: RequestType.GET,
             headers: {
                 'Authorization': bearer,
-                ...(role && { 'UserRole': role }),
+                ...(role && { 'User-Role': role }),
             }
         }
     }
@@ -65,7 +65,7 @@ export class RequestUtil {
             headers: {
                 'Authorization': bearer,
                 'Content-Type': 'application/json',
-                ...(role && { 'UserRole': role }),
+                ...(role && { 'User-Role': role }),
             },
             body: JSON.stringify(body)
         }
@@ -78,7 +78,7 @@ export class RequestUtil {
             headers: {
                 'Authorization': bearer,
                 'Content-Type': 'application/json',
-                ...(role && { 'UserRole': role }),
+                ...(role && { 'User-Role': role }),
             },
             body: JSON.stringify(body)
         }

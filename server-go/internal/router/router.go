@@ -6,6 +6,7 @@ import (
 	"weddingpass/server/internal/guests"
 	"weddingpass/server/internal/middleware"
 	"weddingpass/server/internal/passes"
+	"weddingpass/server/internal/pendingguests"
 	"weddingpass/server/internal/subevents"
 	"weddingpass/server/internal/surveys"
 	"weddingpass/server/internal/users"
@@ -26,10 +27,11 @@ func SetupRouter(ctrls *Controllers) *gin.Engine {
 	events.RegisterEventRoutes(apiRoute, ctrls.EventController)
 	users.RegisterUserRoutes(apiRoute, ctrls.UserController)
 
-	eventSpecificRoute := apiRoute.Group("/event/:eventId")
+	eventSpecificRoute := apiRoute.Group("/events/:eventId")
 	guests.RegisterGuestRoutes(eventSpecificRoute, ctrls.GuestController)
-	accommodation.RegisterHotelRoutes(eventSpecificRoute, ctrls.HotelController)
+	accommodation.RegisterAccommodationRoutes(eventSpecificRoute, ctrls.AccommodationController)
 	passes.RegisterPassRoutes(eventSpecificRoute, ctrls.PassController)
+	pendingguests.RegisterPendingGuestRoutes(eventSpecificRoute, ctrls.PendingGuestController)
 	subevents.RegisterSubEventRoutes(eventSpecificRoute, ctrls.SubEventController)
 	surveys.RegisterSurveyRoutes(eventSpecificRoute, ctrls.SurveyController, ctrls.SurveyResponseController)
 

@@ -10,7 +10,7 @@ import (
 
 type SurveyRepository interface {
 	common.IBaseRepository[*surveys_models.Survey]
-	GetPublishedSurveys(params map[string]string) ([]*surveys_models.Survey, error)
+	GetPublishedSurveys(params map[string]string) ([]*surveys_models.Survey, *common.CustomError)
 }
 
 type surveyRepository struct {
@@ -25,6 +25,6 @@ func NewSurveyRepository(client *firestore.Client, ctx context.Context) SurveyRe
 	}
 }
 
-func (repository *surveyRepository) GetPublishedSurveys(params map[string]string) ([]*surveys_models.Survey, error) {
+func (repository *surveyRepository) GetPublishedSurveys(params map[string]string) ([]*surveys_models.Survey, *common.CustomError) {
 	return repository.GetMultiByField(params)
 }

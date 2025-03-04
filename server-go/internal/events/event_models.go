@@ -3,11 +3,11 @@ package events
 import "time"
 
 type Event struct {
-	Id       string    `json:"id"`
-	Name     string    `json:"name"`
-	Date     time.Time `json:"date"`
-	Location string    `json:"location"`
-	OwnerId  string    `json:"ownerId"`
+	Id       string    `firestore:"id"`
+	Name     string    `firestore:"name"`
+	Date     time.Time `firestore:"date"`
+	Location string    `firestore:"location"`
+	OwnerId  string    `firestore:"ownerId"`
 }
 
 func NewEventInstance() *Event {

@@ -1,5 +1,7 @@
 package transportation
 
+import "weddingpass/server/internal/common"
+
 type TransportationConverter struct {
 }
 
@@ -7,9 +9,8 @@ func NewTransportationConverter() *TransportationConverter {
 	return &TransportationConverter{}
 }
 
-func (tc *TransportationConverter) ConvertTransportationToDTO(raw *Transportation) (*TransportationDTO, error) {
+func (tc *TransportationConverter) ConvertTransportationToDTO(raw *Transportation) (*TransportationDTO, *common.CustomError) {
 	dto := &TransportationDTO{
-		Id:        raw.Id,
 		Type:      raw.Type,
 		IsArrival: raw.IsArrival,
 		Time:      raw.Time,
@@ -18,9 +19,8 @@ func (tc *TransportationConverter) ConvertTransportationToDTO(raw *Transportatio
 	return dto, nil
 }
 
-func (tc *TransportationConverter) ConvertTransportationToDAO(dto *TransportationDTO) (*Transportation, error) {
+func (tc *TransportationConverter) ConvertTransportationToDAO(dto *TransportationDTO) (*Transportation, *common.CustomError) {
 	transport := &Transportation{
-		Id:        dto.Id,
 		Type:      dto.Type,
 		IsArrival: dto.IsArrival,
 		Time:      dto.Time,

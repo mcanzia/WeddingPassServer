@@ -3,16 +3,16 @@
         <Card class="mx-auto max-w-sm h-3/4 flex flex-col" v-if="!loading">
             <CardHeader class="flex-none">
                 <CardTitle class="text-2xl">
-                    Hotels
+                    Sub Events
                 </CardTitle>
-                <Search class="mb-4" placeholder="Search hotel name..." v-model="searchQuery" />
-                <Button @click="goToUpdateHotel">New</Button>
+                <Search class="mb-4" placeholder="Search subevent name..." v-model="searchQuery" />
+                <Button @click="goToUpdateSubEvent">New</Button>
                 <Separator />
             </CardHeader>
             <CardContent class="flex-1 overflow-y-auto">
-                <div v-if="filteredHotels.length === 0">No Hotels</div>
-                <div v-else v-for="hotel in filteredHotels" :key="hotel.id">
-                    <HotelCard :hotel="hotel" @editHotel="goToUpdateHotel(hotel)"></HotelCard>
+                <div v-if="filteredSubEvents.length === 0">No Sub Events</div>
+                <div v-else v-for="subEvent in filteredSubEvents" :key="subEvent.id">
+                    <SubEventCard :sub-event="subEvent" @edit-sub-event="goToUpdateSubEvent(subEvent)"></SubEventCard>
                 </div>
             </CardContent>
         </Card>
@@ -27,22 +27,22 @@ import { Separator } from '@/components/ui/separator'
 import { ref, watch, computed, onMounted } from 'vue';
 import Search from '@/components/Search.vue';
 import debounce from 'lodash/debounce';
-import { Hotel } from '@/models/Hotel';
-import HotelCard from '@/components/hotels/HotelCard.vue';
+import { SubEvent } from '@/models/SubEvent';
+import SubEventCard from '@/components/subevents/SubEventCard.vue';
 import { useRouterHelper } from '@/util/composables/useRouterHelper';
-import { HotelService } from '@/services/HotelService';
+import { SubEventService } from '@/services/SubEventService';
 import Loader from '@/components/Loader.vue';
 
 const { goToRouteSecured } = useRouterHelper();
 
 onMounted(async () => {
     loading.value = true;
-    const hotelService = new HotelService();
-    allHotels.value = await hotelService.getAllHotels();
+    const subEventService = new SubEventService();
+    allSubEvents.value = await subEventService.getAllSubEvents();
     loading.value = false;
 });
 
-const allHotels = ref<Hotel[]>([]);
+const allSubEvents = ref<SubEvent[]>([]);
 const loading = ref(false);
 const searchQuery = ref('');
 const debouncedSearchQuery = ref('');
@@ -51,23 +51,23 @@ const updateSearchQuery = debounce((value: string) => {
     debouncedSearchQuery.value = value;
 }, 250);
 
-const filteredHotels = computed(() => {
-    let localHotels = allHotels.value;
+const filteredSubEvents = computed(() => {
+    let localSubEvents = allSubEvents.value;
 
     if (debouncedSearchQuery.value) {
-        localHotels = localHotels.filter(hotel =>
-            hotel.name.toLowerCase().includes(debouncedSearchQuery.value.toLowerCase())
+        localSubEvents = localSubEvents.filter(subEvent =>
+            subEvent.name.toLowerCase().includes(debouncedSearchQuery.value.toLowerCase())
         );
     }
-    return localHotels;
+    return localSubEvents;
 });
 
 watch(searchQuery, (newValue) => {
     updateSearchQuery(newValue);
 });
 
-function goToUpdateHotel(hotel?: Hotel) {
-    hotel ? goToRouteSecured('edit-hotel', { hotelId: hotel.id }) : goToRouteSecured('edit-hotel');
+function goToUpdateSubEvent(subEvent?: SubEvent) {
+    subEvent ? goToRouteSecured('edit-sub-event', { subEventId: subEvent.id }) : goToRouteSecured('edit-sub-event');
 }
 
 </script>

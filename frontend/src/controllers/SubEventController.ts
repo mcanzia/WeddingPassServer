@@ -8,7 +8,7 @@ export class SubEventController {
 
     async getAllSubEvents(userAuthToken: any, eventRole: EventRole) {
         try {
-            const requestUrl = `${RequestUtil.getAPIUrl()}/api/events/${eventRole.event.id}/subevents`;
+            const requestUrl = `${RequestUtil.getAPIUrl()}/api/events/${eventRole.event.id}/subevents/`;
             return await RequestUtil.apiRequest(requestUrl, RequestUtil.GETRequestParams(userAuthToken, eventRole.role));
         } catch (error: any) {
             ErrorHandler.handleGetAllError<SubEvent>(userAuthToken, ObjectType.SUBEVENT, error);
@@ -28,7 +28,7 @@ export class SubEventController {
 
     async saveSubEvent(userAuthToken: any, eventRole: EventRole, subEvent: SubEvent) {
         try {
-            const requestUrl = `${RequestUtil.getAPIUrl()}/api/events/${eventRole.event.id}/subevents`;
+            const requestUrl = `${RequestUtil.getAPIUrl()}/api/events/${eventRole.event.id}/subevents/`;
             return await RequestUtil.apiRequest(requestUrl, RequestUtil.POSTRequestParams(userAuthToken, subEvent, eventRole.role));
         } catch (error: any) {
             ErrorHandler.handleAddError<SubEvent>(userAuthToken, ObjectType.SUBEVENT, subEvent, error);
@@ -48,7 +48,7 @@ export class SubEventController {
 
     async deleteSubEvent(userAuthToken: any, eventRole: EventRole, subEvent: SubEvent) {
         try {
-            const requestUrl = `${RequestUtil.getAPIUrl()}/api/events/${eventRole.event.id}/subEvents`;
+            const requestUrl = `${RequestUtil.getAPIUrl()}/api/events/${eventRole.event.id}/subEvents/`;
             return await RequestUtil.apiRequest(requestUrl, RequestUtil.DELETERequestParams(userAuthToken, subEvent, eventRole.role));
         } catch (error: any) {
             ErrorHandler.handleDeleteError<SubEvent>(ObjectType.SUBEVENT);

@@ -13,12 +13,6 @@ func init() {
 	common.RegisterInstanceFactory(reflect.TypeOf((*GuestDTO)(nil)), func() interface{} {
 		return new(GuestDTO)
 	})
-	common.RegisterInstanceFactory(reflect.TypeOf((*PendingGuest)(nil)), func() interface{} {
-		return new(PendingGuest)
-	})
-	common.RegisterInstanceFactory(reflect.TypeOf((*PendingGuestDTO)(nil)), func() interface{} {
-		return new(PendingGuestDTO)
-	})
 	common.RegisterInstanceFactory(reflect.TypeOf((*UploadValidation)(nil)), func() interface{} {
 		return new(UploadValidation)
 	})

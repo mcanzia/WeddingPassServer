@@ -9,7 +9,7 @@ export class PendingGuestController {
 
     async getAllPendingGuests(userAuthToken: any, eventRole: EventRole) {
         try {
-            const requestUrl = `${RequestUtil.getAPIUrl()}/api/events/${eventRole.event.id}/pending-guests`;
+            const requestUrl = `${RequestUtil.getAPIUrl()}/api/events/${eventRole.event.id}/pending-guests/`;
             return await RequestUtil.apiRequest(requestUrl, RequestUtil.GETRequestParams(userAuthToken, eventRole.role));
         } catch (error: any) {
             ErrorHandler.handleGetAllError<PendingGuest>(userAuthToken, ObjectType.SURVEY, error);
@@ -29,7 +29,7 @@ export class PendingGuestController {
 
     async savePendingGuest(userAuthToken: any, eventRole: EventRole, pendingGuest: PendingGuest) {
         try {
-            const requestUrl = `${RequestUtil.getAPIUrl()}/api/events/${eventRole.event.id}/pending-guests`;
+            const requestUrl = `${RequestUtil.getAPIUrl()}/api/events/${eventRole.event.id}/pending-guests/`;
             return await RequestUtil.apiRequest(requestUrl, RequestUtil.POSTRequestParams(userAuthToken, pendingGuest, eventRole.role));
         } catch (error: any) {
             ErrorHandler.handleAddError<PendingGuest>(userAuthToken, ObjectType.SURVEY, pendingGuest, error);
@@ -39,7 +39,7 @@ export class PendingGuestController {
 
     async deletePendingGuest(userAuthToken: any, eventRole: EventRole, pendingGuest: PendingGuest) {
         try {
-            const requestUrl = `${RequestUtil.getAPIUrl()}/api/events/${eventRole.event.id}/pending-guests`;
+            const requestUrl = `${RequestUtil.getAPIUrl()}/api/events/${eventRole.event.id}/pending-guests/`;
             return await RequestUtil.apiRequest(requestUrl, RequestUtil.DELETERequestParams(userAuthToken, pendingGuest, eventRole.role));
         } catch (error: any) {
             ErrorHandler.handleDeleteError<PendingGuest>(ObjectType.SURVEY);

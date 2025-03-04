@@ -1,9 +1,9 @@
 package passes
 
 type Pass struct {
-	Id           string `json:"id"`
-	Name         string `json:"name"`
-	SerialNumber string `json:"serialNumber"`
+	Id           string `firestore:"id"`
+	Name         string `firestore:"name"`
+	SerialNumber string `firestore:"serialNumber"`
 }
 
 func NewPassInstance() *Pass {

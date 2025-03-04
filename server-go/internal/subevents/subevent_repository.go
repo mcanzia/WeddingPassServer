@@ -9,7 +9,7 @@ import (
 
 type SubEventRepository interface {
 	common.IBaseRepository[*SubEvent]
-	GetSubEventByName(params map[string]string) (*SubEvent, error)
+	GetSubEventByName(params map[string]string) (*SubEvent, *common.CustomError)
 }
 
 type subEventRepository struct {
@@ -24,6 +24,6 @@ func NewSubEventRepository(client *firestore.Client, ctx context.Context) SubEve
 	}
 }
 
-func (dao *subEventRepository) GetSubEventByName(params map[string]string) (*SubEvent, error) {
+func (dao *subEventRepository) GetSubEventByName(params map[string]string) (*SubEvent, *common.CustomError) {
 	return dao.GetSingleByField(params)
 }

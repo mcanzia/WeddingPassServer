@@ -4,29 +4,29 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func RegisterHotelRoutes(rg *gin.RouterGroup, hotelCtrl *HotelController) {
-	hotelsGroup := rg.Group("/hotels")
+func RegisterAccommodationRoutes(rg *gin.RouterGroup, accommodationCtrl *AccommodationController) {
+	accommodationsGroup := rg.Group("/accommodations")
 	{
-		hotelsGroup.GET("/", func(c *gin.Context) {
-			hotelCtrl.BaseController.GetAll(c, "eventId")
+		accommodationsGroup.GET("/", func(c *gin.Context) {
+			accommodationCtrl.BaseController.GetAll(c, "eventId")
 		})
-		hotelsGroup.GET("/id/:id", func(c *gin.Context) {
-			hotelCtrl.BaseController.GetByID(c, "eventId", "id")
+		accommodationsGroup.GET("/id/:id", func(c *gin.Context) {
+			accommodationCtrl.BaseController.GetByID(c, "eventId", "id")
 		})
-		hotelsGroup.POST("/", func(c *gin.Context) {
-			hotelCtrl.BaseController.Save(c, "eventId")
+		accommodationsGroup.POST("/", func(c *gin.Context) {
+			accommodationCtrl.BaseController.Save(c, "eventId")
 		})
-		hotelsGroup.POST("/batch", func(c *gin.Context) {
-			hotelCtrl.BaseController.BatchCreate(c, "eventId")
+		accommodationsGroup.POST("/batch", func(c *gin.Context) {
+			accommodationCtrl.BaseController.BatchCreate(c, "eventId")
 		})
-		// hotelsGroup.PUT("/:id", func(c *gin.Context) {
-		// 	hotelCtrl.BaseController.Update(c, "eventId", "id")
+		// accommodationsGroup.PUT("/:id", func(c *gin.Context) {
+		// 	accommodationCtrl.BaseController.Update(c, "eventId", "id")
 		// })
-		hotelsGroup.DELETE("/:id", func(c *gin.Context) {
-			hotelCtrl.BaseController.Delete(c, "eventId", "id")
+		accommodationsGroup.DELETE("/:id", func(c *gin.Context) {
+			accommodationCtrl.BaseController.Delete(c, "eventId", "id")
 		})
-		hotelsGroup.DELETE("/batch", func(c *gin.Context) {
-			hotelCtrl.BaseController.BatchDelete(c, "eventId")
+		accommodationsGroup.DELETE("/batch", func(c *gin.Context) {
+			accommodationCtrl.BaseController.BatchDelete(c, "eventId")
 		})
 	}
 }

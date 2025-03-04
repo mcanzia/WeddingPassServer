@@ -13,7 +13,7 @@ export class SurveyResponseController {
 
     async getAllSurveyResponses(userAuthToken: any, eventRole: EventRole, surveyId: string) {
         try {
-            const requestUrl = `${this.getSurveyBaseUrl(eventRole)}/${surveyId}/response`;
+            const requestUrl = `${this.getSurveyBaseUrl(eventRole)}/${surveyId}/response/`;
             return await RequestUtil.apiRequest(requestUrl, RequestUtil.GETRequestParams(userAuthToken, eventRole.role));
         } catch (error: any) {
             ErrorHandler.handleGetAllError<Survey>(userAuthToken, ObjectType.SURVEY, error);
@@ -23,7 +23,7 @@ export class SurveyResponseController {
 
     async getAllSurveyResponsesForGuest(userAuthToken: any, eventRole: EventRole, guestId: string) {
         try {
-            const requestUrl = `${this.getSurveyBaseUrl(eventRole)}/response/${guestId}`;
+            const requestUrl = `${this.getSurveyBaseUrl(eventRole)}/response/guest/${guestId}`;
             return await RequestUtil.apiRequest(requestUrl, RequestUtil.GETRequestParams(userAuthToken, eventRole.role));
         } catch (error: any) {
             ErrorHandler.handleGetAllError<Survey>(userAuthToken, ObjectType.SURVEY, error);
@@ -53,7 +53,7 @@ export class SurveyResponseController {
 
     async saveSurveyResponse(userAuthToken: any, eventRole: EventRole, surveyResponse: SurveyResponse) {
         try {
-            const requestUrl = `${this.getSurveyBaseUrl(eventRole)}/${surveyResponse.survey.id}/response`;
+            const requestUrl = `${this.getSurveyBaseUrl(eventRole)}/${surveyResponse.survey.id}/response/`;
             return await RequestUtil.apiRequest(requestUrl, RequestUtil.POSTRequestParams(userAuthToken, surveyResponse, eventRole.role));
         } catch (error: any) {
             ErrorHandler.handleAddError<SurveyResponse>(userAuthToken, ObjectType.SURVEY_RESPONSE, surveyResponse, error);
@@ -83,7 +83,7 @@ export class SurveyResponseController {
 
     async deleteSurveyResponse(userAuthToken: any, eventRole: EventRole, surveyId: string, surveyResponse: SurveyResponse) {
         try {
-            const requestUrl = `${this.getSurveyBaseUrl(eventRole)}/${surveyId}/response`;
+            const requestUrl = `${this.getSurveyBaseUrl(eventRole)}/${surveyId}/response/`;
             return await RequestUtil.apiRequest(requestUrl, RequestUtil.DELETERequestParams(userAuthToken, surveyResponse, eventRole.role));
         } catch (error: any) {
             ErrorHandler.handleDeleteError<SurveyResponse>(ObjectType.SURVEY_RESPONSE);

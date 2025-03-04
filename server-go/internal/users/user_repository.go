@@ -9,11 +9,10 @@ import (
 
 type UserRepository interface {
 	common.IBaseRepository[*User]
-	GetUserByPhone(params map[string]string) (*User, error)
-	GetUserByEmail(params map[string]string) (*User, error)
-	GenerateInviteLink(eventRole EventRole) (*InviteToken, error)
-	ProcessInvite(params map[string]string, inviteToken InviteToken) (*EventRole, error)
-	AddUserToWedding(params map[string]string, eventRole EventRole) (*EventRole, error)
+	GetUserByPhone(params map[string]string) (*User, *common.CustomError)
+	GetUserByEmail(params map[string]string) (*User, *common.CustomError)
+	ProcessInvite(params map[string]string, inviteToken InviteToken) (*EventRole, *common.CustomError)
+	AddUserToWedding(params map[string]string, eventRole EventRole) (*EventRole, *common.CustomError)
 }
 
 type userRepository struct {
@@ -28,24 +27,20 @@ func NewUserRepository(client *firestore.Client, ctx context.Context) UserReposi
 	}
 }
 
-func (repository *userRepository) GenerateInviteLink(eventRole EventRole) (*InviteToken, error) {
-	panic("unimplemented")
-}
-
-func (repository *userRepository) GetUserByEmail(params map[string]string) (*User, error) {
+func (repository *userRepository) GetUserByEmail(params map[string]string) (*User, *common.CustomError) {
 	return repository.GetSingleByField(params)
 }
 
-func (repository *userRepository) GetUserByPhone(params map[string]string) (*User, error) {
+func (repository *userRepository) GetUserByPhone(params map[string]string) (*User, *common.CustomError) {
 	return repository.GetSingleByField(params)
 }
 
 // ProcessInvite implements UserRepository.
-func (repository *userRepository) ProcessInvite(params map[string]string, inviteToken InviteToken) (*EventRole, error) {
+func (repository *userRepository) ProcessInvite(params map[string]string, inviteToken InviteToken) (*EventRole, *common.CustomError) {
 	panic("unimplemented")
 }
 
 // AddUserToWedding implements UserRepository.
-func (repository *userRepository) AddUserToWedding(params map[string]string, eventRole EventRole) (*EventRole, error) {
+func (repository *userRepository) AddUserToWedding(params map[string]string, eventRole EventRole) (*EventRole, *common.CustomError) {
 	panic("unimplemented")
 }

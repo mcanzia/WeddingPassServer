@@ -1,7 +1,7 @@
 package drinks
 
 import (
-	"fmt"
+	"weddingpass/server/internal/common"
 	"weddingpass/server/internal/subevents"
 )
 
@@ -15,7 +15,7 @@ func NewDrinksConverter(subEventConverter *subevents.SubEventConverter) *DrinksC
 	}
 }
 
-func (dc *DrinksConverter) ConvertDrinksToDAO(drinks *DrinksDTO) (*Drinks, error) {
+func (dc *DrinksConverter) ConvertDrinksToDAO(drinks *DrinksDTO) (*Drinks, *common.CustomError) {
 	var drinkCounts []DrinkCount
 	for _, drinkCountDto := range drinks.DrinkCount {
 		drinkCount, err := dc.ConvertDrinkCountToDAO(&drinkCountDto)
@@ -33,7 +33,7 @@ func (dc *DrinksConverter) ConvertDrinksToDAO(drinks *DrinksDTO) (*Drinks, error
 	return dao, nil
 }
 
-func (dc *DrinksConverter) ConvertDrinksToDTO(rawDrinks *Drinks) (*DrinksDTO, error) {
+func (dc *DrinksConverter) ConvertDrinksToDTO(rawDrinks *Drinks) (*DrinksDTO, *common.CustomError) {
 	var drinkCountDtos []DrinkCountDTO
 	for _, drinkCount := range rawDrinks.DrinkCount {
 		drinkCountDto, err := dc.ConvertDrinkCountToDTO(&drinkCount)
@@ -51,10 +51,10 @@ func (dc *DrinksConverter) ConvertDrinksToDTO(rawDrinks *Drinks) (*DrinksDTO, er
 	return dto, nil
 }
 
-func (dc *DrinksConverter) ConvertDrinkCountToDAO(drinkCount *DrinkCountDTO) (*DrinkCount, error) {
+func (dc *DrinksConverter) ConvertDrinkCountToDAO(drinkCount *DrinkCountDTO) (*DrinkCount, *common.CustomError) {
 	subEvent, err := dc.SubEventConverter.ConvertSubEventToDAO(&drinkCount.SubEvent)
 	if err != nil {
-		return nil, fmt.Errorf("failed to convert drink count to dto: %w", err)
+		return nil, err
 	}
 	dao := &DrinkCount{
 		NumberOfDrinks: drinkCount.NumberOfDrinks,
@@ -64,10 +64,10 @@ func (dc *DrinksConverter) ConvertDrinkCountToDAO(drinkCount *DrinkCountDTO) (*D
 	return dao, nil
 }
 
-func (dc *DrinksConverter) ConvertDrinkCountToDTO(rawDrinkCount *DrinkCount) (*DrinkCountDTO, error) {
+func (dc *DrinksConverter) ConvertDrinkCountToDTO(rawDrinkCount *DrinkCount) (*DrinkCountDTO, *common.CustomError) {
 	subEventDTO, err := dc.SubEventConverter.ConvertSubEventToDTO(&rawDrinkCount.SubEvent)
 	if err != nil {
-		return nil, fmt.Errorf("failed to convert drink count to dto: %w", err)
+		return nil, err
 	}
 	dto := &DrinkCountDTO{
 		NumberOfDrinks: rawDrinkCount.NumberOfDrinks,

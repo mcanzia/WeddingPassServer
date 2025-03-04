@@ -1,13 +1,10 @@
 package transportation
 
-import "time"
-
 type Transportation struct {
-	Id        string    `json:"id"`
-	Type      string    `json:"type"`
-	IsArrival bool      `json:"isArrival"`
-	Time      time.Time `json:"time"`
-	Number    string    `json:"number"`
+	Type      string `firestore:"type"`
+	IsArrival bool   `firestore:"isArrival"`
+	Time      string `firestore:"time"`
+	Number    string `firestore:"number"`
 }
 
 func NewTransportationInstance() *Transportation {
@@ -15,11 +12,10 @@ func NewTransportationInstance() *Transportation {
 }
 
 type TransportationDTO struct {
-	Id        string    `json:"id"`
-	Type      string    `json:"type"`
-	IsArrival bool      `json:"isArrival"`
-	Time      time.Time `json:"time"`
-	Number    string    `json:"number"`
+	Type      string `json:"type"`
+	IsArrival bool   `json:"isArrival"`
+	Time      string `json:"time"`
+	Number    string `json:"number"`
 }
 
 func NewTransportationDTOInstance() *TransportationDTO {

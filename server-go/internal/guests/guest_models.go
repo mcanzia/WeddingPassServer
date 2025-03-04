@@ -7,21 +7,51 @@ import (
 	"weddingpass/server/internal/transportation"
 )
 
+func CsvHeaders() []string {
+	return []string{"Id", "Event Id", "Name", "Party Number", "Serial Number", "Events", "Email", "Accommodation", "Room Number", "Dietary Restrictions", "Drinks?", "Type of Drink", "Arrival Type", "Arr.Date", "Arr.Time", "Arr.Num", "Departure Type", "Dep.Date", "Dep.Time", "Dep.Num"}
+}
+
+func CsvFields() map[string]string {
+	csvFields := make(map[string]string)
+	csvFields["Id"] = "Id"
+	csvFields["Event Id"] = "EventId"
+	csvFields["Name"] = "Name"
+	csvFields["Party Number"] = "GroupNumber"
+	csvFields["Serial Number"] = "SerialNumber"
+	csvFields["Events"] = "Events"
+	csvFields["Email"] = "Email"
+	csvFields["Accommodation"] = "Accommodation.Name"
+	csvFields["Room Number"] = "Accommodation.RoomNumber"
+	csvFields["Dietary Restrictions"] = "DietaryRestrictions"
+	csvFields["Drinks?"] = "Drinks.WillDrinkAlcohol"
+	csvFields["Type of Drink"] = "Drinks.Preferences"
+	csvFields["Arrival Type"] = "Arrival.Type"
+	csvFields["Arr.Date"] = "Arrival.Time"
+	csvFields["Arr.Time"] = "Arrival.Time"
+	csvFields["Arr.Num"] = "Arrival.Number"
+	csvFields["Departure Type"] = "Departure.Type"
+	csvFields["Dep.Date"] = "Departure.Time"
+	csvFields["Dep.Time"] = "Departure.Time"
+	csvFields["Dep.Num"] = "Departure.Number"
+
+	return csvFields
+}
+
 type Guest struct {
-	Id                  string                        `json:"id"`
-	EventId             string                        `json:"eventId"`
-	GroupNumber         int                           `json:"groupNumber"`
-	Name                string                        `json:"name"`
-	Email               string                        `json:"email"`
-	Phone               string                        `json:"phone"`
-	SubEvents           []subevents.SubEvent          `json:"subEvents"`
-	AttendingSubEvents  []subevents.SubEvent          `json:"attendingSubEvents"`
-	Arrival             transportation.Transportation `json:"arrival"`
-	Departure           transportation.Transportation `json:"departure"`
-	Drinks              drinks.Drinks                 `json:"drinks"`
-	SerialNumber        string                        `json:"serialNumber"`
-	DietaryRestrictions string                        `json:"dietaryRestrictions"`
-	Accommodation       accommodation.Accommodation   `json:"accommodation"`
+	Id                  string                        `firestore:"id"`
+	EventId             string                        `firestore:"eventId"`
+	GroupNumber         int                           `firestore:"groupNumber"`
+	Name                string                        `firestore:"name"`
+	Email               string                        `firestore:"email"`
+	Phone               string                        `firestore:"phone"`
+	SubEvents           []string                      `firestore:"subEvents"`
+	AttendingSubEvents  []string                      `firestore:"attendingSubEvents"`
+	Arrival             transportation.Transportation `firestore:"arrival"`
+	Departure           transportation.Transportation `firestore:"departure"`
+	Drinks              drinks.Drinks                 `firestore:"drinks"`
+	SerialNumber        string                        `firestore:"serialNumber"`
+	DietaryRestrictions string                        `firestore:"dietaryRestrictions"`
+	Accommodation       accommodation.Accommodation   `firestore:"accommodation"`
 }
 
 func NewGuestInstance() *Guest {
@@ -50,52 +80,16 @@ type GuestDTO struct {
 	Drinks              drinks.DrinksDTO                 `json:"drinks"`
 	SerialNumber        string                           `json:"serialNumber"`
 	DietaryRestrictions string                           `json:"dietaryRestrictions"`
-	Accommodation       accommodation.Accommodation      `json:"accommodation"`
+	Accommodation       accommodation.AccommodationDTO   `json:"accommodation"`
 }
 
 func NewGuestDTOInstance() *GuestDTO {
 	return &GuestDTO{}
 }
 
-type PendingGuest struct {
-	Id        string `json:"id"`
-	UserId    string `json:"userId"`
-	EventId   string `json:"eventId"`
-	GuestName string `json:"guestName"`
-	Email     string `json:"email"`
-	Phone     string `json:"phone"`
-	Status    string `json:"status"`
-}
-
-func NewPendingGuestInstance() *PendingGuest {
-	return &PendingGuest{}
-}
-
-type PendingGuestDTO struct {
-	Id        string `json:"id"`
-	UserId    string `json:"userId"`
-	EventId   string `json:"eventId"`
-	GuestName string `json:"guestName"`
-	Email     string `json:"email"`
-	Phone     string `json:"phone"`
-	Status    string `json:"status"`
-}
-
-func NewPendingGuestDTOInstance() *PendingGuestDTO {
-	return &PendingGuestDTO{}
-}
-
-func (pg *PendingGuest) SetID(id string) {
-	pg.Id = id
-}
-
-func (pg *PendingGuest) GetID() string {
-	return pg.Id
-}
-
 type UploadValidation struct {
-	UploadIssues     string           `json:"uploadIssues"`
-	UploadGuestLists UploadGuestLists `json:"uploadGuestLists"`
+	UploadIssues     map[string]string `firestore:"uploadIssues"`
+	UploadGuestLists UploadGuestLists  `firestore:"uploadGuestLists"`
 }
 
 func NewUploadValidationInstance() *UploadValidation {
@@ -103,7 +97,7 @@ func NewUploadValidationInstance() *UploadValidation {
 }
 
 type UploadValidationDTO struct {
-	UploadIssues     string              `json:"uploadIssues"`
+	UploadIssues     map[string]string   `json:"uploadIssues"`
 	UploadGuestLists UploadGuestListsDTO `json:"uploadGuestLists"`
 }
 
@@ -112,8 +106,8 @@ func NewUploadValidationDTOInstance() *UploadValidationDTO {
 }
 
 type UploadGuestLists struct {
-	CreateGuests []Guest `json:"createGuests"`
-	UpdateGuests []Guest `json:"updateGuests"`
+	CreateGuests []Guest `firestore:"createGuests"`
+	UpdateGuests []Guest `firestore:"updateGuests"`
 }
 
 func NewUploadGuestListsInstance() *UploadGuestLists {

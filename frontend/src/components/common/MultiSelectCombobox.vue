@@ -80,6 +80,9 @@ const emit = defineEmits(['update:modelValue']);
 
 const modelValueComputed = computed({
   get() {
+    if (!props.modelValue) {
+      return [];
+    }
     return props.modelValue;
   },
   set(val) {

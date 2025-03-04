@@ -26,7 +26,7 @@ func RegisterEventRoutes(rg *gin.RouterGroup, eventCtrl *EventController) {
 		// eventsGroup.PUT("/:id", func(c *gin.Context) {
 		// 	eventCtrl.BaseController.Update(c, "id")
 		// })
-		eventsGroup.DELETE("/:id", func(c *gin.Context) {
+		eventsGroup.DELETE("/id/:id", func(c *gin.Context) {
 			eventCtrl.BaseController.Delete(c, "id")
 		})
 		eventsGroup.DELETE("/batch", func(c *gin.Context) {

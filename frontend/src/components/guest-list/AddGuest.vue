@@ -75,9 +75,9 @@
                     </div>
                     <div class="grid gap-4">
                         <div>
-                            <Label for="hotel">Hotel</Label>
-                            <SingleSelectDropdown id="hotel" v-model="newUserForm.accommodation.hotel" fieldKey="name"
-                                :selectOptions="hotels as unknown as Record<string, unknown>[]">
+                            <Label for="accommodation">Accommodation</Label>
+                            <SingleSelectDropdown id="accommodation" v-model="newUserForm.accommodation" fieldKey="name"
+                                :selectOptions="accommodations as unknown as Record<string, unknown>[]">
                             </SingleSelectDropdown>
                         </div>
                         <div>
@@ -97,7 +97,7 @@
                         </div>
                         <div>
                             <Label for="drink-preferences">Drink Preferences</Label>
-                            <SingleSelectDropdown id="drink-preferences" v-model="newUserForm.drinks.preferences"
+                            <SingleSelectDropdown id="drink-preferences" v-model="chosenDrinkPreferences"
                                 :selectOptions="drinkPreferences">
                             </SingleSelectDropdown>
                         </div>
@@ -135,10 +135,10 @@ import Loader from '@/components/Loader.vue';
 import { TransportationType } from '@/models/TransportationType';
 import SingleSelectDropdown from '@/components/common/SingleSelectDropdown.vue';
 import DateTimeInput from '@/components/common/DateTimeInput.vue';
-import { Hotel } from '@/models/Hotel';
-import { HotelService } from '@/services/HotelService';
+import { AccommodationService } from '@/services/AccommodationService';
 import { useRoute } from 'vue-router';
 import Textarea from '../ui/textarea/Textarea.vue';
+import { Accommodation } from '@/models/Accommodation';
 
 const { goToRouteSecured } = useRouterHelper();
 const notificationStore = useNotificationStore();
@@ -151,14 +151,14 @@ const guestId = route.params.guestId as string;
 
 const loading = ref(false);
 const subEvents = ref<SubEvent[]>([]);
-const hotels = ref<Hotel[]>([]);
+const accommodations = ref<Accommodation[]>([]);
 
 onMounted(async () => {
     loading.value = true;
     const subEventService = new SubEventService();
     subEvents.value = await subEventService.getAllSubEvents();
-    const hotelService = new HotelService();
-    hotels.value = await hotelService.getAllHotels();
+    const accommodationService = new AccommodationService();
+    accommodations.value = await accommodationService.getAllAccommodations();
     if (guestId) {
         const guestSerice = new GuestService();
         const editGuest = await guestSerice.getGuestById(guestId);
@@ -206,28 +206,28 @@ const newUserForm = ref({
     attendingSubEvents: [],
     arrival: {
         type: '',
-        flightTime: '',
-        flightNumber: '',
-        trainTime: '',
-        trainNumber: '',
-        time: ''
+        time: '',
+        number: '',
+        isArrival: true,
     },
     departure: {
         type: '',
-        flightTime: '',
-        flightNumber: '',
-        trainTime: '',
-        trainNumber: '',
-        time: ''
+        time: '',
+        number: '',
+        isArrival: false,
     },
     dietaryRestrictions: '',
     accommodation: {
-        hotel: {} as Hotel,
-        roomNumber: ''
+        id: '',
+        eventId: '',
+        type: '',
+        name: '',
+        roomNumber: '',
+        location: ''
     },
     drinks: {
         willDrinkAlcohol: false,
-        preferences: '',
+        preferences: [],
         drinkCount: []
     }
 });
@@ -238,146 +238,56 @@ const transportationTypeOptions = computed(() => {
 
 const arrivalTimeComputed = computed({
     get() {
-        if (newUserForm.value.arrival) {
-            switch (newUserForm.value.arrival.type) {
-                case TransportationType.FLIGHT: {
-                    return newUserForm.value.arrival.flightTime;
-                }
-                case TransportationType.TRAIN: {
-                    return newUserForm.value.arrival.trainTime;
-                }
-                case TransportationType.OTHER: {
-                    return newUserForm.value.arrival.time;
-                }
-                default: {
-                    return ''
-                }
-            }
+        if (newUserForm.value.arrival && newUserForm.value.arrival.time) {
+            return newUserForm.value.arrival.time;
         }
         return '';
     },
     set(val) {
-        if (newUserForm.value.arrival) {
-            switch (newUserForm.value.arrival.type) {
-                case TransportationType.FLIGHT: {
-                    newUserForm.value.arrival.flightTime = val;
-                    break;
-                }
-                case TransportationType.TRAIN: {
-                    newUserForm.value.arrival.trainTime = val;
-                    break;
-                }
-                case TransportationType.OTHER: {
-                    newUserForm.value.arrival.time = val;
-                    break;
-                }
-            }
+        if (val && newUserForm.value.arrival) {
+            newUserForm.value.arrival.time = val;
         }
     }
 });
 
 const arrivalNumberComputed = computed({
     get() {
-        if (newUserForm.value.arrival) {
-            switch (newUserForm.value.arrival.type) {
-                case TransportationType.FLIGHT: {
-                    return newUserForm.value.arrival.flightNumber;
-                }
-                case TransportationType.TRAIN: {
-                    return newUserForm.value.arrival.trainNumber;
-                }
-                default: {
-                    return ''
-                }
-            }
+        if (newUserForm.value.arrival && newUserForm.value.arrival.number) {
+            return newUserForm.value.arrival.number;
         }
         return '';
     },
     set(val) {
-        if (newUserForm.value.arrival) {
-            switch (newUserForm.value.arrival.type) {
-                case TransportationType.FLIGHT: {
-                    newUserForm.value.arrival.flightNumber = val;
-                    break;
-                }
-                case TransportationType.TRAIN: {
-                    newUserForm.value.arrival.trainNumber = val;
-                    break;
-                }
-            }
+        if (val && newUserForm.value.arrival) {
+            newUserForm.value.arrival.number = val;
         }
     }
 });
 
 const departureNumberComputed = computed({
     get() {
-        if (newUserForm.value.departure) {
-            switch (newUserForm.value.departure.type) {
-                case TransportationType.FLIGHT: {
-                    return newUserForm.value.departure.flightNumber;
-                }
-                case TransportationType.TRAIN: {
-                    return newUserForm.value.departure.trainNumber;
-                }
-                default: {
-                    return ''
-                }
-            }
+        if (newUserForm.value.departure && newUserForm.value.departure.number) {
+            return newUserForm.value.departure.number;
         }
         return '';
     },
     set(val) {
-        if (newUserForm.value.departure) {
-            switch (newUserForm.value.departure.type) {
-                case TransportationType.FLIGHT: {
-                    newUserForm.value.departure.flightNumber = val;
-                    break;
-                }
-                case TransportationType.TRAIN: {
-                    newUserForm.value.departure.trainNumber = val;
-                    break;
-                }
-            }
+        if (val && newUserForm.value.departure) {
+            newUserForm.value.departure.number = val;
         }
     }
 });
 
 const departureTimeComputed = computed({
     get() {
-        if (newUserForm.value.departure) {
-            switch (newUserForm.value.departure.type) {
-                case TransportationType.FLIGHT: {
-                    return newUserForm.value.departure.flightTime;
-                }
-                case TransportationType.TRAIN: {
-                    return newUserForm.value.departure.trainTime;
-                }
-                case TransportationType.OTHER: {
-                    return newUserForm.value.departure.time;
-                }
-                default: {
-                    return ''
-                }
-            }
+        if (newUserForm.value.departure && newUserForm.value.departure.time) {
+            return newUserForm.value.departure.time;
         }
         return '';
     },
     set(val) {
-        if (newUserForm.value.departure) {
-            switch (newUserForm.value.departure.type) {
-                case TransportationType.FLIGHT: {
-                    newUserForm.value.departure.flightTime = val;
-                    break;
-                }
-                case TransportationType.TRAIN: {
-                    newUserForm.value.departure.trainTime = val;
-                    break;
-                }
-                case TransportationType.OTHER: {
-                    newUserForm.value.departure.time = val;
-                    break;
-                }
-            }
+        if (val && newUserForm.value.departure) {
+            newUserForm.value.departure.time = val;
         }
     }
 });
@@ -389,10 +299,8 @@ function clearArrivalTransport() {
 
     newUserForm.value.arrival = {
         ...newUserForm.value.arrival,
-        trainTime: '',
-        trainNumber: '',
-        flightNumber: '',
-        flightTime: '',
+        isArrival: true,
+        number: '',
         time: ''
     }
 }
@@ -404,11 +312,9 @@ function clearDepartureTransport() {
 
     newUserForm.value.departure = {
         ...newUserForm.value.departure,
-        trainTime: '',
-        trainNumber: '',
-        flightNumber: '',
-        flightTime: '',
-        time: ''
+        isArrival: false,
+        time: '',
+        number: '',
     }
 }
 
@@ -431,6 +337,22 @@ async function saveGuest() {
 
 const drinkPreferences = computed(() => {
     return ['SCOTCH', 'RUM', 'GIN', 'BEER', 'WHITE WINE', 'RED WINE'];
+});
+
+const chosenDrinkPreferences = computed({
+    get() {
+        if (newUserForm.value && newUserForm.value.drinks && newUserForm.value.drinks.preferences) {
+            return newUserForm.value.drinks.preferences[0];
+        }
+    },
+    set(val) {
+        if (!newUserForm.value.drinks.preferences) {
+            newUserForm.value.drinks.preferences = [];
+        }
+        if (val) {
+            newUserForm.value.drinks.preferences[0] = val;
+        }
+    }
 });
 
 const willDrinkAlcoholComputed = computed({

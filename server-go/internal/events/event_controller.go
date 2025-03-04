@@ -28,7 +28,11 @@ func (ec *EventController) GetEventsByOwner(c *gin.Context, lookupKeys ...string
 		ec.BaseController.RespondWithError(c, http.StatusNotFound, err.Error())
 		return
 	}
-	ec.BaseController.RespondWithJSON(c, http.StatusOK, events)
+	if len(events) == 0 {
+		ec.BaseController.RespondWithJSON(c, http.StatusNoContent, events)
+	} else {
+		ec.BaseController.RespondWithJSON(c, http.StatusOK, events)
+	}
 }
 
 func (ec *EventController) GetEventByName(c *gin.Context, lookupKeys ...string) {

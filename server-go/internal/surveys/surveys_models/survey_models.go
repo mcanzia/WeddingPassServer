@@ -6,12 +6,12 @@ import (
 )
 
 type Survey struct {
-	Id                     string            `json:"id"`
-	EventId                string            `json:"eventId"`
-	Title                  string            `json:"title"`
-	SurveyComponents       []SurveyComponent `json:"surveyComponents"`
-	Published              bool              `json:"published"`
-	ShowPartyMemberSurveys bool              `json:"showPartyMemberSurveys"`
+	Id                     string            `firestore:"id"`
+	EventId                string            `firestore:"eventId"`
+	Title                  string            `firestore:"title"`
+	SurveyComponents       []SurveyComponent `firestore:"surveyComponents"`
+	Published              bool              `firestore:"published"`
+	ShowPartyMemberSurveys bool              `firestore:"showPartyMemberSurveys"`
 }
 
 func NewSurveyInstance() *Survey {
@@ -40,16 +40,16 @@ func NewSurveyDTOInstance() *SurveyDTO {
 }
 
 type SurveyComponent struct {
-	Id              string          `json:"id"`
-	Label           string          `json:"label"`
-	Type            string          `json:"type"`
-	FriendlyName    string          `json:"friendlyName"`
-	Order           int             `json:"order"`
-	ComponentValue  interface{}     `json:"componentValue"`
-	Options         []string        `json:"options"`
-	SurveyTriggers  []SurveyTrigger `json:"surveyTriggers"`
-	EditableInfo    bool            `json:"editableInfo"`
-	InfoLookupField string          `json:"infoLookupField"`
+	Id              string          `firestore:"id"`
+	Label           string          `firestore:"label"`
+	Type            string          `firestore:"type"`
+	FriendlyName    string          `firestore:"friendlyName"`
+	Order           int             `firestore:"order"`
+	ComponentValue  interface{}     `firestore:"componentValue"`
+	Options         []string        `firestore:"options"`
+	SurveyTriggers  []SurveyTrigger `firestore:"surveyTriggers"`
+	EditableInfo    bool            `firestore:"editableInfo"`
+	InfoLookupField string          `firestore:"infoLookupField"`
 }
 
 func NewSurveyComponentInstance() *SurveyComponent {
@@ -82,8 +82,8 @@ func NewSurveyComponentDTOInstance() *SurveyComponentDTO {
 }
 
 type SurveyTrigger struct {
-	TriggerField string          `json:"triggerField"`
-	Child        SurveyComponent `json:"child"`
+	TriggerField string          `firestore:"triggerField"`
+	Child        SurveyComponent `firestore:"child"`
 }
 
 func NewSurveyTriggerInstance() *SurveyTrigger {
@@ -100,11 +100,11 @@ func NewSurveyTriggerDTOInstance() *SurveyTriggerDTO {
 }
 
 type SurveyResponse struct {
-	ResponseId string       `json:"responseId"`
-	Guest      guests.Guest `json:"guest"`
-	Survey     Survey       `json:"survey"`
-	UpdatedAt  time.Time    `json:"updatedAt"`
-	Submitted  bool         `json:"submitted"`
+	ResponseId string    `firestore:"responseId"`
+	Guest      string    `firestore:"guest"`
+	Survey     Survey    `firestore:"survey"`
+	UpdatedAt  time.Time `firestore:"updatedAt"`
+	Submitted  bool      `firestore:"submitted"`
 }
 
 func NewSurveyResponseInstance() *SurveyResponse {
