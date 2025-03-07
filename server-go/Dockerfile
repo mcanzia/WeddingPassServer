@@ -6,7 +6,7 @@ COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
 
-RUN go build -o event-manager-server .
+RUN go build -o event-manager-server ./cmd/event-manager
 
 FROM alpine:latest
 WORKDIR /app
