@@ -2,11 +2,11 @@ FROM golang:1.21 as builder
 
 WORKDIR /app
 
-COPY go.mod go.sum ./
+COPY server-go/go.mod server-go/go.sum ./
 RUN go mod download
 COPY . .
 
-RUN go build -o event-manager-server ./cmd/event-manager
+RUN go build -o event-manager-server ./server-go/cmd/event-manager
 
 FROM alpine:latest
 WORKDIR /app
