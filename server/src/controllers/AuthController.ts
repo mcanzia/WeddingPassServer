@@ -3,7 +3,7 @@ import { NextFunction, Request, Response } from 'express';
 import Logger from '../util/logs/logger';
 import { CustomError } from '../util/error/CustomError';
 import { firebaseAdmin } from '../configs/firebase';
-import { WeddingRole } from '../models/WeddingRole';
+import { EventRole } from '../models/EventRole';
 import { TYPES } from '../configs/types';
 import { UserDao } from '../dao/UserDao';
 import { User } from '../models/User';
@@ -36,7 +36,7 @@ export class AuthController {
     //     try {
     //         const userId = request.params.userId;
     //         Logger.info(`Setting user role for: ${userId}`);
-    //         const role: WeddingRole = request.body;
+    //         const role: EventRole = request.body;
     //         await firebaseAdmin.auth().setCustomUserClaims(userId, { role: role.role });
     //         response.status(204).send();
     //     } catch (error) {
@@ -158,9 +158,9 @@ export class AuthController {
     async generateInviteLink(request: Request, response: Response, next: NextFunction) {
         try {
             Logger.info(`Generating Invite Link`);
-            const weddingRole: WeddingRole = request.body;
-            const inviteToken: InviteToken = await this.authService.generateInviteLinkShort(weddingRole);
-            Logger.info(`Successfully created invite link for ${weddingRole.wedding.id}`);
+            const eventRole: EventRole = request.body;
+            const inviteToken: InviteToken = await this.authService.generateInviteLinkShort(eventRole);
+            Logger.info(`Successfully created invite link for ${eventRole.event.id}`);
             response.status(200).json(inviteToken);
         } catch (error) {
             Logger.error("Error generating invite link", error);
@@ -173,10 +173,10 @@ export class AuthController {
             Logger.info(`Processing Invite Link`);
             const inviteToken: InviteToken = request.body;
             const userId: string = response.locals.userAuth;
-            const weddingRole: WeddingRole | null = await this.authService.processInviteLinkShort(inviteToken.token);
-            if (weddingRole) {
+            const eventRole: EventRole | null = await this.authService.processInviteLinkShort(inviteToken.token);
+            if (eventRole) {
                 Logger.info(`Successfully processed invite link for ${userId}`);
-                response.status(200).send(weddingRole);
+                response.status(200).send(eventRole);
             } else {
                 Logger.info(`Invite link not found for ${userId}`);
                 response.status(204).send();
@@ -187,12 +187,12 @@ export class AuthController {
         }
     }
 
-    async addUserToWedding(request: Request, response: Response, next: NextFunction) {
+    async addUserToEvent(request: Request, response: Response, next: NextFunction) {
         try {
-            Logger.info(`Adding user to wedding: ${JSON.stringify(request.body)}`);
+            Logger.info(`Adding user to event: ${JSON.stringify(request.body)}`);
             const userId: string = response.locals.userAuth;
-            const newWeddingRole: WeddingRole = request.body;
-            await this.userDao.addUserToWedding(userId, newWeddingRole);
+            const newEventRole: EventRole = request.body;
+            await this.userDao.addUserToEvent(userId, newEventRole);
             // const user: User | null = await this.userDao.getUserById(userId);
             // if (user) {
             //     response.status(200).json(user);
@@ -201,7 +201,7 @@ export class AuthController {
             // }
             response.status(204).send();
         } catch (error) {
-            Logger.error("Error adding user to wedding", error);
+            Logger.error("Error adding user to event", error);
             response.status((error as CustomError).statusCode).send((error as CustomError).message);
         }
     }

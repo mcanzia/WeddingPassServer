@@ -35,7 +35,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator'
 import { ref, watch, computed, onMounted } from 'vue';
-import GuestCard from '@/components/events/GuestCard.vue';
+import GuestCard from '@/components/subevents/GuestCard.vue';
 import Search from '@/components/Search.vue';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import debounce from 'lodash/debounce';

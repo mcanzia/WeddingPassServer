@@ -15,7 +15,7 @@ export class InviteDao {
     async createInvite(inviteToken: InviteToken): Promise<void> {
         const inviteRef = this.invitesCollection.doc(inviteToken.token);
         await inviteRef.set({
-            weddingRole: inviteToken.weddingRole,
+            eventRole: inviteToken.eventRole,
             createdAt: Timestamp.now(),
         });
     }
@@ -30,7 +30,7 @@ export class InviteDao {
 
         const data = doc.data();
         if (data) {
-            return new InviteToken(token, data.weddingRole);
+            return new InviteToken(token, data.eventRole);
         }
 
         return null;

@@ -10,10 +10,10 @@ import { onMounted } from "vue";
 const { goToRoute, goToRouteSecured } = useRouterHelper();
 
 const userStore = useUserStore();
-const { selectedWedding, selectedRole } = storeToRefs(userStore);
+const { selectedEvent, selectedRole } = storeToRefs(userStore);
 
 onMounted(() => {
-  if (selectedWedding) {
+  if (selectedEvent) {
   }
 });
 </script>

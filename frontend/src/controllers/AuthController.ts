@@ -1,7 +1,7 @@
 import { ErrorHandler } from "@/util/error/ErrorHandler";
 import { RequestUtil } from "@/controllers/RequestUtil";
 import { ObjectType } from "@/models/ObjectType";
-import { WeddingRole } from "@/models/WeddingRole";
+import { EventRole } from "@/models/EventRole";
 import { User } from "@/models/User";
 import { InviteToken } from "@/models/InviteToken";
 
@@ -9,7 +9,7 @@ export class AuthController {
 
     async getAllUsers(userAuthToken: any) {
         try {
-            const requestUrl = `${RequestUtil.getAPIUrl()}/api/auth`;
+            const requestUrl = `${RequestUtil.getAPIUrl()}/api/users/`;
             return await RequestUtil.apiRequest(requestUrl, RequestUtil.GETRequestParams(userAuthToken));
         } catch (error: any) {
             ErrorHandler.handleGetAllError<User>(userAuthToken, ObjectType.USER, error);
@@ -19,7 +19,7 @@ export class AuthController {
 
     async getUserById(userAuthToken: any, uid: string) {
         try {
-            const requestUrl = `${RequestUtil.getAPIUrl()}/api/auth/id/${uid}`;
+            const requestUrl = `${RequestUtil.getAPIUrl()}/api/users/id/${uid}`;
             return await RequestUtil.apiRequest(requestUrl, RequestUtil.GETRequestParams(userAuthToken));
         } catch (error: any) {
             ErrorHandler.handleGetByIdError();
@@ -29,7 +29,7 @@ export class AuthController {
 
     async getUserByPhone(userAuthToken: any, phone: string) {
         try {
-            const requestUrl = `${RequestUtil.getAPIUrl()}/api/auth/phone/${phone}`;
+            const requestUrl = `${RequestUtil.getAPIUrl()}/api/users/phone/${phone}`;
             return await RequestUtil.apiRequest(requestUrl, RequestUtil.GETRequestParams(userAuthToken));
         } catch (error: any) {
             ErrorHandler.handleGetByIdError();
@@ -39,7 +39,7 @@ export class AuthController {
 
     async getUserByEmail(userAuthToken: any, email: string) {
         try {
-            const requestUrl = `${RequestUtil.getAPIUrl()}/api/auth/email/${email}`;
+            const requestUrl = `${RequestUtil.getAPIUrl()}/api/users/email/${email}`;
             return await RequestUtil.apiRequest(requestUrl, RequestUtil.GETRequestParams(userAuthToken));
         } catch (error: any) {
             ErrorHandler.handleGetByIdError();
@@ -49,7 +49,7 @@ export class AuthController {
 
     async getUserRoles(userAuthToken: any, userId: string) {
         try {
-            const requestUrl = `${RequestUtil.getAPIUrl()}/api/auth/roles/${userId}`;
+            const requestUrl = `${RequestUtil.getAPIUrl()}/api/users/roles/${userId}`;
             return await RequestUtil.apiRequest(requestUrl, RequestUtil.GETRequestParams(userAuthToken));
         } catch (error: any) {
             ErrorHandler.handleGetByIdError();
@@ -57,9 +57,9 @@ export class AuthController {
         }
     }
 
-    async setUserRole(userAuthToken: any, userId: string, role: WeddingRole) {
+    async setUserRole(userAuthToken: any, userId: string, role: EventRole) {
         try {
-            const requestUrl = `${RequestUtil.getAPIUrl()}/api/auth/roles/${userId}`;
+            const requestUrl = `${RequestUtil.getAPIUrl()}/api/users/roles/${userId}`;
             return await RequestUtil.apiRequest(requestUrl, RequestUtil.PUTRequestParams(userAuthToken, role));
         } catch (error: any) {
             ErrorHandler.handleUpdateError(ObjectType.ROLE);
@@ -67,9 +67,9 @@ export class AuthController {
         }
     }
 
-    async addUser(userAuthToken: any, user: User) {
+    async saveUser(userAuthToken: any, user: User) {
         try {
-            const requestUrl = `${RequestUtil.getAPIUrl()}/api/auth`;
+            const requestUrl = `${RequestUtil.getAPIUrl()}/api/users/`;
             return await RequestUtil.apiRequest(requestUrl, RequestUtil.POSTRequestParams(userAuthToken, user));
         } catch (error: any) {
             ErrorHandler.handleAddError<User>(userAuthToken, ObjectType.USER, user, error);
@@ -77,19 +77,19 @@ export class AuthController {
         }
     }
 
-    async updateUser(userAuthToken: any, user: User) {
-        try {
-            const requestUrl = `${RequestUtil.getAPIUrl()}/api/auth/${user.id}`;
-            return await RequestUtil.apiRequest(requestUrl, RequestUtil.PUTRequestParams(userAuthToken, user));
-        } catch (error: any) {
-            ErrorHandler.handleUpdateError(ObjectType.USER);
-            throw error;
-        }
-    }
+    // async updateUser(userAuthToken: any, user: User) {
+    //     try {
+    //         const requestUrl = `${RequestUtil.getAPIUrl()}/api/users/${user.id}`;
+    //         return await RequestUtil.apiRequest(requestUrl, RequestUtil.PUTRequestParams(userAuthToken, user));
+    //     } catch (error: any) {
+    //         ErrorHandler.handleUpdateError(ObjectType.USER);
+    //         throw error;
+    //     }
+    // }
 
     async deleteUser(userAuthToken: any, user: User) {
         try {
-            const requestUrl = `${RequestUtil.getAPIUrl()}/api/auth`;
+            const requestUrl = `${RequestUtil.getAPIUrl()}/api/users/`;
             return await RequestUtil.apiRequest(requestUrl, RequestUtil.DELETERequestParams(userAuthToken, user));
         } catch (error: any) {
             ErrorHandler.handleDeleteError<User>(ObjectType.USER);
@@ -97,10 +97,10 @@ export class AuthController {
         }
     }
 
-    async generateInviteLink(userAuthToken: any, newWeddingRole: WeddingRole, weddingRole: WeddingRole) {
+    async generateInviteLink(userAuthToken: any, newEventRole: EventRole, eventRole: EventRole) {
         try {
-            const requestUrl = `${RequestUtil.getAPIUrl()}/api/auth/${weddingRole.wedding.id}/invite`;
-            return await RequestUtil.apiRequest(requestUrl, RequestUtil.POSTRequestParams(userAuthToken, newWeddingRole, weddingRole.role));
+            const requestUrl = `${RequestUtil.getAPIUrl()}/api/users/${eventRole.event.id}/invite`;
+            return await RequestUtil.apiRequest(requestUrl, RequestUtil.POSTRequestParams(userAuthToken, newEventRole, eventRole.role));
         } catch (error: any) {
             ErrorHandler.handleGenerateInviteLinkError();
             throw error;
@@ -109,7 +109,7 @@ export class AuthController {
 
     async processInvite(userAuthToken: any, token: InviteToken) {
         try {
-            const requestUrl = `${RequestUtil.getAPIUrl()}/api/auth/process-invite`;
+            const requestUrl = `${RequestUtil.getAPIUrl()}/api/users/process-invite`;
             return await RequestUtil.apiRequest(requestUrl, RequestUtil.POSTRequestParams(userAuthToken, token));
         } catch (error: any) {
             ErrorHandler.handleProcessInviteLinkError();
@@ -117,10 +117,10 @@ export class AuthController {
         }
     }
 
-    async addUserToWedding(userAuthToken: any, newWeddingRole: WeddingRole) {
+    async addUserToEvent(userAuthToken: any, newEventRole: EventRole) {
         try {
-            const requestUrl = `${RequestUtil.getAPIUrl()}/api/auth/roles`;
-            return await RequestUtil.apiRequest(requestUrl, RequestUtil.POSTRequestParams(userAuthToken, newWeddingRole));
+            const requestUrl = `${RequestUtil.getAPIUrl()}/api/users/roles`;
+            return await RequestUtil.apiRequest(requestUrl, RequestUtil.POSTRequestParams(userAuthToken, newEventRole));
         } catch (error: any) {
             ErrorHandler.handleUpdateError(ObjectType.USER);
             throw error;

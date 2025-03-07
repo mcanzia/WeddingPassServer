@@ -5,9 +5,9 @@ import { CustomError, DatabaseError, NoDataError } from '../util/error/CustomErr
 import { injectable } from 'inversify';
 import { CollectionReference, DocumentData, QuerySnapshot, QueryDocumentSnapshot, FieldPath } from 'firebase-admin/firestore';
 import validator from 'validator';
-import { Wedding } from '../models/Wedding';
+import { Event } from '../models/Event';
 import { User } from '../models/User';
-import { WeddingRole } from '../models/WeddingRole';
+import { EventRole } from '../models/EventRole';
 import { PendingGuest } from '../models/PendingGuest';
 import { Guest } from '../models/Guest';
 import { Roles } from '../models/Roles';
@@ -16,63 +16,66 @@ import { Roles } from '../models/Roles';
 export class UserDao {
 
     private usersCollection: CollectionReference<DocumentData>;
-    private weddingsCollection: CollectionReference<DocumentData>;
+    private eventsCollection: CollectionReference<DocumentData>;
 
     constructor() {
         this.usersCollection = db.collection('users');
-        this.weddingsCollection = db.collection('weddings');
+        this.eventsCollection = db.collection('events');
     }
 
-    private async fetchWeddingsByNames(weddingNames: string[]): Promise<Map<string, Wedding>> {
-        const fetchedWeddingsMap: Map<string, Wedding> = new Map();
+    private async fetchEventsByNames(eventNames: string[]): Promise<Map<string, Event>> {
+        const fetchedEventsMap: Map<string, Event> = new Map();
         const batchSize = 10;
 
-        for (let i = 0; i < weddingNames.length; i += batchSize) {
-            const batch = weddingNames.slice(i, i + batchSize);
-            const snapshot = await this.weddingsCollection.where('name', 'in', batch).get();
+        for (let i = 0; i < eventNames.length; i += batchSize) {
+            const batch = eventNames.slice(i, i + batchSize);
+            const snapshot = await this.eventsCollection.where('name', 'in', batch).get();
 
             snapshot.forEach(doc => {
-                const weddingData = doc.data() as Wedding;
-                fetchedWeddingsMap.set(weddingData.name, new Wedding(doc.id, weddingData.name, weddingData.date, weddingData.location, weddingData.ownerId));
+                const eventData = doc.data() as Event;
+                fetchedEventsMap.set(eventData.name, new Event(doc.id, eventData.name, eventData.date, eventData.location, eventData.ownerId));
             });
         }
 
-        return fetchedWeddingsMap;
+        return fetchedEventsMap;
     }
 
-    private async fetchWeddingsByIds(weddingIds: string[]): Promise<Map<string, Wedding>> {
-        const fetchedWeddingsMap: Map<string, Wedding> = new Map();
+    private async fetchEventsByIds(eventIds: string[]): Promise<Map<string, Event>> {
+        const fetchedEventsMap: Map<string, Event> = new Map();
         const batchSize = 10;
 
-        for (let i = 0; i < weddingIds.length; i += batchSize) {
-            const batch = weddingIds.slice(i, i + batchSize);
-            const snapshot = await this.weddingsCollection.where(FieldPath.documentId(), 'in', batch).get();
+        if (!eventIds) {
+            return fetchedEventsMap;
+        }
+        for (let i = 0; i < eventIds.length; i += batchSize) {
+            const batch = eventIds.slice(i, i + batchSize);
+            const snapshot = await this.eventsCollection.where(FieldPath.documentId(), 'in', batch).get();
 
             snapshot.forEach(doc => {
-                const weddingData = doc.data() as Wedding;
-                fetchedWeddingsMap.set(doc.id, new Wedding(doc.id, weddingData.name, weddingData.date, weddingData.location, weddingData.ownerId));
+                const eventData = doc.data() as Event;
+                fetchedEventsMap.set(doc.id, new Event(doc.id, eventData.name, eventData.date, eventData.location, eventData.ownerId));
             });
         }
 
-        return fetchedWeddingsMap;
+        return fetchedEventsMap;
     }
 
-    private async fetchAllWeddings(): Promise<Map<string, Wedding>> {
-        const fetchedWeddingsMap: Map<string, Wedding> = new Map();
+    private async fetchAllEvents(): Promise<Map<string, Event>> {
+        const fetchedEventsMap: Map<string, Event> = new Map();
 
-        const snapshot: QuerySnapshot<DocumentData> = await this.weddingsCollection.get();
+        const snapshot: QuerySnapshot<DocumentData> = await this.eventsCollection.get();
 
         if (snapshot.empty) {
-            return fetchedWeddingsMap;
+            return fetchedEventsMap;
         }
 
         snapshot.forEach((doc: QueryDocumentSnapshot<DocumentData>) => {
-            const weddingData = doc.data() as Wedding;
-            weddingData.id = doc.id;
-            fetchedWeddingsMap.set(weddingData.id, weddingData);
+            const eventData = doc.data() as Event;
+            eventData.id = doc.id;
+            fetchedEventsMap.set(eventData.id, eventData);
         });
 
-        return fetchedWeddingsMap;
+        return fetchedEventsMap;
     }
 
     async getAllUsers(): Promise<Array<User>> {
@@ -85,16 +88,16 @@ export class UserDao {
 
             const users: Array<User> = [];
 
-            const weddings: Map<string, Wedding> = await this.fetchAllWeddings();
+            const events: Map<string, Event> = await this.fetchAllEvents();
 
             snapshot.forEach((doc: QueryDocumentSnapshot<DocumentData>) => {
                 const userData = doc.data();
                 userData.id = doc.id;
-                userData.weddingRoles = userData.weddingRoles.map((weddingRole: any) => {
-                    const foundWedding = weddings.get(weddingRole.wedding);
-                    if (weddingRole && foundWedding) {
-                        const userWeddingRole = new WeddingRole(weddingRole.role, foundWedding, weddingRole.guestId);
-                        return userWeddingRole;
+                userData.eventRoles = userData.eventRoles.map((eventRole: any) => {
+                    const foundEvent = events.get(eventRole.event);
+                    if (eventRole && foundEvent) {
+                        const userEventRole = new EventRole(eventRole.role, foundEvent, eventRole.guestId);
+                        return userEventRole;
                     }
                 });
                 users.push(userData as User);
@@ -114,19 +117,19 @@ export class UserDao {
                 return null;
             }
 
-            const weddings: Map<string, Wedding> = await this.fetchAllWeddings();
+            const events: Map<string, Event> = await this.fetchAllEvents();
 
             const userData = userDoc.data();
             if (userData) {
-                userData.weddingRoles = userData.weddingRoles.map((weddingRole: any) => {
-                    const foundWedding = weddings.get(weddingRole.wedding);
-                    if (weddingRole && foundWedding) {
-                        const userWeddingRole = new WeddingRole(
-                            weddingRole.role,
-                            foundWedding,
-                            weddingRole.guestId
+                userData.eventRoles = userData.eventRoles.map((eventRole: any) => {
+                    const foundEvent = events.get(eventRole.event);
+                    if (eventRole && foundEvent) {
+                        const userEventRole = new EventRole(
+                            eventRole.role,
+                            foundEvent,
+                            eventRole.guestId
                         );
-                        return userWeddingRole;
+                        return userEventRole;
                     }
                     return null;
                 }).filter(Boolean);
@@ -153,19 +156,19 @@ export class UserDao {
 
             const userDoc = querySnapshot.docs[0];
 
-            const weddings: Map<string, Wedding> = await this.fetchAllWeddings();
+            const events: Map<string, Event> = await this.fetchAllEvents();
 
             const userData = userDoc.data();
             if (userData) {
-                userData.weddingRoles = userData.weddingRoles.map((weddingRole: any) => {
-                    const foundWedding = weddings.get(weddingRole.wedding);
-                    if (weddingRole && foundWedding) {
-                        const userWeddingRole = new WeddingRole(
-                            weddingRole.role,
-                            foundWedding,
-                            weddingRole.guestId
+                userData.eventRoles = userData.eventRoles.map((eventRole: any) => {
+                    const foundEvent = events.get(eventRole.event);
+                    if (eventRole && foundEvent) {
+                        const userEventRole = new EventRole(
+                            eventRole.role,
+                            foundEvent,
+                            eventRole.guestId
                         );
-                        return userWeddingRole;
+                        return userEventRole;
                     }
                     return null;
                 }).filter(Boolean);
@@ -192,19 +195,19 @@ export class UserDao {
 
             const userDoc = querySnapshot.docs[0];
 
-            const weddings: Map<string, Wedding> = await this.fetchAllWeddings();
+            const events: Map<string, Event> = await this.fetchAllEvents();
 
             const userData = userDoc.data();
             if (userData) {
-                userData.weddingRoles = userData.weddingRoles.map((weddingRole: any) => {
-                    const foundWedding = weddings.get(weddingRole.wedding);
-                    if (weddingRole && foundWedding) {
-                        const userWeddingRole = new WeddingRole(
-                            weddingRole.role,
-                            foundWedding,
-                            weddingRole.guestId
+                userData.eventRoles = userData.eventRoles.map((eventRole: any) => {
+                    const foundEvent = events.get(eventRole.event);
+                    if (eventRole && foundEvent) {
+                        const userEventRole = new EventRole(
+                            eventRole.role,
+                            foundEvent,
+                            eventRole.guestId
                         );
-                        return userWeddingRole;
+                        return userEventRole;
                     }
                     return null;
                 }).filter(Boolean);
@@ -220,16 +223,16 @@ export class UserDao {
 
     async createUser(user: User): Promise<void> {
         try {
-            const weddingIds = Array.from(new Set(user.weddingRoles.map(weddingRole => weddingRole.wedding.id)));
+            const eventIds = Array.from(new Set(user.eventRoles.map(eventRole => eventRole.event.id)));
 
-            const fetchedWeddingsMap = await this.fetchWeddingsByIds(weddingIds);
+            const fetchedEventsMap = await this.fetchEventsByIds(eventIds);
 
-            const validatedWeddingRoles: Array<Object> = [];
+            const validatedEventRoles: Array<Object> = [];
 
-            user.weddingRoles.forEach(weddingRole => {
-                const fetchedWedding = fetchedWeddingsMap.get(weddingRole.wedding.id);
-                if (fetchedWedding) {
-                    validatedWeddingRoles.push({ role: weddingRole.role, wedding: fetchedWedding.id, guestId: weddingRole.guestId });
+            user.eventRoles.forEach(eventRole => {
+                const fetchedEvent = fetchedEventsMap.get(eventRole.event.id);
+                if (fetchedEvent) {
+                    validatedEventRoles.push({ role: eventRole.role, event: fetchedEvent.id, guestId: eventRole.guestId ?? "" });
                 }
             });
 
@@ -242,7 +245,7 @@ export class UserDao {
                 user.email = validator.escape(user.email.trim());
             }
 
-            const newUser = user.toObject ? { ...user.toObject(), weddingRoles: validatedWeddingRoles } : { ...user, weddingRoles: validatedWeddingRoles };
+            const newUser = user.toObject ? { ...user.toObject(), eventRoles: validatedEventRoles } : { ...user, eventRoles: validatedEventRoles };
 
             await newUserRef.set(newUser);
         } catch (error: any) {
@@ -262,7 +265,7 @@ export class UserDao {
             const updatedData = {
                 ...updatedUser,
                 email: validator.escape(updatedUser.email?.trim()),
-                weddingRoles: updatedUser.weddingRoles.map(weddingRole => { return { role: weddingRole.role, wedding: weddingRole.wedding.id, guestId: weddingRole.guestId || null } }),
+                eventRoles: updatedUser.eventRoles.map(eventRole => { return { role: eventRole.role, event: eventRole.event.id, guestId: eventRole.guestId || null } }),
             };
 
             await userRef.update(updatedData);
@@ -272,7 +275,7 @@ export class UserDao {
         }
     }
 
-    async addUserToWedding(userId: string, newWeddingRole: WeddingRole): Promise<void> {
+    async addUserToEvent(userId: string, newEventRole: EventRole): Promise<void> {
         try {
             if (!userId) {
                 throw new Error('Provided User ID is empty');
@@ -290,20 +293,20 @@ export class UserDao {
                 throw new Error('User to update does not exist.');
             }
 
-            const currentWeddingRoles = userData.weddingRoles;
-            let filteredWeddingRoles = currentWeddingRoles.filter((weddingRole: any) => weddingRole.wedding !== newWeddingRole.wedding.id);
+            const currentEventRoles = userData.eventRoles;
+            let filteredEventRoles = currentEventRoles.filter((eventRole: any) => eventRole.event !== newEventRole.event.id);
 
-            filteredWeddingRoles.push({ role: newWeddingRole.role, wedding: newWeddingRole.wedding.id, guestId: newWeddingRole.guestId || null });
+            filteredEventRoles.push({ role: newEventRole.role, event: newEventRole.event.id, guestId: newEventRole.guestId || null });
 
             const updatedData = {
                 ...userData,
-                weddingRoles: filteredWeddingRoles,
+                eventRoles: filteredEventRoles,
             };
 
             await userRef.update(updatedData);
 
         } catch (error) {
-            throw new DatabaseError("Could not add user to wedding: " + error);
+            throw new DatabaseError("Could not add user to event: " + error);
         }
     }
 
@@ -322,7 +325,7 @@ export class UserDao {
         }
     }
 
-    async linkGuestAccount(weddingId: string, pendingGuest: PendingGuest, guest: Guest) {
+    async linkGuestAccount(eventId: string, pendingGuest: PendingGuest, guest: Guest) {
         try {
             const userId = pendingGuest.userId;
             const existingUser: User | null = await this.getUserById(userId);
@@ -331,19 +334,19 @@ export class UserDao {
                 throw new Error('Can not find existing user account.');
             }
 
-            const newWeddingRole = {
+            const newEventRole = {
                 role: Roles.GUEST,
                 guestId: guest.id,
-                wedding: {
-                    id: weddingId
-                } as Wedding
-            } as WeddingRole
+                event: {
+                    id: eventId
+                } as Event
+            } as EventRole
 
             const updatedUser = {
                 ...existingUser,
                 phone: pendingGuest.phone,
                 email: pendingGuest.email,
-                weddingRoles: [...existingUser.weddingRoles, newWeddingRole]
+                eventRoles: [...existingUser.eventRoles, newEventRole]
             } as User;
 
             await this.updateUser(userId, updatedUser);

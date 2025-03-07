@@ -16,9 +16,9 @@ export class PendingGuestController {
     async getPendingGuests(request: Request, response: Response, next: NextFunction) {
         try {
             Logger.info(`Retrieving all pending guests`);
-            const { weddingId } = request.params;
+            const { eventId } = request.params;
 
-            const pendingGuests: Array<PendingGuest> = await this.pendingGuestDao.getAllPendingGuests(weddingId);
+            const pendingGuests: Array<PendingGuest> = await this.pendingGuestDao.getAllPendingGuests(eventId);
 
             Logger.info(`Number of pending guests retrieved successfully: ${pendingGuests.length}`);
             response.status(200).json(pendingGuests);
@@ -31,8 +31,8 @@ export class PendingGuestController {
     async getPendingGuestbyId(request: Request, response: Response, next: NextFunction) {
         try {
             Logger.info(`Retrieving pending guest with ID: ${request.params.pendingGuestId}`);
-            const { weddingId, pendingGuestId } = request.params;
-            const pendingGuest: PendingGuest = await this.pendingGuestDao.getPendingGuestById(weddingId, pendingGuestId);
+            const { eventId, pendingGuestId } = request.params;
+            const pendingGuest: PendingGuest = await this.pendingGuestDao.getPendingGuestById(eventId, pendingGuestId);
             response.status(200).json(pendingGuest);
         } catch (error) {
             Logger.error(`Error retrieving pending guest with ${request.params.pendingGuestId}`);
@@ -43,9 +43,9 @@ export class PendingGuestController {
     async savePendingGuest(request: Request, response: Response, next: NextFunction) {
         try {
             Logger.info(`Creating new pending guest`);
-            const { weddingId } = request.params;
+            const { eventId } = request.params;
             const pendingGuest: PendingGuest = request.body;
-            const updatedPendingGuest: PendingGuest = await this.pendingGuestDao.savePendingGuest(weddingId, pendingGuest);
+            const updatedPendingGuest: PendingGuest = await this.pendingGuestDao.savePendingGuest(eventId, pendingGuest);
             Logger.info(`Successfully updated pending guest for ${pendingGuest.id}`);
             response.status(200).json(updatedPendingGuest);
         } catch (error) {
@@ -57,11 +57,11 @@ export class PendingGuestController {
     async linkGuestAccount(request: Request, response: Response, next: NextFunction) {
         try {
             Logger.info(`Confirming pending guest`);
-            const { weddingId } = request.params;
+            const { eventId } = request.params;
             const { pendingGuest, guest } = request.body;
-            await this.userDao.linkGuestAccount(weddingId, pendingGuest, guest);
+            await this.userDao.linkGuestAccount(eventId, pendingGuest, guest);
             Logger.info(`Successfully linked guest account for ${pendingGuest.guestName}`);
-            const updatedPendingGuest: PendingGuest = await this.pendingGuestDao.savePendingGuest(weddingId, { ...pendingGuest, status: GuestInviteStatus.CONFIRMED });
+            const updatedPendingGuest: PendingGuest = await this.pendingGuestDao.savePendingGuest(eventId, { ...pendingGuest, status: GuestInviteStatus.CONFIRMED });
             response.status(200).json(updatedPendingGuest);
         } catch (error) {
             Logger.error("Error linking guest account", error);
@@ -72,9 +72,9 @@ export class PendingGuestController {
     async deletePendingGuest(request: Request, response: Response, next: NextFunction) {
         try {
             Logger.info(`Deleting pending guest ${JSON.stringify(request.body)}`);
-            const { weddingId } = request.params;
+            const { eventId } = request.params;
             const pendingGuest: PendingGuest = request.body;
-            await this.pendingGuestDao.deletePendingGuest(weddingId, pendingGuest.id);
+            await this.pendingGuestDao.deletePendingGuest(eventId, pendingGuest.id);
             response.status(204).send();
         } catch (error) {
             Logger.error("Error deleting pending guest", error);

@@ -3,8 +3,8 @@ export const ObjectType = Object.freeze({
   SURVEY: "survey",
   SURVEY_RESPONSE: "survey response",
   PASS: "pass",
+  SUBEVENT: "sub event",
   EVENT: "event",
-  WEDDING: "wedding",
   ROLE: "role",
   USER: "user",
   HOTEL: "hotel"

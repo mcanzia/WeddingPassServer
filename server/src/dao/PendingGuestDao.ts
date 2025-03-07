@@ -4,7 +4,7 @@ import { db } from '../configs/firebase';
 import { CustomError, DatabaseError, NoDataError } from '../util/error/CustomError';
 import { injectable } from 'inversify';
 import { Guest } from '../models/Guest';
-import { WeddingEvent } from '../models/WeddingEvent';
+import { SubEvent } from '../models/SubEvent';
 import { CollectionReference, DocumentData, QuerySnapshot, QueryDocumentSnapshot } from 'firebase-admin/firestore';
 import validator from 'validator';
 import { PendingGuest } from '../models/PendingGuest';
@@ -18,11 +18,11 @@ export class PendingGuestDao {
         this.pendingGuestsCollection = db.collection('pending-guests');
     }
 
-    async getAllPendingGuests(weddingId: string): Promise<Array<PendingGuest>> {
+    async getAllPendingGuests(eventId: string): Promise<Array<PendingGuest>> {
         try {
 
             const snapshot: QuerySnapshot<DocumentData> = await this.pendingGuestsCollection
-                .where('weddingId', '==', weddingId)
+                .where('eventId', '==', eventId)
                 .get();
 
             if (snapshot.empty) {
@@ -43,15 +43,15 @@ export class PendingGuestDao {
         }
     }
 
-    async getPendingGuestById(weddingId: string, pendingGuestId: string): Promise<PendingGuest> {
+    async getPendingGuestById(eventId: string, pendingGuestId: string): Promise<PendingGuest> {
         try {
             const snapshot = await this.pendingGuestsCollection
                 .where('__name__', '==', pendingGuestId)
-                .where('weddingId', '==', weddingId)
+                .where('eventId', '==', eventId)
                 .get();
 
             if (snapshot.empty) {
-                throw new Error('No such pending guest found with the given id and weddingId');
+                throw new Error('No such pending guest found with the given id and eventId');
             }
 
             const pendingGuestDoc = snapshot.docs[0];
@@ -67,13 +67,13 @@ export class PendingGuestDao {
         }
     }
 
-    async savePendingGuest(weddingId: string, pendingGuest: PendingGuest): Promise<PendingGuest> {
+    async savePendingGuest(eventId: string, pendingGuest: PendingGuest): Promise<PendingGuest> {
         try {
             const pendingGuestId = pendingGuest.id || this.pendingGuestsCollection.doc().id;
             const pendingGuestRef = this.pendingGuestsCollection.doc(pendingGuestId);
 
             pendingGuest.id = pendingGuestId;
-            pendingGuest.weddingId = weddingId;
+            pendingGuest.eventId = eventId;
 
             await pendingGuestRef.set(pendingGuest, { merge: true });
             return pendingGuest;
@@ -83,7 +83,7 @@ export class PendingGuestDao {
     }
 
 
-    async deletePendingGuest(weddingId: string, pendingGuestId: string): Promise<void> {
+    async deletePendingGuest(eventId: string, pendingGuestId: string): Promise<void> {
         try {
             const pendingGuestRef = this.pendingGuestsCollection.doc(pendingGuestId);
             const pendingGuestDoc = await pendingGuestRef.get();
@@ -96,8 +96,8 @@ export class PendingGuestDao {
             if (!pendingGuestData) {
                 throw new Error('Pending guest data is undefined.');
             }
-            if (pendingGuestData.weddingId !== weddingId) {
-                throw new Error('Pending guest does not belong to the specified wedding.');
+            if (pendingGuestData.eventId !== eventId) {
+                throw new Error('Pending guest does not belong to the specified event.');
             }
 
             await pendingGuestRef.delete();

@@ -1,12 +1,12 @@
 import { createRouter, createWebHistory } from "vue-router";
 import GuestList from "@/components/guest-list/GuestList.vue";
 import AddGuest from "@/components/guest-list/AddGuest.vue";
-import AddWedding from "@/components/weddings/AddWedding.vue";
-import EditWedding from "@/components/weddings/EditWedding.vue";
+import AddEvent from "@/components/events/AddEvent.vue";
+import EditEvent from "@/components/events/EditEvent.vue";
 import InviteUser from "@/components/InviteUser.vue";
-import EventAttendance from "@/components/events/EventAttendance.vue";
+import SubEventAttendance from "@/components/subevents/SubEventAttendance.vue";
 import GuestUpload from "@/components/guest-list/GuestUpload.vue";
-import WeddingList from "@/components/weddings/WeddingList.vue";
+import EventList from "@/components/events/EventList.vue";
 import { Roles } from "@/models/Roles";
 import { useUserStore } from "@/stores/UserStore";
 import Login from "@/components/Login.vue";
@@ -26,24 +26,26 @@ import ThingsToDo from "@/components/guests/ThingsToDo.vue";
 import PendingGuests from "@/components/pending-guests/PendingGuests.vue";
 import LoginDirect from "@/components/LoginDirect.vue";
 import GuestInfo from "@/components/guests/GuestInfo.vue";
-import HotelList from "@/components/hotels/HotelList.vue";
-import UpdateHotel from "@/components/hotels/UpdateHotel.vue";
+import AccommodationList from "@/components/accommodations/AccommodationList.vue";
+import UpdateAccommodation from "@/components/accommodations/UpdateAccommodation.vue";
 import GuestEvents from "@/components/guests/GuestEvents.vue";
 import BarcodeHandler from "@/components/barcodes/BarcodeHandler.vue";
 import SurveyResponseTracking from "@/components/surveys/SurveyResponseTracking.vue";
 import DrinkTracker from "@/components/drinks/DrinkTracker.vue";
+import SubEventList from "@/components/subevents/SubEventList.vue";
+import UpdateSubEvent from "@/components/subevents/UpdateSubEvent.vue";
 
 const routes = [
    {
       path: '/',
       name: 'landing',
-      component: WeddingList,
+      component: EventList,
       meta: {
          allowedRoles: [Roles.ADMIN, Roles.EDITOR]
       }
    },
    {
-      path: '/:weddingId/guests',
+      path: '/:eventId/guests',
       name: 'guests',
       component: GuestList,
       props: true,
@@ -52,7 +54,7 @@ const routes = [
       }
    },
    {
-      path: '/:weddingId/guests-upload',
+      path: '/:eventId/guests-upload',
       name: 'guests-upload',
       component: GuestUpload,
       props: true,
@@ -61,7 +63,7 @@ const routes = [
       }
    },
    {
-      path: '/:weddingId/barcode',
+      path: '/:eventId/barcode',
       name: 'barcode',
       component: BarcodeHandler,
       props: true,
@@ -70,7 +72,7 @@ const routes = [
       }
    },
    {
-      path: '/:weddingId/update-guest/:guestId?',
+      path: '/:eventId/update-guest/:guestId?',
       name: 'update-guest',
       component: AddGuest,
       props: true,
@@ -79,7 +81,7 @@ const routes = [
       }
    },
    {
-      path: '/:weddingId/invite-user',
+      path: '/:eventId/invite-user',
       name: 'invite-user',
       component: InviteUser,
       props: true,
@@ -88,41 +90,41 @@ const routes = [
       }
    },
    {
-      path: '/weddings',
-      name: 'weddings',
-      component: WeddingList,
+      path: '/events',
+      name: 'events',
+      component: EventList,
       meta: {
          allowedRoles: [Roles.ADMIN, Roles.EDITOR]
       }
    },
    {
-      path: '/add-wedding',
-      name: 'add-wedding',
-      component: AddWedding,
+      path: '/add-event',
+      name: 'add-event',
+      component: AddEvent,
       meta: {
          allowedRoles: [Roles.ADMIN, Roles.EDITOR]
       }
    },
    {
-      path: '/edit-wedding/:weddingId',
-      name: 'edit-wedding',
-      component: EditWedding,
+      path: '/edit-event/:eventId',
+      name: 'edit-event',
+      component: EditEvent,
       props: true,
       meta: {
          allowedRoles: [Roles.ADMIN, Roles.EDITOR]
       }
    },
    {
-      path: '/:weddingId/event-attendance',
-      name: 'event-attendance',
-      component: EventAttendance,
+      path: '/:eventId/sub-event-attendance',
+      name: 'sub-event-attendance',
+      component: SubEventAttendance,
       props: true,
       meta: {
          allowedRoles: [Roles.ADMIN, Roles.EDITOR, Roles.READONLY, Roles.TRIO]
       }
    },
    {
-      path: '/:weddingId/drinks',
+      path: '/:eventId/drinks',
       name: 'drinks',
       component: DrinkTracker,
       props: true,
@@ -131,7 +133,7 @@ const routes = [
       }
    },
    {
-      path: '/:weddingId/surveys',
+      path: '/:eventId/surveys',
       name: 'surveys',
       component: SurveyAdmin,
       props: true,
@@ -140,7 +142,7 @@ const routes = [
       }
    },
    {
-      path: '/:weddingId/:surveyId',
+      path: '/:eventId/:surveyId',
       name: 'edit-survey',
       component: SurveyBuilder,
       props: true,
@@ -149,7 +151,7 @@ const routes = [
       }
    },
    {
-      path: '/:weddingId/:surveyId/tracker',
+      path: '/:eventId/:surveyId/tracker',
       name: 'survey-tracker',
       component: SurveyResponseTracking,
       props: true,
@@ -158,25 +160,43 @@ const routes = [
       }
    },
    {
-      path: '/:weddingId/hotels',
-      name: 'hotels',
-      component: HotelList,
+      path: '/:eventId/accommodations',
+      name: 'accommodations',
+      component: AccommodationList,
       props: true,
       meta: {
          allowedRoles: [Roles.ADMIN, Roles.EDITOR, Roles.READONLY]
       }
    },
    {
-      path: '/:weddingId/edit-hotel/:hotelId?',
-      name: 'edit-hotel',
-      component: UpdateHotel,
+      path: '/:eventId/edit-accommodation/:accommodationId?',
+      name: 'edit-accommodation',
+      component: UpdateAccommodation,
+      props: true,
+      meta: {
+         allowedRoles: [Roles.ADMIN, Roles.EDITOR]
+      }
+   },
+   {
+      path: '/:eventId/sub-events',
+      name: 'sub-events',
+      component: SubEventList,
       props: true,
       meta: {
          allowedRoles: [Roles.ADMIN, Roles.EDITOR, Roles.READONLY]
       }
    },
    {
-      path: '/:weddingId/',
+      path: '/:eventId/edit-sub-event/:subEventId?',
+      name: 'edit-sub-event',
+      component: UpdateSubEvent,
+      props: true,
+      meta: {
+         allowedRoles: [Roles.ADMIN, Roles.EDITOR]
+      }
+   },
+   {
+      path: '/:eventId/',
       name: 'home',
       component: HomeRouter,
    },
@@ -209,22 +229,22 @@ const routes = [
       component: InvitePage,
    },
    {
-      path: '/:weddingId/guest-details',
+      path: '/:eventId/guest-details',
       name: 'guest-details',
       component: GuestInfo,
    },
    {
-      path: '/:weddingId/guest-events',
+      path: '/:eventId/guest-events',
       name: 'guest-events',
       component: GuestEvents,
    },
    {
-      path: '/:weddingId/guest-surveys',
+      path: '/:eventId/guest-surveys',
       name: 'guest-surveys',
       component: AssignedSurveys,
    },
    {
-      path: '/:weddingId/:surveyId/survey-response/:surveyResponseId',
+      path: '/:eventId/:surveyId/survey-response/:surveyResponseId',
       name: 'survey-response',
       component: SurveyResponder,
       props: true,
@@ -233,7 +253,7 @@ const routes = [
       }
    },
    {
-      path: '/:weddingId/q-and-a',
+      path: '/:eventId/q-and-a',
       name: 'q-and-a',
       component: QAndA,
       props: true,
@@ -242,7 +262,7 @@ const routes = [
       }
    },
    {
-      path: '/:weddingId/things-to-do',
+      path: '/:eventId/things-to-do',
       name: 'things-to-do',
       component: ThingsToDo,
       props: true,
@@ -251,7 +271,7 @@ const routes = [
       }
    },
    {
-      path: '/:weddingId/pending-guests',
+      path: '/:eventId/pending-guests',
       name: 'pending-guests',
       component: PendingGuests,
       props: true,
@@ -286,7 +306,7 @@ router.beforeEach((to, from, next) => {
    function proceedWithNavigation() {
       const isAuthenticated = !!user.value;
       const isGuest = localStorage.getItem('guest');
-      // let userRole = userStore.localUser?.weddingRoles;
+      // let userRole = userStore.localUser?.eventRoles;
       const exemptedRoutes = ['login', 'invite', 'guest-login', 'login-router'];
       if (!isAuthenticated && !exemptedRoutes.includes(String(to.name))) {
          if (isGuest) {

@@ -1,67 +1,87 @@
 import { ErrorHandler } from "@/util/error/ErrorHandler";
-import { WeddingEvent } from "@/models/WeddingEvent";
+import { Event } from "@/models/Event";
 import { RequestUtil } from "@/controllers/RequestUtil";
 import { ObjectType } from "@/models/ObjectType";
-import { WeddingRole } from "@/models/WeddingRole";
 
 export class EventController {
 
-    async getAllEvents(userAuthToken: any, weddingRole: WeddingRole) {
+    async getAllEvents(userAuthToken: any) {
         try {
-            const requestUrl = `${RequestUtil.getAPIUrl()}/api/weddings/${weddingRole.wedding.id}/events`;
-            return await RequestUtil.apiRequest(requestUrl, RequestUtil.GETRequestParams(userAuthToken, weddingRole.role));
+            const requestUrl = `${RequestUtil.getAPIUrl()}/api/events/`;
+            return await RequestUtil.apiRequest(requestUrl, RequestUtil.GETRequestParams(userAuthToken));
         } catch (error: any) {
-            ErrorHandler.handleGetAllError<WeddingEvent>(userAuthToken, ObjectType.EVENT, error);
+            ErrorHandler.handleGetAllError<Event>(userAuthToken, ObjectType.EVENT, error);
             throw error;
         }
     }
 
-    async getEventById(userAuthToken: any, weddingRole: WeddingRole, eventId: string) {
+    async getEventsByOwner(userAuthToken: any, ownerId: string) {
         try {
-            const requestUrl = `${RequestUtil.getAPIUrl()}/api/weddings/${weddingRole.wedding.id}/events/id/${eventId}`;
-            return await RequestUtil.apiRequest(requestUrl, RequestUtil.GETRequestParams(userAuthToken, weddingRole.role));
+            const requestUrl = `${RequestUtil.getAPIUrl()}/api/events/owner/${ownerId}`;
+            return await RequestUtil.apiRequest(requestUrl, RequestUtil.GETRequestParams(userAuthToken));
+        } catch (error: any) {
+            ErrorHandler.handleGetAllError<Event>(userAuthToken, ObjectType.EVENT, error);
+            throw error;
+        }
+    }
+
+    async getEventById(userAuthToken: any, eventId: string) {
+        try {
+            const requestUrl = `${RequestUtil.getAPIUrl()}/api/events/${eventId}`;
+            return await RequestUtil.apiRequest(requestUrl, RequestUtil.GETRequestParams(userAuthToken));
         } catch (error: any) {
             ErrorHandler.handleGetByIdError();
             throw error;
         }
     }
 
-    async addEvent(userAuthToken: any, weddingRole: WeddingRole, event: WeddingEvent) {
+    async saveEvent(userAuthToken: any, event: Event) {
         try {
-            const requestUrl = `${RequestUtil.getAPIUrl()}/api/weddings/${weddingRole.wedding.id}/events`;
-            return await RequestUtil.apiRequest(requestUrl, RequestUtil.POSTRequestParams(userAuthToken, event, weddingRole.role));
+            console.log('EVENT', event);
+            const requestUrl = `${RequestUtil.getAPIUrl()}/api/events/`;
+            return await RequestUtil.apiRequest(requestUrl, RequestUtil.POSTRequestParams(userAuthToken, event));
         } catch (error: any) {
-            ErrorHandler.handleAddError<WeddingEvent>(userAuthToken, ObjectType.EVENT, event, error);
+            ErrorHandler.handleAddError<Event>(userAuthToken, ObjectType.EVENT, event, error);
             throw error;
         }
     }
 
-    async batchAddEvents(userAuthToken: any, weddingRole: WeddingRole, events: Array<WeddingEvent>) {
+    async batchAddEvents(userAuthToken: any, events: Array<Event>) {
         try {
-            const requestUrl = `${RequestUtil.getAPIUrl()}/api/weddings/${weddingRole.wedding.id}/events/batch`;
-            return await RequestUtil.apiRequest(requestUrl, RequestUtil.POSTRequestParams(userAuthToken, events, weddingRole.role));
+            const requestUrl = `${RequestUtil.getAPIUrl()}/api/events/batch`;
+            return await RequestUtil.apiRequest(requestUrl, RequestUtil.POSTRequestParams(userAuthToken, events));
         } catch (error: any) {
-            ErrorHandler.handleBatchAddError<WeddingEvent>(userAuthToken, ObjectType.EVENT, events, error);
+            ErrorHandler.handleBatchAddError<Event>(userAuthToken, ObjectType.EVENT, events, error);
             throw error;
         }
     }
 
-    async deleteEvent(userAuthToken: any, weddingRole: WeddingRole, event: WeddingEvent) {
+    // async updateEvent(userAuthToken: any, event: Event) {
+    //     try {
+    //         const requestUrl = `${RequestUtil.getAPIUrl()}/api/events/${event.id}`;
+    //         return await RequestUtil.apiRequest(requestUrl, RequestUtil.PUTRequestParams(userAuthToken, event));
+    //     } catch (error: any) {
+    //         ErrorHandler.handleUpdateError(ObjectType.EVENT);
+    //         throw error;
+    //     }
+    // }
+
+    async deleteEvent(userAuthToken: any, event: Event) {
         try {
-            const requestUrl = `${RequestUtil.getAPIUrl()}/api/weddings/${weddingRole.wedding.id}/events`;
-            return await RequestUtil.apiRequest(requestUrl, RequestUtil.DELETERequestParams(userAuthToken, event, weddingRole.role));
+            const requestUrl = `${RequestUtil.getAPIUrl()}/api/events/`;
+            return await RequestUtil.apiRequest(requestUrl, RequestUtil.DELETERequestParams(userAuthToken, event));
         } catch (error: any) {
-            ErrorHandler.handleDeleteError<WeddingEvent>(ObjectType.EVENT);
+            ErrorHandler.handleDeleteError<Event>(ObjectType.EVENT);
             throw error;
         }
     }
 
-    async batchDeleteEvents(userAuthToken: any, weddingRole: WeddingRole, events: Array<WeddingEvent>) {
+    async batchDeleteEvents(userAuthToken: any, events: Array<Event>) {
         try {
-            const requestUrl = `${RequestUtil.getAPIUrl()}/api/weddings/${weddingRole.wedding.id}/events/batch`;
-            return await RequestUtil.apiRequest(requestUrl, RequestUtil.DELETERequestParams(userAuthToken, events, weddingRole.role));
+            const requestUrl = `${RequestUtil.getAPIUrl()}/api/events/batch`;
+            return await RequestUtil.apiRequest(requestUrl, RequestUtil.DELETERequestParams(userAuthToken, events));
         } catch (error: any) {
-            ErrorHandler.handleBatchDeleteError<WeddingEvent>(ObjectType.EVENT);
+            ErrorHandler.handleBatchDeleteError<Event>(ObjectType.EVENT);
             throw error;
         }
     }

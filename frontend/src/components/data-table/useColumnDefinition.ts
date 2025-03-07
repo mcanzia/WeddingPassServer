@@ -1,22 +1,16 @@
 import { computed, h } from "vue";
 import { Button } from "@/components/ui/button";
 import { ArrowUpDown } from "lucide-vue-next";
-import { Flight } from "@/models/Flight";
-import { Bus } from "@/models/Bus";
-import { Train } from "@/models/Train";
-import { WeddingEvent } from "@/models/WeddingEvent";
+import { SubEvent } from "@/models/SubEvent";
 import { Checkbox } from "@/components/ui/checkbox";
-import EventCircle from '@/components/data-table/EventCircle.vue';
+import SubEventCircle from '@/components/data-table/SubEventCircle.vue';
 import { Guest } from "@/models/Guest";
 import { ColumnDef } from "@tanstack/vue-table";
 import { TransportationType } from "@/models/TransportationType";
 import { Transportation } from "@/models/Transportation";
-import { isFlight, isOther, isTrain } from "@/models/TransportationTypeGuard";
 import { useDateUtils } from "@/components/common/useDateUtils";
 import { Drinks } from "@/models/Drinks";
 import { Accommodation } from "@/models/Accommodation";
-import { Hotel } from "@/models/Hotel";
-import { OtherTransport } from "@/models/OtherTransport";
 
 export function useColumnDefinition() {
 
@@ -68,14 +62,14 @@ export function useColumnDefinition() {
                 cell: ({ row }) => h('div', { class: 'lowercase whitespace-nowrap text-center' }, row.getValue('phone')),
             },
             {
-                accessorKey: 'events',
+                accessorKey: 'subEvents',
                 header: ({ column }) => {
-                    return setHeaderDetails(column, 'Events');
+                    return setHeaderDetails(column, 'SubEvents');
                 },
                 cell: ({ row }) => {
-                    const events: WeddingEvent[] = row.getValue('events') || [];
-                    const circles = events.sort((a, b) => a.order - b.order).map(event =>
-                        h(EventCircle, { event, key: event.id })
+                    const subEvents: SubEvent[] = row.getValue('subEvents') || [];
+                    const circles = subEvents.sort((a, b) => a.order - b.order).map(subEvent =>
+                        h(SubEventCircle, { subEvent, key: subEvent.id })
                     );
                     return h('div', { class: 'flex gap-1 whitespace-nowrap text-center' }, circles);
                 },
@@ -111,68 +105,29 @@ export function useColumnDefinition() {
             },
 
             {
-                id: 'arrivalFlightTime',
-                header: ({ column }) => {
-                    return setHeaderDetails(column, 'Arrival Flight Time');
-                },
-                accessorFn: (row: Guest) => {
-                    const arrival = row.arrival as Flight;
-                    return arrival && arrival.flightTime ? new Date(arrival.flightTime).getTime() : 0;
-                },
-                cell: ({ row }) => {
-                    return getTransportationField(row.original.arrival, 'flightTime');
-                },
-            },
-            {
-                id: 'arrivalFlightNumber',
-                header: ({ column }) => {
-                    return setHeaderDetails(column, 'Arrival Flight Number');
-                },
-                accessorFn: (row: Guest) => {
-                    const arrival = row.arrival as Flight;
-                    return arrival?.flightNumber ?? '';
-                },
-                cell: ({ row }) => {
-                    return getTransportationField(row.original.arrival, 'flightNumber');
-                },
-            },
-            {
-                id: 'arrivalTrainTime',
-                header: ({ column }) => {
-                    return setHeaderDetails(column, 'Arrival Train Time');
-                },
-                accessorFn: (row: Guest) => {
-                    const arrival = row.arrival as Train;
-                    return arrival && arrival.trainTime ? new Date(arrival.trainTime).getTime() : 0;
-                },
-                cell: ({ row }) => {
-                    return getTransportationField(row.original.arrival, 'trainTime');
-                },
-            },
-            {
-                id: 'arrivalTrainNumber',
-                header: ({ column }) => {
-                    return setHeaderDetails(column, 'Arrival Train Number');
-                },
-                accessorFn: (row: Guest) => {
-                    const arrival = row.arrival as Train;
-                    return arrival?.trainNumber ?? '';
-                },
-                cell: ({ row }) => {
-                    return getTransportationField(row.original.arrival, 'trainNumber');
-                },
-            },
-            {
                 id: 'arrivalTime',
                 header: ({ column }) => {
                     return setHeaderDetails(column, 'Arrival Time');
                 },
                 accessorFn: (row: Guest) => {
-                    const arrival = row.arrival as OtherTransport;
+                    const arrival = row.arrival as Transportation;
                     return arrival && arrival.time ? new Date(arrival.time).getTime() : 0;
                 },
                 cell: ({ row }) => {
                     return getTransportationField(row.original.arrival, 'time');
+                },
+            },
+            {
+                id: 'arrivalNumber',
+                header: ({ column }) => {
+                    return setHeaderDetails(column, 'Arrival Number');
+                },
+                accessorFn: (row: Guest) => {
+                    const arrival = row.arrival as Transportation;
+                    return arrival?.number ?? '';
+                },
+                cell: ({ row }) => {
+                    return getTransportationField(row.original.arrival, 'number');
                 },
             },
             {
@@ -206,68 +161,29 @@ export function useColumnDefinition() {
             },
 
             {
-                id: 'departureFlightTime',
-                header: ({ column }) => {
-                    return setHeaderDetails(column, 'Departure Flight Time');
-                },
-                accessorFn: (row: Guest) => {
-                    const departure = row.departure as Flight;
-                    return departure && departure.flightTime ? new Date(departure.flightTime).getTime() : 0;
-                },
-                cell: ({ row }) => {
-                    return getTransportationField(row.original.departure, 'flightTime');
-                },
-            },
-            {
-                id: 'departureFlightNumber',
-                header: ({ column }) => {
-                    return setHeaderDetails(column, 'Departure Flight Number');
-                },
-                accessorFn: (row: Guest) => {
-                    const departure = row.departure as Flight;
-                    return departure?.flightNumber ?? '';
-                },
-                cell: ({ row }) => {
-                    return getTransportationField(row.original.departure, 'flightNumber');
-                },
-            },
-            {
-                id: 'departureTrainTime',
-                header: ({ column }) => {
-                    return setHeaderDetails(column, 'Departure Train Time');
-                },
-                accessorFn: (row: Guest) => {
-                    const departure = row.departure as Train;
-                    return departure && departure.trainTime ? new Date(departure.trainTime).getTime() : 0;
-                },
-                cell: ({ row }) => {
-                    return getTransportationField(row.original.departure, 'trainTime');
-                },
-            },
-            {
-                id: 'departureTrainNumber',
-                header: ({ column }) => {
-                    return setHeaderDetails(column, 'Departure Train Number');
-                },
-                accessorFn: (row: Guest) => {
-                    const departure = row.departure as Train;
-                    return departure?.trainNumber ?? '';
-                },
-                cell: ({ row }) => {
-                    return getTransportationField(row.original.departure, 'trainNumber');
-                },
-            },
-            {
                 id: 'departureTime',
                 header: ({ column }) => {
                     return setHeaderDetails(column, 'Departure Time');
                 },
                 accessorFn: (row: Guest) => {
-                    const departure = row.departure as OtherTransport;
+                    const departure = row.departure as Transportation;
                     return departure && departure.time ? new Date(departure.time).getTime() : 0;
                 },
                 cell: ({ row }) => {
                     return getTransportationField(row.original.departure, 'time');
+                },
+            },
+            {
+                id: 'departureNumber',
+                header: ({ column }) => {
+                    return setHeaderDetails(column, 'Departure Number');
+                },
+                accessorFn: (row: Guest) => {
+                    const departure = row.departure as Transportation;
+                    return departure?.number ?? '';
+                },
+                cell: ({ row }) => {
+                    return getTransportationField(row.original.departure, 'number');
                 },
             },
             {
@@ -295,19 +211,19 @@ export function useColumnDefinition() {
                     return setHeaderDetails(column, 'Number of Drinks');
                 },
                 accessorFn: (row: Guest) => {
-                    return row.drinks?.numberOfDrinks ?? 0;
+                    return row.drinks?.drinkCount ?? 0;
                 },
                 cell: ({ row }) => {
                     return getDrinksField(row.original.drinks, 'numberOfDrinks');
                 },
             },
             {
-                id: 'hotelName',
+                id: 'accommodationName',
                 header: ({ column }) => {
-                    return setHeaderDetails(column, 'Hotel Name');
+                    return setHeaderDetails(column, 'Accommodation Name');
                 },
                 accessorFn: (row: Guest) => {
-                    return row.accommodation?.hotel.name ?? '';
+                    return row.accommodation?.name ?? '';
                 },
                 cell: ({ row }) => {
                     return getAccommodationField(row.original.accommodation, 'name');
@@ -341,50 +257,16 @@ export function useColumnDefinition() {
             return h('div', '');
         }
 
-        if (isFlight(details)) {
-            if (fieldName in details) {
-                const value = (details as Flight)[fieldName as keyof Flight];
-                if (fieldName === 'flightTime') {
-                    const dateCheck = value ? new Date(value) : undefined;
-                    if (dateCheck && !isNaN(dateCheck.getTime())) {
-                        return h('div', dateToString(dateCheck) || '');
-                    }
-                }
-                return h('div', String(value || ''));
-            }
-        } else if (isTrain(details)) {
-            if (fieldName in details) {
-                const value = (details as Train)[fieldName as keyof Train];
-                if (fieldName === 'trainTime') {
-                    const dateCheck = value ? new Date(value) : undefined;
-                    if (dateCheck && !isNaN(dateCheck.getTime())) {
-                        return h('div', dateToString(dateCheck) || '');
-                    }
-                }
-                return h('div', String(value || ''));
-            }
-        } else if (isOther(details)) {
-            if (fieldName in details) {
-                const value = (details as OtherTransport)[fieldName as keyof OtherTransport];
-                if (fieldName === 'time') {
-                    const dateCheck = value ? new Date(value) : undefined;
-                    if (dateCheck && !isNaN(dateCheck.getTime())) {
-                        return h('div', dateToString(dateCheck) || '');
-                    }
-                }
-                return h('div', String(value || ''));
-            }
-        } else {
-            if (fieldName in details) {
-                const value = (details as Transportation)[fieldName as keyof Transportation];
+        if (fieldName in details) {
+            const value = (details as Transportation)[fieldName as keyof Transportation];
+            if (typeof value === 'string') {
                 const dateCheck = value ? new Date(value) : undefined;
                 if (dateCheck && !isNaN(dateCheck.getTime())) {
                     return h('div', dateToString(dateCheck) || '');
                 }
-                return h('div', String(value || ''));
             }
+            return h('div', String(value || ''));
         }
-
         return h('div', '');
     }
 
@@ -414,18 +296,18 @@ export function useColumnDefinition() {
         }
 
         if (fieldName === 'name') {
-            return h('div', details.hotel?.name ?? defaultVal ?? '');
+            return h('div', details?.name ?? defaultVal ?? '');
         }
 
         const value = details[fieldName as keyof Accommodation];
         return h('div', String(value) ?? defaultVal ?? '');
     }
 
-    function getEventsDisplay(events: WeddingEvent[]) {
-        if (events.length) {
-            return events.sort((a, b) => a.order - b.order).map(event => event.name).join(', ');
+    function getSubEventsDisplay(subEvents: SubEvent[]) {
+        if (subEvents.length) {
+            return subEvents.sort((a, b) => a.order - b.order).map(subEvent => subEvent.name).join(', ');
         }
-        return 'Not Attending Events'
+        return 'Not Attending SubEvents'
     }
 
     const partyColumnDefs = computed(() => {
@@ -438,9 +320,9 @@ export function useColumnDefinition() {
                 cell: ({ row }: any) => h('div', { class: 'capitalize whitespace-nowrap text-center' }, row.getValue('name')),
             },
             {
-                accessorKey: 'hotelName',
+                accessorKey: 'accommodationName',
                 header: ({ column }) => {
-                    return setHeaderDetails(column, 'Hotel Name');
+                    return setHeaderDetails(column, 'Accommodation Name');
                 },
                 cell: ({ row }) => {
                     return getAccommodationField(row.original.accommodation, 'name');
@@ -456,13 +338,13 @@ export function useColumnDefinition() {
                 },
             },
             {
-                accessorKey: 'events',
+                accessorKey: 'subEvents',
                 header: ({ column }) => {
-                    return setHeaderDetails(column, 'Events');
+                    return setHeaderDetails(column, 'SubEvents');
                 },
                 cell: ({ row }) => {
-                    const events: WeddingEvent[] = row.getValue('events') || [];
-                    return h('div', { class: 'flex gap-1 whitespace-nowrap text-center' }, getEventsDisplay(events));
+                    const subEvents: SubEvent[] = row.getValue('subEvents') || [];
+                    return h('div', { class: 'flex gap-1 whitespace-nowrap text-center' }, getSubEventsDisplay(subEvents));
                 },
             },
         ]

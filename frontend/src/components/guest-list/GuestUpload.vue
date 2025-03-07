@@ -107,10 +107,24 @@ onChange((files) => {
     }
 });
 
+const uploadCreateList = computed(() => {
+    return guestValidation.value && guestValidation.value.uploadGuestLists
+        && guestValidation.value.uploadGuestLists.createGuests ? guestValidation.value.uploadGuestLists.createGuests : [];
+})
+
+const uploadUpdateList = computed(() => {
+    return guestValidation.value && guestValidation.value.uploadGuestLists
+        && guestValidation.value.uploadGuestLists.updateGuests ? guestValidation.value.uploadGuestLists.updateGuests : [];
+})
+
+const uploadIssues = computed(() => {
+    return guestValidation.value && guestValidation.value.uploadIssues ? guestValidation.value.uploadIssues : new Map()
+})
+
 const validationAreaDescription = computed(() => {
-    const uploadCreateListSize = guestValidation.value?.uploadGuestLists.createGuests.length ?? 0;
-    const uploadUpdateListSize = guestValidation.value?.uploadGuestLists.updateGuests.length ?? 0;
-    if (guestValidation.value && guestValidation.value.uploadIssues.size === 0) {
+    const uploadCreateListSize = uploadCreateList.value.length ?? 0;
+    const uploadUpdateListSize = uploadUpdateList.value.length ?? 0;
+    if (uploadIssues.value.size === 0) {
         return `Validation was successful for all rows. Please click continue to proceed with upload. 
         Creating ${uploadCreateListSize} and Updating ${uploadUpdateListSize}.`;
     } else {
@@ -136,13 +150,13 @@ function cancelUpload() {
 
 async function proceedWithUpload() {
     if (guestValidation.value && guestValidation.value?.uploadGuestLists) {
-        if (guestValidation.value?.uploadGuestLists.createGuests && guestValidation.value?.uploadGuestLists.createGuests.length) {
-            await guestService.batchAddGuests(guestValidation.value.uploadGuestLists.createGuests);
+        if (uploadCreateList.value.length) {
+            await guestService.batchAddGuests(uploadCreateList.value);
 
         }
 
-        if (guestValidation.value?.uploadGuestLists.updateGuests && guestValidation.value?.uploadGuestLists.updateGuests.length) {
-            await guestService.batchUpdateGuests(guestValidation.value.uploadGuestLists.updateGuests);
+        if (uploadUpdateList.value.length) {
+            await guestService.batchUpdateGuests(uploadUpdateList.value);
         }
         showValidationArea.value = false;
         guestValidation.value = null;

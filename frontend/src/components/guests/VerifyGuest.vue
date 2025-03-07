@@ -59,7 +59,7 @@ import { storeToRefs } from "pinia";
 import { useRouterHelper } from "@/util/composables/useRouterHelper";
 import { GuestService } from "@/services/GuestService";
 import { Guest } from "@/models/Guest";
-import { WeddingRole } from "@/models/WeddingRole";
+import { EventRole } from "@/models/EventRole";
 import { SuccessHandler } from "@/util/SuccessHandler";
 import { ErrorHandler } from "@/util/error/ErrorHandler";
 import PhoneInput from "@/components/common/PhoneInput.vue";
@@ -68,7 +68,7 @@ import { GuestInviteStatus } from "@/models/GuestInviteStatus";
 import { PendingGuest } from "@/models/PendingGuest";
 
 const userStore = useUserStore();
-const { selectedWeddingRole, localUser } = storeToRefs(userStore);
+const { selectedEventRole, localUser } = storeToRefs(userStore);
 const { updateUserDetails, addPendingGuest, logoutUser } = userStore;
 const notificationStore = useNotificationStore();
 const { setMessage } = notificationStore;
@@ -133,17 +133,17 @@ function setGuestEmail() {
 
 async function confirmGuest() {
   if (selectedGuestObject.value && guestEmail.value) {
-    selectedWeddingRole.value = {
-      ...selectedWeddingRole.value,
+    selectedEventRole.value = {
+      ...selectedEventRole.value,
       guestId: selectedGuestObject.value.id,
-    } as WeddingRole;
-    await updateUserDetails(selectedWeddingRole.value, guestEmail.value, guestPhone.value!);
+    } as EventRole;
+    await updateUserDetails(selectedEventRole.value, guestEmail.value, guestPhone.value!);
     localStorage.removeItem("guestPhone");
     SuccessHandler.showNotification("Welcome!");
     goToRouteSecured("home");
   } else if (!guestNames.value.length && localUser.value) {
     const pendingGuest = {
-      weddingId: selectedWeddingRole.value?.wedding.id,
+      eventId: selectedEventRole.value?.event.id,
       userId: localUser.value.id,
       guestName: guestName.value,
       email: guestEmail.value,

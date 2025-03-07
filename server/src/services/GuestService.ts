@@ -4,52 +4,47 @@ import { Readable } from 'stream';
 import csvParser from 'csv-parser';
 import ExcelJS from 'exceljs';
 import { inject, injectable } from "inversify";
-import { EventDao } from "../dao/EventDao";
+import { SubEventDao } from "../dao/SubEventDao";
 import { TYPES } from "../configs/types";
-import { WeddingEvent } from "../models/WeddingEvent";
+import { SubEvent } from "../models/SubEvent";
 import { GuestDao } from "../dao/GuestDao";
 import { UploadValidation } from "../models/UploadValidation";
 import { DUPLICATE_GUEST, EMAIL_BAD_FORMAT, EMAIL_MISSING, EMAIL_TOO_LONG, MISSING_EVENT, NAME_MISSING, NAME_TOO_LONG, PARTY_NUMBER_MISSING, PHONE_TOO_LONG } from "../util/upload/ValidationErrors";
 import validator from 'validator';
-import { Flight } from "../models/Flight";
 import { TransportationType } from "../models/TransportationType";
-import { Train } from "../models/Train";
-import { Bus } from "../models/Bus";
 import { Transportation } from "../models/Transportation";
-import { Accommodation } from "../models/Accommodation";
-import { HotelDao } from "../dao/HotelDao";
-import { Hotel } from "../models/Hotel";
+import { Accommodation } from '../models/Accommodation';
 import { Drinks } from "../models/Drinks";
 import { Parser } from 'json2csv';
 import { CustomError } from "../util/error/CustomError";
 import { UploadGuestLists } from "../models/UploadGuestLists";
-import { OtherTransport } from "../models/OtherTransport";
+import { AccommodationDao } from "../dao/AccommodationDao";
 
 @injectable()
 export class GuestService {
 
     constructor(
-        @inject(TYPES.EventDao) private eventDao: EventDao,
+        @inject(TYPES.SubEventDao) private subEventDao: SubEventDao,
         @inject(TYPES.GuestDao) private guestDao: GuestDao,
-        @inject(TYPES.HotelDao) private hotelDao: HotelDao
+        @inject(TYPES.AccommodationDao) private accommodationDao: AccommodationDao
     ) { }
 
-    async parseCSV(buffer: Buffer, weddingId: string): Promise<UploadGuestLists> {
+    async parseCSV(buffer: Buffer, eventId: string): Promise<UploadGuestLists> {
         const createGuests: Guest[] = [];
         const updateGuests: Guest[] = [];
         const stream = Readable.from(buffer.toString());
 
-        const weddingEvents: WeddingEvent[] = await this.eventDao.getAllEvents(weddingId);
-        const hotels: Hotel[] = await this.hotelDao.getAllHotels(weddingId);
+        const subEvents: SubEvent[] = await this.subEventDao.getAllSubEvents(eventId);
+        const accommodations: Accommodation[] = await this.accommodationDao.getAllAccommodations(eventId);
 
         return new Promise((resolve, reject) => {
             stream.pipe(csvParser())
                 .on('data', (data) => {
                     if (data['Id']) {
-                        const guest = this.updateGuestFromData(data, hotels);
+                        const guest = this.updateGuestFromData(data, accommodations);
                         updateGuests.push(guest);
                     } else {
-                        const guest = this.createGuestFromData(data, weddingId, weddingEvents, hotels);
+                        const guest = this.createGuestFromData(data, eventId, subEvents, accommodations);
                         createGuests.push(guest);
                     }
                 })
@@ -62,7 +57,7 @@ export class GuestService {
         });
     }
 
-    async parseExcel(buffer: Buffer, weddingId: string): Promise<UploadGuestLists> {
+    async parseExcel(buffer: Buffer, eventId: string): Promise<UploadGuestLists> {
         const createGuests: Guest[] = [];
         const updateGuests: Guest[] = [];
         const workbook = new ExcelJS.Workbook();
@@ -71,8 +66,8 @@ export class GuestService {
 
         const headers = worksheet.getRow(1).values as string[];
 
-        const weddingEvents: WeddingEvent[] = await this.eventDao.getAllEvents(weddingId);
-        const hotels: Hotel[] = await this.hotelDao.getAllHotels(weddingId);
+        const subEvents: SubEvent[] = await this.subEventDao.getAllSubEvents(eventId);
+        const accommodations: Accommodation[] = await this.accommodationDao.getAllAccommodations(eventId);
 
         worksheet.eachRow({ includeEmpty: false }, (row, rowNumber) => {
             if (rowNumber === 1) return;
@@ -86,10 +81,10 @@ export class GuestService {
             });
 
             if (data['Id']) {
-                const guest = this.updateGuestFromData(data, hotels);
+                const guest = this.updateGuestFromData(data, accommodations);
                 updateGuests.push(guest);
             } else {
-                const guest = this.createGuestFromData(data, weddingId, weddingEvents, hotels);
+                const guest = this.createGuestFromData(data, eventId, subEvents, accommodations);
                 createGuests.push(guest);
             }
 
@@ -98,11 +93,11 @@ export class GuestService {
         return { createGuests, updateGuests } as UploadGuestLists;
     }
 
-    private createGuestFromData(data: any, weddingId: string, weddingEvents: WeddingEvent[], hotels: Hotel[]): Guest {
+    private createGuestFromData(data: any, eventId: string, subEvents: SubEvent[], accommodations: Accommodation[]): Guest {
         const guest: Partial<Guest> = {};
 
         guest.id = '';
-        guest.weddingId = weddingId;
+        guest.eventId = eventId;
         guest.name = (data['Name'] || '').trim();
         guest.email = (data['Email'] || '').trim();
         guest.phone = this.cleanPhoneField(data['Phone']);
@@ -110,26 +105,26 @@ export class GuestService {
         guest.groupNumber = Number(data['Party Number'] || -1);
         guest.dietaryRestrictions = (data['Dietary Restrictions'] || '').trim();
 
-        // Events
-        guest.events = this.parseGuestEvents(data, weddingEvents);
+        // SubEvents
+        guest.subEvents = this.parseGuestEvents(data, subEvents);
 
         // Arrival Transportation
-        guest.arrival = this.parseTransportation(data, 'Arrival Type', 'Arr');
+        guest.arrival = this.parseTransportation(data, 'Arrival Type', true);
 
         // Departure Transportation
-        guest.departure = this.parseTransportation(data, 'Departure Type', 'Dep');
+        guest.departure = this.parseTransportation(data, 'Departure Type', false);
 
         // Accommodation
-        guest.accommodation = this.parseAccommodation(data, hotels);
+        guest.accommodation = this.parseAccommodation(data, accommodations);
 
         return guest as Guest;
     }
 
-    private updateGuestFromData(data: any, hotels: Hotel[]): Guest {
+    private updateGuestFromData(data: any, accommodations: Accommodation[]): Guest {
         const guest: Partial<Guest> = {};
 
         guest.id = data['Id'].trim();
-        guest.weddingId = data['Wedding Id'];
+        guest.eventId = data['Event Id'];
         guest.name = (data['Name'] || '').trim();
         guest.email = (data['Email'] || '').trim();
         guest.serialNumber = (data['Serial Number'] || '').trim();
@@ -137,21 +132,21 @@ export class GuestService {
         guest.dietaryRestrictions = (data['Dietary Restrictions'] || '').trim();
 
         // Arrival Transportation
-        guest.arrival = this.parseTransportation(data, 'Arrival Type', 'Arr');
+        guest.arrival = this.parseTransportation(data, 'Arrival Type', true);
 
         // Departure Transportation
-        guest.departure = this.parseTransportation(data, 'Departure Type', 'Dep');
+        guest.departure = this.parseTransportation(data, 'Departure Type', false);
 
         // Accommodation
-        guest.accommodation = this.parseAccommodation(data, hotels);
+        guest.accommodation = this.parseAccommodation(data, accommodations);
 
         return guest as Guest;
     }
 
-    private parseGuestEvents(data: any, weddingEvents: WeddingEvent[]): WeddingEvent[] {
-        const events: WeddingEvent[] = [];
+    private parseGuestEvents(data: any, subEvents: SubEvent[]): SubEvent[] {
+        const events: SubEvent[] = [];
 
-        for (let weddingEvent of weddingEvents) {
+        for (let weddingEvent of subEvents) {
             const invitedStatus = data[weddingEvent.name];
             if (invitedStatus && ['yes', 'done', 'y', 'true'].includes(String(invitedStatus).trim().toLowerCase())) {
                 events.push(weddingEvent);
@@ -161,65 +156,21 @@ export class GuestService {
         return events;
     }
 
-    private parseTransportation(data: any, typeField: string, prefix: string): Transportation | undefined {
+    private parseTransportation(data: any, typeField: string, isArrival: boolean): Transportation | undefined {
         const transportationTypeValue = data[typeField];
         if (!transportationTypeValue) return undefined;
 
-        let transportation: Transportation | undefined;
+        const prefix = isArrival ? "Arr" : "Dep";
 
-        switch (transportationTypeValue) {
-            case TransportationType.FLIGHT: {
-                transportation = new Flight(TransportationType.FLIGHT);
-                break;
-            }
-            case TransportationType.TRAIN: {
-                transportation = new Train(TransportationType.TRAIN);
-                break;
-            }
-            case TransportationType.OTHER: {
-                transportation = new OtherTransport(TransportationType.OTHER);
-                break;
-            }
-            default: {
-                return undefined;
-            }
-        }
+        let transportation = {
+            isArrival: isArrival,
+            type: transportationTypeValue,
+            number: String(data[`${prefix}.Num`]).trim()
+        } as Transportation;
 
-        const fieldsMapping: { [key: string]: string } = this.getTransportationFieldsMapping(transportation);
+        transportation.time = this.combineDateTime(data[`${prefix}.Date`], data[`${prefix}.Time`]);
 
-        if (transportation.type === TransportationType.FLIGHT && data[`${prefix}.Date`] && data[`${prefix}.Time`]) {
-            (transportation as any)['flightTime'] = this.combineDateTime(data[`${prefix}.Date`], data[`${prefix}.Time`]);
-        }
-
-        if (transportation.type === TransportationType.TRAIN && data[`${prefix}.Date`] && data[`${prefix}.Time`]) {
-            (transportation as any)['trainTime'] = this.combineDateTime(data[`${prefix}.Date`], data[`${prefix}.Time`]);
-        }
-
-        if (transportation.type === TransportationType.OTHER && data[`${prefix}.Date`] && data[`${prefix}.Time`]) {
-            (transportation as any)['time'] = this.combineDateTime(data[`${prefix}.Date`], data[`${prefix}.Time`]);
-        }
-
-        for (const [dataField, propName] of Object.entries(fieldsMapping)) {
-            const value = data[`${prefix}.${dataField}`];
-            if (value) {
-                (transportation as any)[propName] = String(value).trim();
-            }
-        }
         return transportation;
-    }
-
-    private getTransportationFieldsMapping(transportation: Transportation): { [key: string]: string } {
-        if (transportation.type === TransportationType.FLIGHT) {
-            return {
-                'Flight.Num': 'flightNumber',
-            };
-        } else if (transportation.type === TransportationType.TRAIN) {
-            return {
-                'Train.Num': 'trainNumber',
-                'Train.Station': 'trainStation',
-            };
-        }
-        return {};
     }
 
     private combineDateTime(dateStr: string, timeStr: string): string {
@@ -247,23 +198,26 @@ export class GuestService {
         return cleaned;
     }
 
-    private parseAccommodation(data: any, hotels: Hotel[]): Accommodation {
-        const hotelName = data['Hotel'];
+    private parseAccommodation(data: any, accommodations: Accommodation[]): Accommodation {
+
+        const accommodationName = data['Accommodation'];
         const roomNumber = data['Room Number'];
 
-        const assignedHotel = hotels.find(hotel => hotel.name === hotelName);
+        const assignedAccommodation = accommodations.find(acc => acc.name === accommodationName);
 
-        const accommodation = {
-            hotel: assignedHotel ?? undefined,
-            roomNumber: roomNumber ?? undefined
-        } as Accommodation;
+        let accommodation = {} as Accommodation;
+
+        if (assignedAccommodation) {
+            accommodation = assignedAccommodation;
+            accommodation.roomNumber = roomNumber;
+        }
 
         return accommodation;
     }
 
 
-    async validateGuests(weddingId: string, guestLists: UploadGuestLists): Promise<UploadValidation> {
-        const currentGuestNames = (await this.guestDao.getAllGuests(weddingId)).map(guest => guest.name.toLowerCase());
+    async validateGuests(eventId: string, guestLists: UploadGuestLists): Promise<UploadValidation> {
+        const currentGuestNames = (await this.guestDao.getAllGuests(eventId)).map(guest => guest.name.toLowerCase());
 
         const uploadIssues: Map<string, string> = new Map<string, string>();
         const validatedCreateGuests: Guest[] = [];
@@ -322,26 +276,24 @@ export class GuestService {
 
     private csvFields = [
         { label: 'Id', value: 'id' },
-        { label: 'Wedding Id', value: 'weddingId' },
+        { label: 'Wedding Id', value: 'eventId' },
         { label: 'Name', value: 'name' },
         { label: 'Party Number', value: 'groupNumber' },
         { label: 'Serial Number', value: 'serialNumber' },
-        { label: 'Events', value: 'events' },
+        { label: 'SubEvents', value: 'subevents' },
         { label: 'Email', value: 'email' },
-        { label: 'Hotel', value: 'accommodation.hotel.name' },
+        { label: 'Accommodation', value: 'accommodation.name' },
         { label: 'Room Number', value: 'accommodation.roomNumber' },
         { label: 'Dietary Restrictions', value: 'dietaryRestrictions' },
         { label: 'Type of Drink', value: 'drinks.preferences' },
         { label: 'Arrival Type', value: 'arrival.type' },
         { label: 'Arr.Date', value: 'arrival.date' },
         { label: 'Arr.Time', value: 'arrival.time' },
-        { label: 'Arr.Flight.Num', value: 'arrival.flightNumber' },
-        { label: 'Arr.Train.Num', value: 'arrival.trainNumber' },
+        { label: 'Arr.Num', value: 'arrival.number' },
         { label: 'Departure Type', value: 'departure.type' },
         { label: 'Dep.Date', value: 'departure.date' },
         { label: 'Dep.Time', value: 'departure.time' },
-        { label: 'Dep.Flight.Num', value: 'departure.flightNumber' },
-        { label: 'Dep.Train.Num', value: 'departure.trainNumber' },
+        { label: 'Dep.Num', value: 'departure.number' },
     ];
 
     generateCSVContent(guests: Guest[]): string {
@@ -352,13 +304,7 @@ export class GuestService {
                 // Format Arrival
                 const guestArrival = guest.arrival as any;
                 if (guestArrival) {
-                    const [arrDate, arrTime] = guestArrival.flightTime
-                        ? guestArrival.flightTime.split('T')
-                        : guestArrival.trainTime
-                            ? guestArrival.trainTime.split('T')
-                            : guestArrival.time
-                                ? guestArrival.time.split('T')
-                                : ['', ''];
+                    const [arrDate, arrTime] = guestArrival.time ? guestArrival.time.split('T') : ['', ''];
                     processedGuest.arrival = {
                         ...guestArrival,
                         date: arrDate ? this.formatDateString(arrDate) : '',
@@ -369,13 +315,7 @@ export class GuestService {
                 // Format Departure
                 const guestDeparture = guest.departure as any;
                 if (guestDeparture) {
-                    const [depDate, depTime] = guestDeparture.flightTime
-                        ? guestDeparture.flightTime.split('T')
-                        : guestDeparture.trainTime
-                            ? guestDeparture.trainTime.split('T')
-                            : guestDeparture.time
-                                ? guestDeparture.time.split('T')
-                                : ['', ''];
+                    const [depDate, depTime] = guestDeparture.time ? guestDeparture.time.split('T') : ['', ''];
                     processedGuest.departure = {
                         ...guestDeparture,
                         date: depDate ? this.formatDateString(depDate) : '',
@@ -390,8 +330,8 @@ export class GuestService {
                     };
                 }
 
-                if (guest.events && Array.isArray(guest.events)) {
-                    processedGuest.events = guest.events.map(event => event.name).join(', ');
+                if (guest.subEvents && Array.isArray(guest.subEvents)) {
+                    processedGuest.subEvents = guest.subEvents.map(subEvent => subEvent.name).join(', ');
                 }
                 return processedGuest;
             });

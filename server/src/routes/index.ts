@@ -1,25 +1,25 @@
 import express from 'express';
 import passRoutes from './pass';
 import guestRoutes from './guest';
-import eventRoutes from './event';
+import subEventRoutes from './subevent';
 import surveyRoutes from './survey';
-import weddingRoutes from './wedding';
+import eventRoutes from './event';
 import authRoutes from './auth';
 import pendingGuestRoutes from './pending-guest';
-import hotelRoutes from './hotel';
+import accommodationRoutes from './accommodation';
 
 const router = express.Router({ mergeParams: true });
 
 router.use(express.json());
 
 router.use('/pass', passRoutes);
-router.use('/weddings/:weddingId/guests', guestRoutes);
-router.use('/weddings/:weddingId/events', eventRoutes);
-router.use('/weddings/:weddingId/surveys', surveyRoutes);
-router.use('/weddings/:weddingId/pending-guests', pendingGuestRoutes);
-router.use('/weddings/:weddingId/hotels', hotelRoutes);
-router.use('/weddings', weddingRoutes);
-router.use('/auth', authRoutes);
+router.use('/events/:eventId/guests', guestRoutes);
+router.use('/events/:eventId/subevents', subEventRoutes);
+router.use('/events/:eventId/surveys', surveyRoutes);
+router.use('/events/:eventId/pending-guests', pendingGuestRoutes);
+router.use('/events/:eventId/accommodations', accommodationRoutes);
+router.use('/events', eventRoutes);
+router.use('/users', authRoutes);
 export default router;
 
 

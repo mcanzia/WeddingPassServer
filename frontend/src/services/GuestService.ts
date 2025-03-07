@@ -1,24 +1,24 @@
 import { GuestController } from '@/controllers/GuestController';
 import { Guest } from '@/models/Guest';
-import { WeddingRole } from '@/models/WeddingRole';
+import { EventRole } from '@/models/EventRole';
 import { useUserStore } from '@/stores/UserStore';
 
 export class GuestService {
 
     private guestController: GuestController;
     private userStore: any;
-    private weddingRole: WeddingRole;
+    private eventRole: EventRole;
 
     constructor() {
         this.guestController = new GuestController();
         this.userStore = useUserStore();
-        this.weddingRole = this.userStore.selectedWeddingRole;
+        this.eventRole = this.userStore.selectedEventRole;
     }
 
     async getAllGuests() {
         try {
             const userAccessToken = await this.userStore.getAccessToken();
-            const response = await this.guestController.getAllGuests(userAccessToken, this.weddingRole);
+            const response = await this.guestController.getAllGuests(userAccessToken, this.eventRole);
             const allGuests = response ? response : [];
             return allGuests;
         } catch (error) {
@@ -29,7 +29,7 @@ export class GuestService {
     async getGuestById(guestId: string) {
         try {
             const userAccessToken = await this.userStore.getAccessToken();
-            const guest = await this.guestController.getGuestById(userAccessToken, this.weddingRole, guestId);
+            const guest = await this.guestController.getGuestById(userAccessToken, this.eventRole, guestId);
             return guest;
         } catch (error) {
             throw error;
@@ -39,17 +39,17 @@ export class GuestService {
     async fetchPartyMembers(guestId: string) {
         try {
             const userAccessToken = await this.userStore.getAccessToken();
-            const guests = await this.guestController.fetchPartyMembers(userAccessToken, this.weddingRole, guestId);
+            const guests = await this.guestController.fetchPartyMembers(userAccessToken, this.eventRole, guestId);
             return guests;
         } catch (error) {
             throw error;
         }
     }
 
-    async getGuestsForEvent(eventId: string) {
+    async getGuestsForSubEvent(subEventId: string) {
         try {
             const userAccessToken = await this.userStore.getAccessToken();
-            const guests = await this.guestController.getGuestsForEvent(userAccessToken, this.weddingRole, eventId);
+            const guests = await this.guestController.getGuestsForSubEvent(userAccessToken, this.eventRole, subEventId);
             return guests;
         } catch (error) {
             throw error;
@@ -59,8 +59,8 @@ export class GuestService {
     async getGuestsByPhone(guestPhone: string) {
         try {
             const userAccessToken = await this.userStore.getAccessToken();
-            const guests = await this.guestController.getGuestsByPhone(userAccessToken, this.weddingRole, guestPhone);
-            return guests;
+            const guests = await this.guestController.getGuestsByPhone(userAccessToken, this.eventRole, guestPhone);
+            return guests ?? [];
         } catch (error) {
             throw error;
         }
@@ -69,8 +69,8 @@ export class GuestService {
     async getGuestsByEmail(guestEmail: string) {
         try {
             const userAccessToken = await this.userStore.getAccessToken();
-            const guests = await this.guestController.getGuestsByEmail(userAccessToken, this.weddingRole, guestEmail);
-            return guests;
+            const guests = await this.guestController.getGuestsByEmail(userAccessToken, this.eventRole, guestEmail);
+            return guests ?? [];
         } catch (error) {
             throw error;
         }
@@ -79,7 +79,7 @@ export class GuestService {
     async getGuestBySerialNumber(serialNumber: string) {
         try {
             const userAccessToken = await this.userStore.getAccessToken();
-            const guest = await this.guestController.getGuestBySerialNumber(userAccessToken, this.weddingRole, serialNumber);
+            const guest = await this.guestController.getGuestBySerialNumber(userAccessToken, this.eventRole, serialNumber);
             return guest;
         } catch (error) {
             throw error;
@@ -89,7 +89,7 @@ export class GuestService {
     async saveGuest(guestToSave: Guest) {
         try {
             const userAccessToken = await this.userStore.getAccessToken();
-            await this.guestController.saveGuest(userAccessToken, this.weddingRole, guestToSave);
+            await this.guestController.saveGuest(userAccessToken, this.eventRole, guestToSave);
             return;
         } catch (error) {
             throw error;
@@ -99,7 +99,7 @@ export class GuestService {
     async batchAddGuests(guests: Array<Guest>) {
         try {
             const userAccessToken = await this.userStore.getAccessToken();
-            const guest = await this.guestController.batchAddGuests(userAccessToken, this.weddingRole, guests);
+            const guest = await this.guestController.batchAddGuests(userAccessToken, this.eventRole, guests);
             return;
         } catch (error) {
             throw error;
@@ -109,7 +109,7 @@ export class GuestService {
     async batchUpdateGuests(guests: Array<Guest>) {
         try {
             const userAccessToken = await this.userStore.getAccessToken();
-            await this.guestController.batchUpdateGuests(userAccessToken, this.weddingRole, guests);
+            await this.guestController.batchUpdateGuests(userAccessToken, this.eventRole, guests);
             return;
         } catch (error) {
             throw error;
@@ -119,7 +119,7 @@ export class GuestService {
     async deleteGuest(guestToDelete: Guest) {
         try {
             const userAccessToken = await this.userStore.getAccessToken();
-            await this.guestController.deleteGuest(userAccessToken, this.weddingRole, guestToDelete);
+            await this.guestController.deleteGuest(userAccessToken, this.eventRole, guestToDelete);
             return;
         } catch (error) {
             throw error;
@@ -129,7 +129,7 @@ export class GuestService {
     async batchDeleteGuests(guests: Array<Guest>) {
         try {
             const userAccessToken = await this.userStore.getAccessToken();
-            await this.guestController.batchDeleteGuests(userAccessToken, this.weddingRole, guests);
+            await this.guestController.batchDeleteGuests(userAccessToken, this.eventRole, guests);
             return;
         } catch (error) {
             throw error;
@@ -139,7 +139,7 @@ export class GuestService {
     async guestFileUpload(guestFile: File) {
         try {
             const userAccessToken = await this.userStore.getAccessToken();
-            const guestValidation = await this.guestController.guestFileUpload(userAccessToken, this.weddingRole, guestFile);
+            const guestValidation = await this.guestController.guestFileUpload(userAccessToken, this.eventRole, guestFile);
             return { ...guestValidation, uploadIssues: new Map(Object.entries(guestValidation.uploadIssues)) };
         } catch (error) {
             throw error;
@@ -149,7 +149,7 @@ export class GuestService {
     async guestFileDownload() {
         try {
             const userAccessToken = await this.userStore.getAccessToken();
-            await this.guestController.guestFileDownload(userAccessToken, this.weddingRole);
+            await this.guestController.guestFileDownload(userAccessToken, this.eventRole);
         } catch (error) {
             throw error;
         }

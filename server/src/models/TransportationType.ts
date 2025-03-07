@@ -1,5 +1,5 @@
-export const TransportationType = Object.freeze({
-    FLIGHT: 'FLIGHT',
-    TRAIN: 'TRAIN',
-    OTHER: 'OTHER'
-});
+export enum TransportationType {
+    FLIGHT = 'FLIGHT',
+    TRAIN = 'TRAIN',
+    OTHER = 'OTHER'
+}

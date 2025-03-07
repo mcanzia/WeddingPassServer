@@ -6,7 +6,7 @@ export function useColumnVisibility() {
         'groupNumber',
         'email',
         'phone',
-        'events',
+        'subEvents',
         'arrivalType',
         'arrivalFlightTime',
         'arrivalFlightNumber',
@@ -39,7 +39,7 @@ export function useColumnVisibility() {
 
     const viewModeColumnVisibility: Record<ViewModes, Record<string, boolean>> = {
         [ViewModes.ALL_FIELDS]: createVisibilityConfig(...allFields),
-        [ViewModes.CORE_DETAILS]: createVisibilityConfig('name', 'groupNumber', 'email', 'phone', 'events'),
+        [ViewModes.CORE_DETAILS]: createVisibilityConfig('name', 'groupNumber', 'email', 'phone', 'subEvents'),
         [ViewModes.TRANSPORTATION]: createVisibilityConfig('name', 'groupNumber', 'arrivalType', 'arrivalFlightTime', 'arrivalFlightNumber', 'arrivalTrainTime', 'arrivalTrainNumber', 'departureType', 'departureFlightTime', 'departureFlightNumber', 'departureTrainTime', 'departureTrainNumber'),
         [ViewModes.DINING]: createVisibilityConfig('name', 'groupNumber', 'dietaryRestrictions', 'drinkPreferences', 'numberOfDrinks'),
         [ViewModes.ACCOMMODATION]: createVisibilityConfig('name', 'groupNumber', 'hotelName', 'roomNumber'),

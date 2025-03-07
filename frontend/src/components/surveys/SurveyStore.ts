@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import SingleSelectDropdown from '@/components/common/SingleSelectDropdown.vue';
 import MultiSelectCombobox from '@/components/common/MultiSelectCombobox.vue';
 import GuestSelect from '@/components/common/GuestSelect.vue';
-import EventSelect from '@/components/common/EventSelect.vue';
+import SubEventSelect from '@/components/common/SubEventSelect.vue';
 import { useNotificationStore } from "@/stores/NotificationStore";
 import { useUserStore } from "@/stores/UserStore";
 import { SurveyService } from "@/services/SurveyService";
@@ -35,7 +35,7 @@ const surveyComponentMap: ComponentMap = new Map<string, Component>([
     ['SINGLE_SELECT', markRaw(SingleSelectDropdown) as Component],
     ['MULTI_SELECT', markRaw(MultiSelectCombobox) as Component],
     ['GUEST_SELECT', markRaw(GuestSelect) as Component],
-    ['EVENT_SELECT', markRaw(EventSelect) as Component],
+    ['SUB_EVENT_SELECT', markRaw(SubEventSelect) as Component],
 ]);
 
 const componentsWithOptionsProp = ['SINGLE_SELECT', 'MULTI_SELECT'];
@@ -214,6 +214,9 @@ export const useSurveyStore = defineStore('surveyStore', () => {
         if (hasEditAuthority && survey.value) {
             const surveyService = new SurveyService();
             const updatedSurvey = await surveyService.saveSurvey(survey.value);
+            if (!updatedSurvey.surveyComponents) {
+                updatedSurvey.surveyComponents = [];
+            }
             survey.value = updatedSurvey;
             setMessage('Saved survey.', NotificationType.SUCCESS);
             savedStatus.value = true;
@@ -225,6 +228,9 @@ export const useSurveyStore = defineStore('surveyStore', () => {
     async function fetchSurvey(surveyId: string) {
         const surveyService = new SurveyService();
         survey.value = await surveyService.getSurveyById(surveyId);
+        if (survey.value && !survey.value.surveyComponents) {
+            survey.value.surveyComponents = [];
+        }
         if (survey.value && survey.value.surveyComponents) {
             survey.value.surveyComponents = survey.value.surveyComponents.sort((a, b) => a.order! - b.order!);
         }

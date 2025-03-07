@@ -1,19 +1,31 @@
-import { Hotel } from "./Hotel";
+import { AccommodationType } from "./AccommodationType";
 
 export class Accommodation {
 
-    hotel?: Hotel
+    id: string;
+    eventId: string;
+    type: AccommodationType;
+    name: string;
     roomNumber: string;
+    location: string;
 
-    constructor(roomNumber: string, hotel?: Hotel) {
-        this.hotel = hotel;
+    constructor(id: string, eventId: string, type: AccommodationType, name: string, roomNumber: string, location: string) {
+        this.id = id;
+        this.eventId = eventId;
+        this.type = type;
+        this.name = name;
         this.roomNumber = roomNumber;
+        this.location = location;
     }
 
     toObject?() {
         return {
-            hotel: this.hotel?.toObject ? this.hotel.toObject() : this.hotel,
+            id: this.id,
+            eventId: this.eventId,
+            type: this.type,
+            name: this.name,
             roomNumber: this.roomNumber,
+            location: this.location
         }
     }
 }

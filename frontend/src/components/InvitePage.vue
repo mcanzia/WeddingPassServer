@@ -60,9 +60,9 @@ async function processInvite(token: string, isGuest: boolean) {
   //     await authService.processInvite(token);
   //     goToRoute('verify-guest');
   //   } else {
-  //     const weddingrole = await authService.processInvite(token);
+  //     const eventrole = await authService.processInvite(token);
   //     notificationStore.setMessage(
-  //       "You have been added to the wedding.",
+  //       "You have been added to the event.",
   //       NotificationType.SUCCESS
   //     );
   //   }

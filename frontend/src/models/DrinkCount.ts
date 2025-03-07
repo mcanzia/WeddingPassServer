@@ -1,19 +1,19 @@
-import { WeddingEvent } from "@/models/WeddingEvent";
+import { SubEvent } from "@/models/SubEvent";
 
 export class DrinkCount {
 
     numberOfDrinks: number;
-    event: WeddingEvent
+    subEvent: SubEvent
 
-    constructor(numberOfDrinks: number, event: WeddingEvent) {
+    constructor(numberOfDrinks: number, subEvent: SubEvent) {
         this.numberOfDrinks = numberOfDrinks;
-        this.event = event;
+        this.subEvent = subEvent;
     }
 
     toObject?() {
         return {
             numberOfDrinks: this.numberOfDrinks,
-            event: this.event
+            subEvent: this.subEvent
         };
     }
 }

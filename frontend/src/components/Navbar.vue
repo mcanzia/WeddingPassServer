@@ -3,7 +3,7 @@
     <div class="flex h-16 w-screen items-center px-4">
       <nav class="flex justify-between w-screen space-x-4 lg:space-x-6" v-if="!hasNoRoles">
         <div :class="cn('flex items-center space-x-4 lg:space-x-6', $attrs.class ?? '')">
-          <a @click="selectedWedding ? goToRouteSecured('home') : goToRoute('landing')"
+          <a @click="selectedEvent ? goToRouteSecured('home') : goToRoute('landing')"
             class="text-sm font-medium transition-colors hover:text-primary cursor-pointer">
             <img src="/images/black-logo.svg" alt="Home Image" class="w-16  h-11" />
           </a>
@@ -15,11 +15,11 @@
         </div>
 
         <IconDropdown icon="person-circle-outline" :extra-text="userEmail" classes="hidden md:flex">
-          <DropdownMenuItem class="capitalize" v-if="selectedWedding && !isGuest" @click="goToRoute('weddings')">
+          <DropdownMenuItem class="capitalize" v-if="selectedEvent && !isGuest" @click="goToRoute('events')">
             <a class="text-sm font-medium text-muted-foreground transition-colors hover:text-primary cursor-pointer">
               <span>
                 <ion-icon name="sparkles-outline"></ion-icon>
-                {{ selectedWedding.name }}
+                {{ selectedEvent.name }}
               </span>
             </a>
           </DropdownMenuItem>
@@ -30,11 +30,11 @@
           </DropdownMenuItem>
         </IconDropdown>
         <IconDropdown icon="menu" classes="block md:hidden">
-          <DropdownMenuItem class="capitalize" v-if="selectedWedding && !isGuest" @click="goToRoute('weddings')">
+          <DropdownMenuItem class="capitalize" v-if="selectedEvent && !isGuest" @click="goToRoute('events')">
             <a class="text-sm font-medium text-muted-foreground transition-colors hover:text-primary cursor-pointer">
               <span>
                 <ion-icon name="sparkles-outline"></ion-icon>
-                {{ selectedWedding.name }}
+                {{ selectedEvent.name }}
               </span>
             </a>
           </DropdownMenuItem>
@@ -68,7 +68,7 @@ import { Roles } from "@/models/Roles";
 const { goToRoute, goToRouteSecured } = useRouterHelper();
 
 const userStore = useUserStore();
-const { userEmail, selectedWedding, selectedRole, isGuest, hasNoRoles } = storeToRefs(userStore);
+const { userEmail, selectedEvent, selectedRole, isGuest, hasNoRoles } = storeToRefs(userStore);
 
 async function logout() {
   await userStore.logoutUser();
@@ -77,7 +77,7 @@ async function logout() {
 function showRoute(route) {
   if (route.secured) {
     return (
-      selectedWedding.value &&
+      selectedEvent.value &&
       selectedRole.value &&
       route.roles.includes(selectedRole.value)
     );
@@ -96,7 +96,7 @@ const navbarRoutes = computed(() => {
     {
       name: "Event Attendance",
       secured: true,
-      path: "event-attendance",
+      path: "sub-event-attendance",
       roles: [Roles.ADMIN, Roles.EDITOR, Roles.READONLY, Roles.TRIO],
     },
     {
@@ -118,9 +118,15 @@ const navbarRoutes = computed(() => {
       roles: [Roles.ADMIN, Roles.EDITOR],
     },
     {
-      name: "Hotels",
+      name: "Accommodations",
       secured: true,
-      path: "hotels",
+      path: "accommodations",
+      roles: [Roles.ADMIN, Roles.EDITOR, Roles.READONLY],
+    },
+    {
+      name: "Sub Events",
+      secured: true,
+      path: "sub-events",
       roles: [Roles.ADMIN, Roles.EDITOR, Roles.READONLY],
     },
     {

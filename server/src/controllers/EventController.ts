@@ -1,23 +1,25 @@
 import { inject, injectable } from 'inversify';
 import { NextFunction, Request, Response } from 'express';
 import Logger from '../util/logs/logger';
-import { WeddingEvent } from "../models/WeddingEvent";
+import { Event } from "../models/Event";
 import { CustomError } from '../util/error/CustomError';
-import { EventDao } from '../dao/EventDao';
 import { TYPES } from '../configs/types';
+import { EventDao } from '../dao/EventDao';
+import { UserDao } from '../dao/UserDao';
+import { EventRole } from '../models/EventRole';
+import { Roles } from '../models/Roles';
 
 @injectable()
 export class EventController {
 
-    constructor(@inject(TYPES.EventDao) private eventDao: EventDao) {}
+    constructor(@inject(TYPES.EventDao) private eventDao: EventDao, @inject(TYPES.UserDao) private userDao: UserDao) { }
 
-    async getEvents(request : Request, response : Response, next : NextFunction) {
+    async getEvents(request: Request, response: Response, next: NextFunction) {
         try {
             Logger.info(`Retrieving all events`);
-            const { weddingId } = request.params;
 
-            const events : Array<WeddingEvent> = await this.eventDao.getAllEvents(weddingId);
-            
+            const events: Array<Event> = await this.eventDao.getAllEvents();
+
             Logger.info(`Number of events retrieved successfully: ${events.length}`);
             response.status(200).json(events);
         } catch (error) {
@@ -26,11 +28,26 @@ export class EventController {
         }
     }
 
-    async getEventbyId(request : Request, response : Response, next : NextFunction) {
+    async getEventsByOwner(request: Request, response: Response, next: NextFunction) {
+        try {
+            Logger.info(`Retrieving events for owner ${request.params.ownerId}`);
+            const ownerId: string = request.params.ownerId;
+
+            const events: Array<Event> = await this.eventDao.getEventsByOwner(ownerId);
+
+            Logger.info(`Number of events retrieved successfully: ${events.length}`);
+            response.status(200).json(events);
+        } catch (error) {
+            Logger.error("Error retrieving events");
+            response.status((error as CustomError).statusCode).send((error as CustomError).message);
+        }
+    }
+
+    async getEventById(request: Request, response: Response, next: NextFunction) {
         try {
             Logger.info(`Retrieving event with ID: ${request.params.eventId}`);
-            const { weddingId, eventId } = request.params;
-            const event : WeddingEvent = await this.eventDao.getEventById(weddingId, eventId);
+            const eventId: string = request.params.eventId;
+            const event: Event = await this.eventDao.getEventById(eventId);
             response.status(200).json(event);
         } catch (error) {
             Logger.error(`Error retrieving event with ${request.params.eventId}`);
@@ -38,11 +55,11 @@ export class EventController {
         }
     }
 
-    async getEventbyName(request : Request, response : Response, next : NextFunction) {
+    async getEventByName(request: Request, response: Response, next: NextFunction) {
         try {
             Logger.info(`Retrieving event with name: ${request.params.eventName}`);
-            const { weddingId, eventName } = request.params;
-            const event : WeddingEvent = await this.eventDao.getEventByName(weddingId, eventName);
+            const eventName: string = request.params.eventName;
+            const event: Event = await this.eventDao.getEventByName(eventName);
             response.status(200).json(event);
         } catch (error) {
             Logger.error(`Error retrieving event with ${request.params.eventName}`);
@@ -50,26 +67,24 @@ export class EventController {
         }
     }
 
-    async createEvent(request : Request, response : Response, next : NextFunction) {
+    async createEvent(request: Request, response: Response, next: NextFunction) {
         try {
             Logger.info(`Creating new event`);
-            const { weddingId } = request.params;
-            const event: WeddingEvent = request.body;
-            await this.eventDao.createEvent(weddingId, event);
+            const event: Event = request.body;
+            const newEvent: Event = await this.eventDao.createEvent(event);
             Logger.info(`Successfully added event for ${event.name}`);
-            response.status(204).send();
+            response.status(200).send(newEvent);
         } catch (error) {
             Logger.error("Error adding event", error);
             response.status((error as CustomError).statusCode).send((error as CustomError).message);
         }
     }
 
-    async batchCreateEvents(request : Request, response : Response, next : NextFunction) {
+    async batchCreateEvents(request: Request, response: Response, next: NextFunction) {
         try {
             Logger.info(`Batch creating new events`);
-            const { weddingId } = request.params;
-            const events: Array<WeddingEvent> = request.body;
-            await this.eventDao.batchCreateEvents(weddingId, events);
+            const events: Array<Event> = request.body;
+            await this.eventDao.batchCreateEvents(events);
             Logger.info(`Successfully added batch events`);
             response.status(204).send();
         } catch (error) {
@@ -81,9 +96,9 @@ export class EventController {
     async updateEvent(request: Request, response: Response, next: NextFunction) {
         try {
             Logger.info(`Updating event: ${JSON.stringify(request.body)}`);
-            const { weddingId, eventId } = request.params;
-            const updateEventDetails : WeddingEvent = request.body;
-            await this.eventDao.updateEvent(weddingId, eventId, updateEventDetails);
+            const eventId = request.params.eventId;
+            const updateEventDetails: Event = request.body;
+            await this.eventDao.updateEvent(eventId, updateEventDetails);
             response.status(204).send();
         } catch (error) {
             Logger.error("Error updating event", error);
@@ -91,12 +106,11 @@ export class EventController {
         }
     }
 
-    async deleteEvent(request : Request, response : Response, next : NextFunction) {
+    async deleteEvent(request: Request, response: Response, next: NextFunction) {
         try {
             Logger.info(`Deleting event ${JSON.stringify(request.body)}`);
-            const { weddingId } = request.params;
-            const event : WeddingEvent = request.body;
-            await this.eventDao.deleteEvent(weddingId, event.id);
+            const event: Event = request.body;
+            await this.eventDao.deleteEvent(event.id!);
             response.status(204).send();
         } catch (error) {
             Logger.error("Error deleting event", error);
@@ -104,12 +118,11 @@ export class EventController {
         }
     }
 
-    async batchDeleteEvents(request : Request, response : Response, next : NextFunction) {
+    async batchDeleteEvents(request: Request, response: Response, next: NextFunction) {
         try {
             Logger.info(`Deleting events ${JSON.stringify(request.body)}`);
-            const { weddingId } = request.params;
-            const events: Array<WeddingEvent> = request.body;
-            await this.eventDao.batchDeleteEvents(weddingId, events);
+            const events: Array<Event> = request.body;
+            await this.eventDao.batchDeleteEvents(events);
             response.status(204).send();
         } catch (error) {
             Logger.error("Error batch deleting events", error);

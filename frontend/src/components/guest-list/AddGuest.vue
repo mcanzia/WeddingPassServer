@@ -30,12 +30,11 @@
                                 :preferred-countries="['IN', 'US', 'IT', 'GB', 'JP', 'CA']" />
                         </div>
                         <div>
-                            <Label for="events">Events</Label>
+                            <Label for="events">Sub Events</Label>
                             <ToggleGroup type="multiple" variant="outline" class="grid grid-cols-2 sm:grid-cols-3 gap-2"
-                                v-model="newUserForm.events">
-                                <ToggleGroupItem v-for="weddingEvent in weddingEvents" :value="weddingEvent.id!"
-                                    :key="weddingEvent.id">
-                                    {{ weddingEvent.name }}
+                                v-model="newUserForm.subEvents">
+                                <ToggleGroupItem v-for="subEvent in subEvents" :value="subEvent.id!" :key="subEvent.id">
+                                    {{ subEvent.name }}
                                 </ToggleGroupItem>
                             </ToggleGroup>
                         </div>
@@ -76,9 +75,9 @@
                     </div>
                     <div class="grid gap-4">
                         <div>
-                            <Label for="hotel">Hotel</Label>
-                            <SingleSelectDropdown id="hotel" v-model="newUserForm.accommodation.hotel" fieldKey="name"
-                                :selectOptions="hotels as unknown as Record<string, unknown>[]">
+                            <Label for="accommodation">Accommodation</Label>
+                            <SingleSelectDropdown id="accommodation" v-model="newUserForm.accommodation" fieldKey="name"
+                                :selectOptions="accommodations as unknown as Record<string, unknown>[]">
                             </SingleSelectDropdown>
                         </div>
                         <div>
@@ -98,7 +97,7 @@
                         </div>
                         <div>
                             <Label for="drink-preferences">Drink Preferences</Label>
-                            <SingleSelectDropdown id="drink-preferences" v-model="newUserForm.drinks.preferences"
+                            <SingleSelectDropdown id="drink-preferences" v-model="chosenDrinkPreferences"
                                 :selectOptions="drinkPreferences">
                             </SingleSelectDropdown>
                         </div>
@@ -122,8 +121,8 @@ import { Label } from '@/components/ui/label';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { ref, onMounted, computed } from 'vue';
 import { GuestService } from '@/services/GuestService';
-import { EventService } from '@/services/EventService';
-import { WeddingEvent } from '@/models/WeddingEvent';
+import { SubEventService } from '@/services/SubEventService';
+import { SubEvent } from '@/models/SubEvent';
 import { Guest } from '@/models/Guest';
 import { useNotificationStore } from '@/stores/NotificationStore';
 import { NotificationType } from '@/models/NotificationType';
@@ -136,30 +135,30 @@ import Loader from '@/components/Loader.vue';
 import { TransportationType } from '@/models/TransportationType';
 import SingleSelectDropdown from '@/components/common/SingleSelectDropdown.vue';
 import DateTimeInput from '@/components/common/DateTimeInput.vue';
-import { Hotel } from '@/models/Hotel';
-import { HotelService } from '@/services/HotelService';
+import { AccommodationService } from '@/services/AccommodationService';
 import { useRoute } from 'vue-router';
 import Textarea from '../ui/textarea/Textarea.vue';
+import { Accommodation } from '@/models/Accommodation';
 
 const { goToRouteSecured } = useRouterHelper();
 const notificationStore = useNotificationStore();
 const { setMessage } = notificationStore;
 const userStore = useUserStore();
-const { hasEditAuthority, selectedWedding } = storeToRefs(userStore);
+const { hasEditAuthority, selectedEvent } = storeToRefs(userStore);
 
 const route = useRoute();
 const guestId = route.params.guestId as string;
 
 const loading = ref(false);
-const weddingEvents = ref<WeddingEvent[]>([]);
-const hotels = ref<Hotel[]>([]);
+const subEvents = ref<SubEvent[]>([]);
+const accommodations = ref<Accommodation[]>([]);
 
 onMounted(async () => {
     loading.value = true;
-    const eventService = new EventService();
-    weddingEvents.value = await eventService.getAllEvents();
-    const hotelService = new HotelService();
-    hotels.value = await hotelService.getAllHotels();
+    const subEventService = new SubEventService();
+    subEvents.value = await subEventService.getAllSubEvents();
+    const accommodationService = new AccommodationService();
+    accommodations.value = await accommodationService.getAllAccommodations();
     if (guestId) {
         const guestSerice = new GuestService();
         const editGuest = await guestSerice.getGuestById(guestId);
@@ -170,14 +169,14 @@ onMounted(async () => {
         }
 
         newUserForm.value.id = guestId;
-        newUserForm.value.weddingId = editGuest.weddingId;
+        newUserForm.value.eventId = editGuest.eventId;
         newUserForm.value.name = editGuest.name;
         newUserForm.value.groupNumber = editGuest.groupNumber;
         newUserForm.value.email = editGuest.email;
         newUserForm.value.phone = editGuest.phone;
         newUserForm.value.serialNumber = editGuest.serialNumber;
-        newUserForm.value.events = editGuest.events.map((event: { id: any; }) => event.id);
-        newUserForm.value.attendingEvents = editGuest.attendingEvents;
+        newUserForm.value.subEvents = editGuest.subEvents.map((subEvent: { id: any; }) => subEvent.id);
+        newUserForm.value.attendingSubEvents = editGuest.attendingSubEvents;
         newUserForm.value.dietaryRestrictions = editGuest.dietaryRestrictions;
         if (editGuest.arrival) {
             newUserForm.value.arrival = editGuest.arrival;
@@ -197,39 +196,39 @@ onMounted(async () => {
 
 const newUserForm = ref({
     id: '',
-    weddingId: '',
+    eventId: '',
     groupNumber: 0,
     name: '',
     email: '',
     phone: '',
     serialNumber: '',
-    events: [],
-    attendingEvents: [],
+    subEvents: [],
+    attendingSubEvents: [],
     arrival: {
         type: '',
-        flightTime: '',
-        flightNumber: '',
-        trainTime: '',
-        trainNumber: '',
-        time: ''
+        time: '',
+        number: '',
+        isArrival: true,
     },
     departure: {
         type: '',
-        flightTime: '',
-        flightNumber: '',
-        trainTime: '',
-        trainNumber: '',
-        time: ''
+        time: '',
+        number: '',
+        isArrival: false,
     },
     dietaryRestrictions: '',
     accommodation: {
-        hotel: {} as Hotel,
-        roomNumber: ''
+        id: '',
+        eventId: '',
+        type: '',
+        name: '',
+        roomNumber: '',
+        location: ''
     },
     drinks: {
         willDrinkAlcohol: false,
-        preferences: '',
-        numberOfDrinks: undefined
+        preferences: [],
+        drinkCount: []
     }
 });
 
@@ -239,146 +238,56 @@ const transportationTypeOptions = computed(() => {
 
 const arrivalTimeComputed = computed({
     get() {
-        if (newUserForm.value.arrival) {
-            switch (newUserForm.value.arrival.type) {
-                case TransportationType.FLIGHT: {
-                    return newUserForm.value.arrival.flightTime;
-                }
-                case TransportationType.TRAIN: {
-                    return newUserForm.value.arrival.trainTime;
-                }
-                case TransportationType.OTHER: {
-                    return newUserForm.value.arrival.time;
-                }
-                default: {
-                    return ''
-                }
-            }
+        if (newUserForm.value.arrival && newUserForm.value.arrival.time) {
+            return newUserForm.value.arrival.time;
         }
         return '';
     },
     set(val) {
-        if (newUserForm.value.arrival) {
-            switch (newUserForm.value.arrival.type) {
-                case TransportationType.FLIGHT: {
-                    newUserForm.value.arrival.flightTime = val;
-                    break;
-                }
-                case TransportationType.TRAIN: {
-                    newUserForm.value.arrival.trainTime = val;
-                    break;
-                }
-                case TransportationType.OTHER: {
-                    newUserForm.value.arrival.time = val;
-                    break;
-                }
-            }
+        if (val && newUserForm.value.arrival) {
+            newUserForm.value.arrival.time = val;
         }
     }
 });
 
 const arrivalNumberComputed = computed({
     get() {
-        if (newUserForm.value.arrival) {
-            switch (newUserForm.value.arrival.type) {
-                case TransportationType.FLIGHT: {
-                    return newUserForm.value.arrival.flightNumber;
-                }
-                case TransportationType.TRAIN: {
-                    return newUserForm.value.arrival.trainNumber;
-                }
-                default: {
-                    return ''
-                }
-            }
+        if (newUserForm.value.arrival && newUserForm.value.arrival.number) {
+            return newUserForm.value.arrival.number;
         }
         return '';
     },
     set(val) {
-        if (newUserForm.value.arrival) {
-            switch (newUserForm.value.arrival.type) {
-                case TransportationType.FLIGHT: {
-                    newUserForm.value.arrival.flightNumber = val;
-                    break;
-                }
-                case TransportationType.TRAIN: {
-                    newUserForm.value.arrival.trainNumber = val;
-                    break;
-                }
-            }
+        if (val && newUserForm.value.arrival) {
+            newUserForm.value.arrival.number = val;
         }
     }
 });
 
 const departureNumberComputed = computed({
     get() {
-        if (newUserForm.value.departure) {
-            switch (newUserForm.value.departure.type) {
-                case TransportationType.FLIGHT: {
-                    return newUserForm.value.departure.flightNumber;
-                }
-                case TransportationType.TRAIN: {
-                    return newUserForm.value.departure.trainNumber;
-                }
-                default: {
-                    return ''
-                }
-            }
+        if (newUserForm.value.departure && newUserForm.value.departure.number) {
+            return newUserForm.value.departure.number;
         }
         return '';
     },
     set(val) {
-        if (newUserForm.value.departure) {
-            switch (newUserForm.value.departure.type) {
-                case TransportationType.FLIGHT: {
-                    newUserForm.value.departure.flightNumber = val;
-                    break;
-                }
-                case TransportationType.TRAIN: {
-                    newUserForm.value.departure.trainNumber = val;
-                    break;
-                }
-            }
+        if (val && newUserForm.value.departure) {
+            newUserForm.value.departure.number = val;
         }
     }
 });
 
 const departureTimeComputed = computed({
     get() {
-        if (newUserForm.value.departure) {
-            switch (newUserForm.value.departure.type) {
-                case TransportationType.FLIGHT: {
-                    return newUserForm.value.departure.flightTime;
-                }
-                case TransportationType.TRAIN: {
-                    return newUserForm.value.departure.trainTime;
-                }
-                case TransportationType.OTHER: {
-                    return newUserForm.value.departure.time;
-                }
-                default: {
-                    return ''
-                }
-            }
+        if (newUserForm.value.departure && newUserForm.value.departure.time) {
+            return newUserForm.value.departure.time;
         }
         return '';
     },
     set(val) {
-        if (newUserForm.value.departure) {
-            switch (newUserForm.value.departure.type) {
-                case TransportationType.FLIGHT: {
-                    newUserForm.value.departure.flightTime = val;
-                    break;
-                }
-                case TransportationType.TRAIN: {
-                    newUserForm.value.departure.trainTime = val;
-                    break;
-                }
-                case TransportationType.OTHER: {
-                    newUserForm.value.departure.time = val;
-                    break;
-                }
-            }
+        if (val && newUserForm.value.departure) {
+            newUserForm.value.departure.time = val;
         }
     }
 });
@@ -390,10 +299,8 @@ function clearArrivalTransport() {
 
     newUserForm.value.arrival = {
         ...newUserForm.value.arrival,
-        trainTime: '',
-        trainNumber: '',
-        flightNumber: '',
-        flightTime: '',
+        isArrival: true,
+        number: '',
         time: ''
     }
 }
@@ -405,11 +312,9 @@ function clearDepartureTransport() {
 
     newUserForm.value.departure = {
         ...newUserForm.value.departure,
-        trainTime: '',
-        trainNumber: '',
-        flightNumber: '',
-        flightTime: '',
-        time: ''
+        isArrival: false,
+        time: '',
+        number: '',
     }
 }
 
@@ -417,8 +322,8 @@ async function saveGuest() {
     if (hasEditAuthority) {
         const newGuest = {
             ...newUserForm.value,
-            weddingId: selectedWedding.value?.id!,
-            events: newUserForm.value.events.map(eventId => weddingEvents.value.find(wedEvent => wedEvent.id === eventId) as WeddingEvent),
+            eventId: selectedEvent.value?.id!,
+            subEvents: newUserForm.value.subEvents.map(subEventId => subEvents.value.find(subEvent => subEvent.id === subEventId) as SubEvent),
         } as Guest;
         const guestService = new GuestService();
         await guestService.saveGuest(newGuest);
@@ -432,6 +337,22 @@ async function saveGuest() {
 
 const drinkPreferences = computed(() => {
     return ['SCOTCH', 'RUM', 'GIN', 'BEER', 'WHITE WINE', 'RED WINE'];
+});
+
+const chosenDrinkPreferences = computed({
+    get() {
+        if (newUserForm.value && newUserForm.value.drinks && newUserForm.value.drinks.preferences) {
+            return newUserForm.value.drinks.preferences[0];
+        }
+    },
+    set(val) {
+        if (!newUserForm.value.drinks.preferences) {
+            newUserForm.value.drinks.preferences = [];
+        }
+        if (val) {
+            newUserForm.value.drinks.preferences[0] = val;
+        }
+    }
 });
 
 const willDrinkAlcoholComputed = computed({

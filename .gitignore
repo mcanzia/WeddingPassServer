@@ -7,3 +7,4 @@ node_modules
 frontend/src/env.front.development
 server/env.server.development
 server/env.server.production
+/server-go/internal/firebase/serviceAccountKey.json

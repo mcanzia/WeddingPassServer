@@ -5,9 +5,9 @@ import { ErrorHandler } from '@/util/error/ErrorHandler';
 import { SuccessHandler } from '@/util/SuccessHandler';
 import { useRouterHelper } from '@/util/composables/useRouterHelper';
 import { AuthService } from '@/services/AuthService';
-import { WeddingRole } from '@/models/WeddingRole';
+import { EventRole } from '@/models/EventRole';
 import { User } from '@/models/User';
-import { Wedding } from '@/models/Wedding';
+import { Event } from '@/models/Event';
 import Cookies from 'js-cookie';
 import { InviteToken } from '@/models/InviteToken';
 import { Roles } from '@/models/Roles';
@@ -21,7 +21,7 @@ export const useUserStore = defineStore('userStore', () => {
     // State
     const user = ref<any>(null);
     const localUser = ref<User | null>(null);
-    const selectedWeddingRole = ref<WeddingRole | null>(null);
+    const selectedEventRole = ref<EventRole | null>(null);
     const isLoading = ref<boolean>(false);
     const isAuthReady = ref<boolean>(false);
     const confirmationResult = ref<any>(null);
@@ -31,36 +31,40 @@ export const useUserStore = defineStore('userStore', () => {
     const isLoggedIn = computed(() => user.value && !!localUser.value);
     const userEmail = computed(() => user.value?.email || null);
     const hasEditAuthority = computed(() => {
-        const role = selectedWeddingRole.value?.role;
+        const role = selectedEventRole.value?.role;
         return role && [Roles.ADMIN.toString(), Roles.EDITOR.toString()].includes(role);
     });
-    const selectedWedding = computed(() => selectedWeddingRole.value?.wedding);
-    const selectedRole = computed(() => selectedWeddingRole.value?.role);
-    const loggedInGuest = computed(() => selectedWeddingRole.value?.guestId!);
+    const selectedEvent = computed(() => selectedEventRole.value?.event);
+    const selectedRole = computed(() => selectedEventRole.value?.role);
+    const loggedInGuest = computed(() => selectedEventRole.value?.guestId!);
     const isGuest = computed(() => {
-        if (selectedWeddingRole.value) {
-            return selectedWeddingRole.value?.role === Roles.GUEST;
+        if (selectedEventRole.value) {
+            return selectedEventRole.value?.role === Roles.GUEST;
         } else {
-            const guestRole = localUser.value?.weddingRoles.find(role => role.role === Roles.GUEST);
-            if (guestRole) {
-                return true;
+            if (localUser.value && localUser.value.eventRoles && localUser.value.eventRoles.length) {
+                const guestRole = localUser.value.eventRoles.find(role => role.role === Roles.GUEST);
+                if (guestRole) {
+                    return true;
+                }
             }
         }
         return false;
     });
 
     const isTrio = computed(() => {
-        if (selectedWeddingRole.value) {
-            return selectedWeddingRole.value?.role === Roles.TRIO;
+        if (selectedEventRole.value) {
+            return selectedEventRole.value?.role === Roles.TRIO;
         } else {
-            const guestRole = localUser.value?.weddingRoles.find(role => role.role === Roles.TRIO);
-            if (guestRole) {
-                return true;
+            if (localUser.value && localUser.value.eventRoles && localUser.value.eventRoles.length) {
+                const trioRole = localUser.value?.eventRoles.find(role => role.role === Roles.TRIO);
+                if (trioRole) {
+                    return true;
+                }
             }
         }
         return false;
     });
-    const hasNoRoles = computed(() => !localUser.value || !localUser.value.weddingRoles.length)
+    const hasNoRoles = computed(() => !localUser.value || !localUser.value.eventRoles || !localUser.value.eventRoles.length)
 
     // Actions
     function initializeAuthListener() {
@@ -70,7 +74,7 @@ export const useUserStore = defineStore('userStore', () => {
             if (user.value) {
                 await loadLocalUser();
                 await checkForInviteToken();
-                loadSelectedWeddingRole();
+                loadSelectedEventRole();
             } else {
                 localUser.value = null;
             }
@@ -151,7 +155,7 @@ export const useUserStore = defineStore('userStore', () => {
                 const inviteToken = localStorage.getItem('inviteToken');
                 if (isNewUser) {
                     if (!inviteToken) {
-                        throw new Error('No invite token found. Please ask for invite link to be added to a wedding.');
+                        throw new Error('No invite token found. Please ask for invite link to be added to a event.');
                     }
                 }
                 // showOtp.value = false;
@@ -168,8 +172,8 @@ export const useUserStore = defineStore('userStore', () => {
             await auth.signOut();
             user.value = null;
             localUser.value = null;
-            selectedWeddingRole.value = null;
-            Cookies.remove('selectedWeddingRole');
+            selectedEventRole.value = null;
+            Cookies.remove('selectedEventRole');
             goToRoute('login-router');
         } catch (error: any) {
             ErrorHandler.handleUserAuthError(user.value, error);
@@ -193,7 +197,7 @@ export const useUserStore = defineStore('userStore', () => {
         try {
             const newUser = new User(userDetails.uid, userDetails.email, userDetails.phone, []);
             const authService = new AuthService();
-            localUser.value = await authService.addUser(newUser);
+            localUser.value = await authService.saveUser(newUser);
         } catch (error: any) {
             ErrorHandler.handleUserAuthError(user.value, error);
         }
@@ -207,21 +211,24 @@ export const useUserStore = defineStore('userStore', () => {
                 const inviteToken: InviteToken = new InviteToken(token);
                 localStorage.removeItem('inviteToken');
                 const authService = new AuthService();
-                const userWeddingRole: WeddingRole = await authService.processInvite(inviteToken);
+                const userEventRole: EventRole = await authService.processInvite(inviteToken);
 
-                // Check if wedding role already exists
-                const existingWeddingRole = localUser.value.weddingRoles.some(
-                    (role) => role.wedding.id === userWeddingRole.wedding.id && role.role === userWeddingRole.role
+                // Check if event role already exists
+                if (!localUser.value.eventRoles) {
+                    localUser.value.eventRoles = [];
+                }
+                const existingEventRole = localUser.value.eventRoles.some(
+                    (role) => role.event.id === userEventRole.event.id && role.role === userEventRole.role
                 );
 
-                if (!existingWeddingRole) {
+                if (!existingEventRole) {
                     if (!!isGuest) {
-                        selectedWeddingRole.value = userWeddingRole;
+                        selectedEventRole.value = userEventRole;
                         goToRoute('verify-guest');
                     } else {
-                        await updateUserDetails(userWeddingRole);
+                        await updateUserDetails(userEventRole);
                         await refetchLocalUser();
-                        SuccessHandler.showNotification('Successfully added invitation to wedding.');
+                        SuccessHandler.showNotification('Successfully added invitation to event.');
                         goToRoute('landing');
                         window.location.reload();
                     }
@@ -235,18 +242,22 @@ export const useUserStore = defineStore('userStore', () => {
         }
     }
 
-    async function updateUserDetails(userWeddingRole?: WeddingRole, updatedEmail?: string, updatedPhone?: string) {
+    async function updateUserDetails(userEventRole?: EventRole, updatedEmail?: string, updatedPhone?: string) {
         if (localUser.value) {
             try {
-                const weddingRole = userWeddingRole || selectedWeddingRole.value;
-                if (weddingRole) {
-                    // Filter out existing roles for the same wedding
-                    localUser.value.weddingRoles = localUser.value.weddingRoles.filter(
-                        (wRole) => wRole.wedding.id !== weddingRole.wedding.id
+                const eventRole = userEventRole || selectedEventRole.value;
+                if (eventRole) {
+                    // Make sure event roles exists
+                    if (!localUser.value.eventRoles) {
+                        localUser.value.eventRoles = [];
+                    }
+                    // Filter out existing roles for the same event
+                    localUser.value.eventRoles = localUser.value.eventRoles.filter(
+                        (wRole) => wRole.event.id !== eventRole.event.id
                     );
 
                     // Add new role
-                    localUser.value.weddingRoles.push(weddingRole);
+                    localUser.value.eventRoles.push(eventRole);
 
                     // Update email if provided
                     if (updatedEmail) {
@@ -259,7 +270,7 @@ export const useUserStore = defineStore('userStore', () => {
                     }
 
                     const authService = new AuthService();
-                    await authService.updateUser(localUser.value);
+                    await authService.saveUser(localUser.value);
                 }
             } catch (error: any) {
                 console.error('Error updating user details:', error);
@@ -284,51 +295,51 @@ export const useUserStore = defineStore('userStore', () => {
         }
     }
 
-    function loadSelectedWeddingRole() {
-        const weddingData = Cookies.get('selectedWeddingRole');
-        if (weddingData) {
+    function loadSelectedEventRole() {
+        const eventData = Cookies.get('selectedEventRole');
+        if (eventData) {
             try {
-                const parsedData = JSON.parse(weddingData);
-                const wedding = new Wedding(
+                const parsedData = JSON.parse(eventData);
+                const event = new Event(
                     parsedData.id,
                     parsedData.name,
                     new Date(parsedData.date),
                     parsedData.location,
                     parsedData.ownerId
                 );
-                selectedWeddingRole.value = new WeddingRole(
+                selectedEventRole.value = new EventRole(
                     parsedData.role,
-                    wedding,
+                    event,
                     parsedData.guestId
                 );
             } catch (error) {
-                console.error('Failed to parse selectedWeddingRole from cookie:', error);
-                selectedWeddingRole.value = null;
+                console.error('Failed to parse selectedEventRole from cookie:', error);
+                selectedEventRole.value = null;
             }
         }
     }
 
-    function saveSelectedWeddingRole() {
-        if (selectedWeddingRole.value) {
+    function saveSelectedEventRole() {
+        if (selectedEventRole.value) {
             const dataToStore = {
-                id: selectedWeddingRole.value.wedding.id,
-                name: selectedWeddingRole.value.wedding.name,
-                date: selectedWeddingRole.value.wedding.date?.toDateString,
-                location: selectedWeddingRole.value.wedding.location,
-                ownerId: selectedWeddingRole.value.wedding.ownerId,
-                role: selectedWeddingRole.value.role,
-                guestId: selectedWeddingRole.value.guestId
+                id: selectedEventRole.value.event.id,
+                name: selectedEventRole.value.event.name,
+                date: selectedEventRole.value.event.date?.toDateString,
+                location: selectedEventRole.value.event.location,
+                ownerId: selectedEventRole.value.event.ownerId,
+                role: selectedEventRole.value.role,
+                guestId: selectedEventRole.value.guestId
             };
-            Cookies.set('selectedWeddingRole', JSON.stringify(dataToStore), { expires: 7 });
+            Cookies.set('selectedEventRole', JSON.stringify(dataToStore), { expires: 7 });
         } else {
-            Cookies.remove('selectedWeddingRole');
+            Cookies.remove('selectedEventRole');
         }
     }
 
     watch(
-        selectedWeddingRole,
+        selectedEventRole,
         () => {
-            saveSelectedWeddingRole();
+            saveSelectedEventRole();
         },
         { deep: true }
     );
@@ -337,7 +348,7 @@ export const useUserStore = defineStore('userStore', () => {
         // State
         user,
         localUser,
-        selectedWeddingRole,
+        selectedEventRole,
         isLoading,
         isAuthReady,
         confirmationResult,
@@ -347,15 +358,15 @@ export const useUserStore = defineStore('userStore', () => {
         userEmail,
         hasEditAuthority,
         selectedRole,
-        selectedWedding,
+        selectedEvent,
         loggedInGuest,
         isGuest,
         hasNoRoles,
         isTrio,
         // Actions
         initializeAuthListener,
-        loadSelectedWeddingRole,
-        saveSelectedWeddingRole,
+        loadSelectedEventRole,
+        saveSelectedEventRole,
         getAccessToken,
         registerUser,
         loginUser,
