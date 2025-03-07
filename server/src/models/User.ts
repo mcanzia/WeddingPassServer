@@ -1,18 +1,18 @@
 import { Roles } from "./Roles";
-import { WeddingRole } from "./WeddingRole";
+import { EventRole } from "./EventRole";
 
 export class User {
 
     id: string;
     email: string;
     phone: string;
-    weddingRoles: Array<WeddingRole>
+    eventRoles: Array<EventRole>;
 
-    constructor(id: string, email: string, phone: string, weddingRoles: Array<WeddingRole>) {
+    constructor(id: string, email: string, phone: string, eventRoles: Array<EventRole>) {
         this.id = id;
         this.email = email;
         this.phone = phone;
-        this.weddingRoles = weddingRoles;
+        this.eventRoles = eventRoles;
     }
 
     toObject?() {
@@ -20,7 +20,7 @@ export class User {
             id: this.id,
             email: this.email,
             phone: this.phone,
-            weddingRoles: this.weddingRoles.map(role => role.toObject ? role.toObject() : role),
+            eventRoles: this.eventRoles.map(role => role.toObject ? role.toObject() : role),
         };
     }
 

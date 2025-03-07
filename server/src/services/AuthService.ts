@@ -1,7 +1,7 @@
 import { inject, injectable } from "inversify";
 import { firebaseAdmin } from "../configs/firebase";
 import { AuthorizationError, CustomError } from "../util/error/CustomError";
-import { WeddingRole } from "../models/WeddingRole";
+import { EventRole } from "../models/EventRole";
 import jwt from 'jsonwebtoken';
 import { InviteToken } from "../models/InviteToken";
 import { UserDao } from "../dao/UserDao";
@@ -31,15 +31,15 @@ export class AuthService {
         }
     }
 
-    async generateInviteLink(weddingRole: WeddingRole) {
+    async generateInviteLink(eventRole: EventRole) {
         try {
             const payload =
-                weddingRole.role === Roles.GUEST ?
+                eventRole.role === Roles.GUEST ?
                     {
-                        weddingRole
+                        eventRole
                     } :
                     {
-                        weddingRole,
+                        eventRole,
                         exp: Math.floor(Date.now() / 1000) + (60 * 60 * 24),
                     };
 
@@ -55,7 +55,7 @@ export class AuthService {
         }
     }
 
-    async generateInviteLinkShort(weddingRole: WeddingRole): Promise<InviteToken> {
+    async generateInviteLinkShort(eventRole: EventRole): Promise<InviteToken> {
         try {
             let token = shortid.generate();
 
@@ -65,7 +65,7 @@ export class AuthService {
                 existingInvite = await this.inviteDao.getInvite(token);
             }
 
-            const inviteToken = new InviteToken(token, weddingRole);
+            const inviteToken = new InviteToken(token, eventRole);
 
             await this.inviteDao.createInvite(inviteToken);
 
@@ -80,9 +80,9 @@ export class AuthService {
             const secretKey: jwt.Secret | undefined = process.env.JWT_SECRET_KEY;
             if (secretKey) {
                 const payload: any = jwt.verify(token, secretKey);
-                const { weddingRole } = payload;
-                return weddingRole;
-                // await this.userDao.addUserToWedding(userId, weddingRole);
+                const { eventRole } = payload;
+                return eventRole;
+                // await this.userDao.addUserToEvent(userId, eventRole);
             } else {
                 throw new CustomError('JWT secret cannot be found');
             }
@@ -92,20 +92,20 @@ export class AuthService {
         }
     }
 
-    async processInviteLinkShort(token: string): Promise<WeddingRole | null> {
+    async processInviteLinkShort(token: string): Promise<EventRole | null> {
         try {
             const invite = await this.inviteDao.getInvite(token);
             if (!invite) {
                 throw new AuthorizationError('Invite not found or has expired.');
             }
 
-            const { weddingRole } = invite;
+            const { eventRole } = invite;
 
-            if (weddingRole) {
-                if (weddingRole.role !== Roles.GUEST) {
+            if (eventRole) {
+                if (eventRole.role !== Roles.GUEST) {
                     this.inviteDao.deleteInvite(token);
                 }
-                return weddingRole;
+                return eventRole;
             }
             return null;
         } catch (error) {

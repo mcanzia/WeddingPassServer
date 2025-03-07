@@ -1,18 +1,18 @@
 import { Accommodation } from "./Accommodation";
 import { Drinks } from "./Drinks";
 import { Transportation } from "./Transportation";
-import { WeddingEvent } from "./WeddingEvent";
+import { SubEvent } from "./SubEvent";
 
 export class Guest {
 
     id: string;
-    weddingId: string;
+    eventId: string;
     groupNumber: Number;
     name: string;
     email: string;
     phone: string;
-    events: Array<WeddingEvent>;
-    attendingEvents?: Array<WeddingEvent>;
+    subEvents: SubEvent[];
+    attendingSubEvents?: SubEvent[];
     arrival?: Transportation;
     departure?: Transportation;
     drinks?: Drinks;
@@ -20,15 +20,15 @@ export class Guest {
     dietaryRestrictions?: string;
     accommodation?: Accommodation;
 
-    constructor(id: string, weddingId: string, groupNumber: Number, name: string, email: string, phone: string, events: Array<WeddingEvent>, attendingEvents: Array<WeddingEvent>, arrival?: Transportation, departure?: Transportation, drinks?: Drinks, serialNumber?: string, dietaryRestrictions?: string, accommodation?: Accommodation) {
+    constructor(id: string, eventId: string, name: string, email: string, phone: string, subEvents: SubEvent[], groupNumber: Number, attendingSubEvents: SubEvent[], arrival: Transportation, departure: Transportation, drinks?: Drinks, serialNumber?: string, dietaryRestrictions?: string, accommodation?: Accommodation) {
         this.id = id;
-        this.weddingId = weddingId;
-        this.groupNumber = groupNumber;
+        this.eventId = eventId;
         this.name = name;
         this.email = email;
         this.phone = phone;
-        this.events = events;
-        this.attendingEvents = attendingEvents;
+        this.subEvents = subEvents;
+        this.groupNumber = groupNumber;
+        this.attendingSubEvents = attendingSubEvents;
         this.arrival = arrival;
         this.departure = departure;
         this.drinks = drinks;
@@ -40,13 +40,13 @@ export class Guest {
     toObject?() {
         return {
             id: this.id,
-            weddingId: this.weddingId,
+            eventId: this.eventId,
             groupNumber: this.groupNumber,
             name: this.name,
             email: this.email,
             phone: this.phone,
-            events: this.events.map(event => event.toObject ? event.toObject() : event),
-            attendingEvents: this.attendingEvents?.map(event => event.toObject ? event.toObject() : event),
+            subEvents: this.subEvents.map(subEvent => subEvent.toObject ? subEvent.toObject() : subEvent),
+            attendingSubEvents: this.attendingSubEvents?.map(attendingSubEvent => attendingSubEvent.toObject ? attendingSubEvent.toObject() : attendingSubEvent),
             arrival: this.arrival?.toObject ? this.arrival.toObject() : this.arrival,
             departure: this.departure?.toObject ? this.departure.toObject() : this.departure,
             drinks: this.drinks?.toObject ? this.drinks.toObject() : this.drinks,

@@ -1,19 +1,19 @@
-import { WeddingRole } from "./WeddingRole";
+import { EventRole } from "./EventRole";
 
 export class InviteToken {
 
     token: string
-    weddingRole?: WeddingRole
+    eventRole?: EventRole
 
-    constructor(token: string, weddingRole?: WeddingRole) {
+    constructor(token: string, eventRole?: EventRole) {
         this.token = token;
-        this.weddingRole = weddingRole;
+        this.eventRole = eventRole;
     }
 
     toObject?() {
         return {
             token: this.token,
-            weddingRole: this.weddingRole
+            eventRole: this.eventRole
         };
     }
 

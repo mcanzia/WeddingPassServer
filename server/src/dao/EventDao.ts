@@ -1,7 +1,7 @@
 import { db } from '../configs/firebase';
 import { DatabaseError, NoDataError } from '../util/error/CustomError';
 import { injectable } from 'inversify';
-import { WeddingEvent } from '../models/WeddingEvent';
+import { Event } from '../models/Event';
 import { CollectionReference, DocumentData, QuerySnapshot, QueryDocumentSnapshot } from 'firebase-admin/firestore';
 
 @injectable()
@@ -13,20 +13,18 @@ export class EventDao {
         this.eventsCollection = db.collection('events');
     }
 
-    async getAllEvents(weddingId: string): Promise<Array<WeddingEvent>> {
+    async getAllEvents(): Promise<Array<Event>> {
         try {
-            const snapshot: QuerySnapshot<DocumentData> = await this.eventsCollection
-                .where('weddingId', '==', weddingId)
-                .get();
+            const snapshot: QuerySnapshot<DocumentData> = await this.eventsCollection.get();
 
             if (snapshot.empty) {
-                return [];
+                throw new NoDataError('No events found.');
             }
 
-            const events: Array<WeddingEvent> = [];
+            const events: Array<Event> = [];
 
             snapshot.forEach((doc: QueryDocumentSnapshot<DocumentData>) => {
-                const eventData = doc.data() as WeddingEvent;
+                const eventData = doc.data() as Event;
                 eventData.id = doc.id;
                 events.push(eventData);
             });
@@ -37,20 +35,39 @@ export class EventDao {
         }
     }
 
-    async getEventById(weddingId: string, eventId: string): Promise<WeddingEvent> {
+    async getEventsByOwner(ownerId: string): Promise<Array<Event>> {
         try {
-            const snapshot = await this.eventsCollection
-                .where('__name__', '==', eventId)
-                .where('weddingId', '==', weddingId)
+            const querySnapshot: QuerySnapshot<DocumentData> = await this.eventsCollection
+                .where('ownerId', '==', ownerId)
                 .get();
 
-            if (snapshot.empty) {
-                throw new Error('No such event found with the given id and weddingId');
+            if (querySnapshot.empty) {
+                return [];
             }
 
-            const eventDoc = snapshot.docs[0];
+            const events: Array<Event> = [];
 
-            const eventData = eventDoc.data() as WeddingEvent;
+            querySnapshot.forEach((doc: QueryDocumentSnapshot<DocumentData>) => {
+                const eventData = doc.data() as Event;
+                eventData.id = doc.id;
+                events.push(eventData);
+            });
+
+            return events;
+        } catch (error) {
+            throw new DatabaseError(`Could not retrieve events for owner ${ownerId}: ${error}`);
+        }
+    }
+
+    async getEventById(eventId: string): Promise<Event> {
+        try {
+            const eventDoc = await this.eventsCollection.doc(eventId).get();
+
+            if (!eventDoc.exists) {
+                throw new Error('No such event found with the given id');
+            }
+
+            const eventData = eventDoc.data() as Event;
             eventData.id = eventDoc.id;
 
             return eventData;
@@ -59,11 +76,10 @@ export class EventDao {
         }
     }
 
-    async getEventByName(weddingId: string, eventName: string): Promise<WeddingEvent> {
+    async getEventByName(eventName: string): Promise<Event> {
         try {
             const querySnapshot: QuerySnapshot<DocumentData> = await this.eventsCollection
                 .where('name', '==', eventName)
-                .where('weddingId', '==', weddingId)
                 .limit(1)
                 .get();
 
@@ -71,10 +87,10 @@ export class EventDao {
                 throw new Error('No such event found with the given name');
             }
 
-            const events: Array<WeddingEvent> = [];
+            const events: Array<Event> = [];
 
             querySnapshot.forEach((doc: QueryDocumentSnapshot<DocumentData>) => {
-                const eventData = doc.data() as WeddingEvent;
+                const eventData = doc.data() as Event;
                 eventData.id = doc.id;
                 events.push(eventData);
             });
@@ -85,18 +101,20 @@ export class EventDao {
         }
     }
 
-    async createEvent(weddingId: string, event: WeddingEvent): Promise<void> {
+    async createEvent(event: Event): Promise<Event> {
         try {
             const newEventRef = this.eventsCollection.doc();
             event.id = newEventRef.id;
-            event.weddingId = weddingId;
             await newEventRef.set(event);
+
+            return event;
+
         } catch (error) {
             throw new DatabaseError("Could not add event to database: " + error);
         }
     }
 
-    async batchCreateEvents(weddingId: string, events: WeddingEvent[]): Promise<void> {
+    async batchCreateEvents(events: Event[]): Promise<void> {
         try {
             const batchSize = 500;
             for (let i = 0; i < events.length; i += batchSize) {
@@ -106,7 +124,6 @@ export class EventDao {
                 batchEvents.forEach(event => {
                     const newEventRef = this.eventsCollection.doc();
                     event.id = newEventRef.id;
-                    event.weddingId = weddingId;
                     batch.set(newEventRef, event);
                 });
 
@@ -118,22 +135,13 @@ export class EventDao {
     }
 
 
-    async updateEvent(weddingId: string, eventId: string, updatedEvent: WeddingEvent): Promise<void> {
+    async updateEvent(eventId: string, updatedEvent: Event): Promise<void> {
         try {
             const eventRef = this.eventsCollection.doc(eventId);
             const eventDoc = await eventRef.get();
 
             if (!eventDoc.exists) {
                 throw new Error('Event to update does not exist.');
-            }
-
-            const eventData = eventDoc.data();
-            if (!eventData) {
-                throw new Error('Event data is undefined.');
-            }
-
-            if (eventData.weddingId !== weddingId) {
-                throw new Error('Event does not belong to the specified wedding.');
             }
 
             const { id, ...data } = updatedEvent;
@@ -144,7 +152,7 @@ export class EventDao {
         }
     }
 
-    async deleteEvent(weddingId: string, eventId: string): Promise<void> {
+    async deleteEvent(eventId: string): Promise<void> {
         try {
             const eventRef = this.eventsCollection.doc(eventId);
             const eventDoc = await eventRef.get();
@@ -153,61 +161,32 @@ export class EventDao {
                 throw new Error('Event to delete does not exist.');
             }
 
-            const eventData = eventDoc.data();
-            if (!eventData) {
-                throw new Error('Event data is undefined.');
-            }
-
-            if (eventData.weddingId !== weddingId) {
-                throw new Error('Event does not belong to the specified wedding.');
-            }
-
             await eventRef.delete();
         } catch (error) {
-            throw new DatabaseError('Could not delete event from database: ' + error);
+            throw new DatabaseError("Could not delete event from database: " + error);
         }
     }
 
-
-    async batchDeleteEvents(weddingId: string, events: WeddingEvent[]): Promise<void> {
+    async batchDeleteEvents(events: Event[]): Promise<void> {
         try {
             const batchSize = 500;
-            const getAllLimit = 100;
-
             for (let i = 0; i < events.length; i += batchSize) {
                 const batch = db.batch();
                 const batchEvents = events.slice(i, i + batchSize);
 
-                const eventRefs = batchEvents.map((event, index) => {
+                batchEvents.forEach(event => {
                     if (!event.id) {
-                        throw new Error(`Event at index ${i + index} does not have an id.`);
+                        throw new Error(`Event at index ${i} does not have an id.`);
                     }
-                    return this.eventsCollection.doc(event.id);
+                    const eventRef = this.eventsCollection.doc(event.id);
+                    batch.delete(eventRef);
                 });
-
-                for (let j = 0; j < eventRefs.length; j += getAllLimit) {
-                    const eventRefsChunk = eventRefs.slice(j, j + getAllLimit);
-
-                    const docs = await db.getAll(...eventRefsChunk);
-
-                    docs.forEach(docSnapshot => {
-                        if (!docSnapshot.exists) {
-                            return;
-                        }
-
-                        const eventData = docSnapshot.data();
-                        if (eventData && eventData.weddingId === weddingId) {
-                            batch.delete(docSnapshot.ref);
-                        }
-                    });
-                }
 
                 await batch.commit();
             }
         } catch (error: any) {
-            throw new DatabaseError('Could not batch delete events: ' + error);
+            throw new DatabaseError(error.toString());
         }
     }
-
 
 }

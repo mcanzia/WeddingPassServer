@@ -89,7 +89,7 @@ async function updateEvent() {
             date: new Date(editEventForm.value.date)
         }
         const eventService = new EventService();
-        await eventService.updateEvent(updatedEventDetails);
+        await eventService.saveEvent(updatedEventDetails);
         setMessage('Updated event.', NotificationType.SUCCESS);
         close()
     } else {

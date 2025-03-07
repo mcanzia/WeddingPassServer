@@ -18,7 +18,13 @@ app.use(compression());
 
 // Security
 app.set('trust proxy', 1);
-app.use(cors());
+app.use(cors({
+  origin: 'http://localhost:3000',
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Authorization', 'User-Role', 'Content-Type'],
+  exposedHeaders: ['Authorization', 'User-Role'],
+  credentials: true
+}));
 const limiter = rateLimit({
   windowMs: 60 * 1000, // 15 minutes
   max: 500 // limit each IP to 100 requests per 15 minutes
@@ -32,7 +38,7 @@ app.use(async (request: Request, response: Response, next: NextFunction) => {
   try {
     const userDetails = await AuthService.validateAuthToken(request.headers.authorization);
     response.locals.userAuth = userDetails.uid;
-    response.locals.userRole = request.headers.userrole;
+    response.locals.userRole = request.headers['user-role'];
     next();
   } catch (error) {
     Logger.error("Authorization attempt failed");

@@ -1,14 +1,14 @@
-export class WeddingEvent {
+export class SubEvent {
 
     id: string;
     name: string;
-    weddingId: string;
+    eventId: string;
     order: number;
 
-    constructor(id: string, name: string, weddingId: string, order: number) {
+    constructor(id: string, name: string, eventId: string, order: number) {
         this.id = id;
         this.name = name;
-        this.weddingId = weddingId;
+        this.eventId = eventId;
         this.order = order;
     }
 
@@ -16,7 +16,7 @@ export class WeddingEvent {
         return {
             id: this.id,
             name: this.name,
-            weddingId: this.weddingId,
+            eventId: this.eventId,
             order: this.order
         };
     }

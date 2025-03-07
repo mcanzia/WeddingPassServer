@@ -1,4 +1,4 @@
-export class Wedding {
+export class Event {
 
     id: string;
     name: string;

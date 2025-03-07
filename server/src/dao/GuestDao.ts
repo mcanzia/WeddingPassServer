@@ -4,7 +4,7 @@ import { db } from '../configs/firebase';
 import { CustomError, DatabaseError, NoDataError } from '../util/error/CustomError';
 import { injectable } from 'inversify';
 import { Guest } from '../models/Guest';
-import { WeddingEvent } from '../models/WeddingEvent';
+import { SubEvent } from '../models/SubEvent';
 import { CollectionReference, DocumentData, QuerySnapshot, QueryDocumentSnapshot, Timestamp, DocumentSnapshot } from 'firebase-admin/firestore';
 import validator from 'validator';
 import Logger from '../util/logs/logger';
@@ -13,56 +13,56 @@ import Logger from '../util/logs/logger';
 export class GuestDao {
 
     private guestsCollection: CollectionReference<DocumentData>;
-    private eventsCollection: CollectionReference<DocumentData>;
+    private subEventsCollection: CollectionReference<DocumentData>;
 
     constructor() {
         this.guestsCollection = db.collection('guests');
-        this.eventsCollection = db.collection('events');
+        this.subEventsCollection = db.collection('subevents');
     }
 
-    private async fetchEventsByNames(weddingId: string, eventNames: string[]): Promise<Map<string, WeddingEvent>> {
-        const fetchedEventsMap: Map<string, WeddingEvent> = new Map();
+    private async fetchSubEventsByNames(eventId: string, subEventNames: string[]): Promise<Map<string, SubEvent>> {
+        const fetchedEventsMap: Map<string, SubEvent> = new Map();
         const batchSize = 10;
 
-        for (let i = 0; i < eventNames.length; i += batchSize) {
-            const batch = eventNames.slice(i, i + batchSize);
-            const snapshot = await this.eventsCollection
-                .where('weddingId', '==', weddingId)
+        for (let i = 0; i < subEventNames.length; i += batchSize) {
+            const batch = subEventNames.slice(i, i + batchSize);
+            const snapshot = await this.subEventsCollection
+                .where('eventId', '==', eventId)
                 .where('name', 'in', batch)
                 .get();
 
             snapshot.forEach(doc => {
-                const eventData = doc.data() as WeddingEvent;
-                fetchedEventsMap.set(eventData.name, new WeddingEvent(doc.id, eventData.name, eventData.weddingId, eventData.order));
+                const subEventData = doc.data() as SubEvent;
+                fetchedEventsMap.set(subEventData.name, new SubEvent(doc.id, subEventData.name, subEventData.eventId, subEventData.order));
             });
         }
 
         return fetchedEventsMap;
     }
 
-    private async fetchAllEvents(weddingId: string): Promise<Map<string, WeddingEvent>> {
-        const fetchedEventsMap: Map<string, WeddingEvent> = new Map();
+    private async fetchAllSubEvents(eventId: string): Promise<Map<string, SubEvent>> {
+        const fetchedEventsMap: Map<string, SubEvent> = new Map();
 
-        const snapshot: QuerySnapshot<DocumentData> = await this.eventsCollection.where('weddingId', '==', weddingId).get();
+        const snapshot: QuerySnapshot<DocumentData> = await this.subEventsCollection.where('eventId', '==', eventId).get();
 
         if (snapshot.empty) {
             return fetchedEventsMap;
         }
 
         snapshot.forEach((doc: QueryDocumentSnapshot<DocumentData>) => {
-            const eventData = doc.data() as WeddingEvent;
-            eventData.id = doc.id;
-            fetchedEventsMap.set(eventData.id, eventData);
+            const subEventData = doc.data() as SubEvent;
+            subEventData.id = doc.id;
+            fetchedEventsMap.set(subEventData.id, subEventData);
         });
 
         return fetchedEventsMap;
     }
 
-    async getAllGuests(weddingId: string): Promise<Array<Guest>> {
+    async getAllGuests(eventId: string): Promise<Array<Guest>> {
         try {
 
             const snapshot: QuerySnapshot<DocumentData> = await this.guestsCollection
-                .where('weddingId', '==', weddingId)
+                .where('eventId', '==', eventId)
                 .get();
 
             if (snapshot.empty) {
@@ -71,13 +71,13 @@ export class GuestDao {
 
             const guests: Array<Guest> = [];
 
-            const events: Map<string, WeddingEvent> = await this.fetchAllEvents(weddingId);
+            const subEvents: Map<string, SubEvent> = await this.fetchAllSubEvents(eventId);
 
             snapshot.forEach((doc: QueryDocumentSnapshot<DocumentData>) => {
                 const guestData = doc.data();
                 guestData.id = doc.id;
-                guestData.events = guestData.events.map((event: string) => events.get(event));
-                guestData.attendingEvents = guestData.attendingEvents.map((event: string) => events.get(event));
+                guestData.subEvents = guestData.subEvents.map((subEvent: string) => subEvents.get(subEvent));
+                guestData.attendingSubEvents = guestData.attendingSubEvents.map((subEvent: string) => subEvents.get(subEvent));
                 guests.push(guestData as Guest);
             });
 
@@ -87,11 +87,11 @@ export class GuestDao {
         }
     }
 
-    async getGuestsForEvent(weddingId: string, eventId: string): Promise<Array<Guest>> {
+    async getGuestsForSubEvent(eventId: string, subEventId: string): Promise<Array<Guest>> {
         try {
             const querySnapshot: QuerySnapshot<DocumentData> = await this.guestsCollection
-                .where('weddingId', '==', weddingId)
-                .where('events', 'array-contains', eventId)
+                .where('eventId', '==', eventId)
+                .where('subEvents', 'array-contains', subEventId)
                 .get();
 
             if (querySnapshot.empty) {
@@ -100,13 +100,13 @@ export class GuestDao {
 
             const guests: Array<Guest> = [];
 
-            const events: Map<string, WeddingEvent> = await this.fetchAllEvents(weddingId);
+            const subEvents: Map<string, SubEvent> = await this.fetchAllSubEvents(eventId);
 
             querySnapshot.forEach((doc: QueryDocumentSnapshot<DocumentData>) => {
                 const guestData = doc.data();
                 guestData.id = doc.id;
-                guestData.events = guestData.events.map((event: string) => events.get(event));
-                guestData.attendingEvents = guestData.attendingEvents.map((event: string) => events.get(event));
+                guestData.subEvents = guestData.subEvents.map((subEvent: string) => subEvents.get(subEvent));
+                guestData.attendingSubEvents = guestData.attendingSubEvents.map((subEvent: string) => subEvents.get(subEvent));
                 guests.push(guestData as Guest);
             });
 
@@ -116,25 +116,25 @@ export class GuestDao {
         }
     }
 
-    async getGuestById(weddingId: string, guestId: string): Promise<Guest> {
+    async getGuestById(eventId: string, guestId: string): Promise<Guest> {
         try {
             const snapshot = await this.guestsCollection
                 .where('__name__', '==', guestId)
-                .where('weddingId', '==', weddingId)
+                .where('eventId', '==', eventId)
                 .get();
 
             if (snapshot.empty) {
-                throw new Error('No such guest found with the given id and weddingId');
+                throw new Error('No such guest found with the given id and eventId');
             }
 
             const guestDoc = snapshot.docs[0];
 
-            const events: Map<string, WeddingEvent> = await this.fetchAllEvents(weddingId);
+            const subEvents: Map<string, SubEvent> = await this.fetchAllSubEvents(eventId);
 
             const guestData = guestDoc.data();
             if (guestData) {
-                guestData.events = guestData.events.map((event: string) => events.get(event));
-                guestData.attendingEvents = guestData.attendingEvents.map((event: string) => events.get(event));
+                guestData.subEvents = guestData.subEvents.map((subEvent: string) => subEvents.get(subEvent));
+                guestData.attendingSubEvents = guestData.attendingSubEvents.map((subEvent: string) => subEvents.get(subEvent));
                 guestData.id = guestDoc.id;
             }
 
@@ -144,10 +144,10 @@ export class GuestDao {
         }
     }
 
-    async getGuestByName(weddingId: string, guestName: string): Promise<Guest> {
+    async getGuestByName(eventId: string, guestName: string): Promise<Guest> {
         try {
             const querySnapshot: QuerySnapshot<DocumentData> = await this.guestsCollection
-                .where('weddingId', '==', weddingId)
+                .where('eventId', '==', eventId)
                 .where('name', '==', guestName)
                 .limit(1)
                 .get();
@@ -156,15 +156,15 @@ export class GuestDao {
                 throw new Error('No such guest found with the given name');
             }
 
-            const events: Map<string, WeddingEvent> = await this.fetchAllEvents(weddingId);
+            const subEvents: Map<string, SubEvent> = await this.fetchAllSubEvents(eventId);
 
             const guests: Array<Guest> = [];
 
             querySnapshot.forEach((doc: QueryDocumentSnapshot<DocumentData>) => {
                 const guestData = doc.data();
                 guestData.id = doc.id;
-                guestData.events = guestData.events.map((event: string) => events.get(event));
-                guestData.attendingEvents = guestData.attendingEvents.map((event: string) => events.get(event));
+                guestData.subEvents = guestData.subEvents.map((subEvent: string) => subEvents.get(subEvent));
+                guestData.attendingSubEvents = guestData.attendingSubEvents.map((subEvent: string) => subEvents.get(subEvent));
                 guests.push(guestData as Guest);
             });
 
@@ -174,7 +174,7 @@ export class GuestDao {
         }
     }
 
-    async fetchPartyMembers(weddingId: string, guestId: string): Promise<Array<Guest>> {
+    async fetchPartyMembers(eventId: string, guestId: string): Promise<Array<Guest>> {
         try {
             const guestDoc = await this.guestsCollection.doc(guestId).get();
             if (!guestDoc.exists) {
@@ -189,7 +189,7 @@ export class GuestDao {
             const groupNumber = guestData.groupNumber;
 
             const querySnapshot: QuerySnapshot<DocumentData> = await this.guestsCollection
-                .where('weddingId', '==', weddingId)
+                .where('eventId', '==', eventId)
                 .where('groupNumber', '==', groupNumber)
                 .get();
 
@@ -198,13 +198,13 @@ export class GuestDao {
             }
 
             const guests: Array<Guest> = [];
-            const events: Map<string, WeddingEvent> = await this.fetchAllEvents(weddingId);
+            const subEvents: Map<string, SubEvent> = await this.fetchAllSubEvents(eventId);
 
             querySnapshot.forEach((doc: QueryDocumentSnapshot<DocumentData>) => {
                 const guestData = doc.data();
                 guestData.id = doc.id;
-                guestData.events = guestData.events.map((eventId: string) => events.get(eventId));
-                guestData.attendingEvents = guestData.attendingEvents.map((eventId: string) => events.get(eventId));
+                guestData.subEvents = guestData.subEvents.map((subEventId: string) => subEvents.get(subEventId));
+                guestData.attendingSubEvents = guestData.attendingSubEvents.map((subEventId: string) => subEvents.get(subEventId));
                 guests.push(guestData as Guest);
             });
 
@@ -214,7 +214,7 @@ export class GuestDao {
         }
     }
 
-    async getGuestsByEmail(weddingId: string, email: string): Promise<Array<Guest>> {
+    async getGuestsByEmail(eventId: string, email: string): Promise<Array<Guest>> {
         try {
             const sanitizedEmail = validator.escape(email.trim()).toLowerCase();
             if (!validator.isEmail(sanitizedEmail)) {
@@ -222,7 +222,7 @@ export class GuestDao {
             }
 
             const querySnapshot: QuerySnapshot<DocumentData> = await this.guestsCollection
-                .where('weddingId', '==', weddingId)
+                .where('eventId', '==', eventId)
                 .where('email', '==', sanitizedEmail)
                 .get();
 
@@ -232,13 +232,13 @@ export class GuestDao {
 
             const guests: Array<Guest> = [];
 
-            const events: Map<string, WeddingEvent> = await this.fetchAllEvents(weddingId);
+            const subEvents: Map<string, SubEvent> = await this.fetchAllSubEvents(eventId);
 
             querySnapshot.forEach((doc: QueryDocumentSnapshot<DocumentData>) => {
                 const guestData = doc.data();
                 guestData.id = doc.id;
-                guestData.events = guestData.events.map((eventId: string) => events.get(eventId));
-                guestData.attendingEvents = guestData.attendingEvents.map((eventId: string) => events.get(eventId));
+                guestData.subEvents = guestData.subEvents.map((subEventId: string) => subEvents.get(subEventId));
+                guestData.attendingSubEvents = guestData.attendingSubEvents.map((subEventId: string) => subEvents.get(subEventId));
                 guests.push(guestData as Guest);
             });
 
@@ -248,7 +248,7 @@ export class GuestDao {
         }
     }
 
-    async getGuestsByPhone(weddingId: string, phone: string): Promise<Array<Guest>> {
+    async getGuestsByPhone(eventId: string, phone: string): Promise<Array<Guest>> {
         try {
             const sanitizedPhone = validator.escape(phone.trim());
             if (!validator.isMobilePhone(sanitizedPhone, 'any', { strictMode: false })) {
@@ -256,7 +256,7 @@ export class GuestDao {
             }
 
             const querySnapshot: QuerySnapshot<DocumentData> = await this.guestsCollection
-                .where('weddingId', '==', weddingId)
+                .where('eventId', '==', eventId)
                 .where('phone', '==', sanitizedPhone)
                 .get();
 
@@ -266,13 +266,13 @@ export class GuestDao {
 
             const guests: Array<Guest> = [];
 
-            const events: Map<string, WeddingEvent> = await this.fetchAllEvents(weddingId);
+            const subEvents: Map<string, SubEvent> = await this.fetchAllSubEvents(eventId);
 
             querySnapshot.forEach((doc: QueryDocumentSnapshot<DocumentData>) => {
                 const guestData = doc.data();
                 guestData.id = doc.id;
-                guestData.events = guestData.events.map((eventId: string) => events.get(eventId));
-                guestData.attendingEvents = guestData.attendingEvents.map((eventId: string) => events.get(eventId));
+                guestData.subEvents = guestData.subEvents.map((subEventId: string) => subEvents.get(subEventId));
+                guestData.attendingSubEvents = guestData.attendingSubEvents.map((subEventId: string) => subEvents.get(subEventId));
                 guests.push(guestData as Guest);
             });
 
@@ -284,10 +284,10 @@ export class GuestDao {
 
 
 
-    async getGuestBySerialNumber(weddingId: string, serialNumber: string): Promise<Guest> {
+    async getGuestBySerialNumber(eventId: string, serialNumber: string): Promise<Guest> {
         try {
             const querySnapshot: QuerySnapshot<DocumentData> = await this.guestsCollection
-                .where('weddingId', '==', weddingId)
+                .where('eventId', '==', eventId)
                 .where('serialNumber', '==', serialNumber)
                 .limit(1)
                 .get();
@@ -296,15 +296,15 @@ export class GuestDao {
                 throw new Error('No such guest found with the given serialNumber');
             }
 
-            const events: Map<string, WeddingEvent> = await this.fetchAllEvents(weddingId);
+            const subEvents: Map<string, SubEvent> = await this.fetchAllSubEvents(eventId);
 
             const guests: Array<Guest> = [];
 
             querySnapshot.forEach((doc: QueryDocumentSnapshot<DocumentData>) => {
                 const guestData = doc.data();
                 guestData.id = doc.id;
-                guestData.events = guestData.events.map((event: string) => events.get(event));
-                guestData.attendingEvents = guestData.attendingEvents.map((event: string) => events.get(event));
+                guestData.subEvents = guestData.subEvents.map((subEvent: string) => subEvents.get(subEvent));
+                guestData.attendingSubEvents = guestData.attendingSubEvents.map((subEvent: string) => subEvents.get(subEvent));
                 guests.push(guestData as Guest);
             });
 
@@ -314,11 +314,11 @@ export class GuestDao {
         }
     }
 
-    async getGuestsByHotel(weddingId: string, hotelId: string): Promise<Array<Guest>> {
+    async getGuestsByAccommodation(eventId: string, accommodationId: string): Promise<Array<Guest>> {
         try {
             const querySnapshot: QuerySnapshot<DocumentData> = await this.guestsCollection
-                .where('weddingId', '==', weddingId)
-                .where('accommodation.hotel.id', '==', hotelId)
+                .where('eventId', '==', eventId)
+                .where('accommodation.id', '==', accommodationId)
                 .get();
 
             if (querySnapshot.empty) {
@@ -327,40 +327,40 @@ export class GuestDao {
 
             const guests: Array<Guest> = [];
 
-            const events: Map<string, WeddingEvent> = await this.fetchAllEvents(weddingId);
+            const subEvents: Map<string, SubEvent> = await this.fetchAllSubEvents(eventId);
 
             querySnapshot.forEach((doc: QueryDocumentSnapshot<DocumentData>) => {
                 const guestData = doc.data();
                 guestData.id = doc.id;
-                guestData.events = guestData.events.map((eventId: string) => events.get(eventId));
-                guestData.attendingEvents = guestData.attendingEvents.map((eventId: string) => events.get(eventId));
+                guestData.subEvents = guestData.subEvents.map((subEventId: string) => subEvents.get(subEventId));
+                guestData.attendingSubEvents = guestData.attendingSubEvents.map((subEventId: string) => subEvents.get(subEventId));
                 guests.push(guestData as Guest);
             });
 
             return guests;
         } catch (error: any) {
-            throw new DatabaseError("Could not retrieve guests by hotel from database: " + error.message);
+            throw new DatabaseError("Could not retrieve guests by accommodation from database: " + error.message);
         }
     }
 
-    async saveGuest(weddingId: string, guest: Guest): Promise<void> {
+    async saveGuest(eventId: string, guest: Guest): Promise<void> {
         try {
 
             const guestId = guest.id || this.guestsCollection.doc().id;
             const guestRef = this.guestsCollection.doc(guestId);
 
             guest.id = guestRef.id;
-            guest.weddingId = weddingId;
+            guest.eventId = eventId;
             guest.name = validator.escape(guest.name.trim());
             guest.email = validator.escape(guest.email.trim());
             guest.phone = validator.escape(guest.phone.trim());
 
-            const events = await this.getValidatedEvents(guest, weddingId, guest.events);
-            const attendingEvents = await this.getValidatedEvents(guest, weddingId, guest.attendingEvents!);
+            const subEvents = await this.getValidatedSubEvents(guest, eventId, guest.subEvents);
+            const attendingSubEvents = await this.getValidatedSubEvents(guest, eventId, guest.attendingSubEvents!);
 
             const updatedGuest = guest.toObject ?
-                { ...guest.toObject(), events: events, attendingEvents: attendingEvents } :
-                { ...guest, events: events, attendingEvents: attendingEvents };
+                { ...guest.toObject(), subEvents: subEvents, attendingSubEvents: attendingSubEvents } :
+                { ...guest, subEvents: subEvents, attendingSubEvents: attendingSubEvents };
 
             await guestRef.set(updatedGuest, { merge: true });
         } catch (error) {
@@ -368,40 +368,40 @@ export class GuestDao {
         }
     }
 
-    async batchCreateGuests(weddingId: string, guests: Guest[]): Promise<void> {
+    async batchCreateGuests(eventId: string, guests: Guest[]): Promise<void> {
         try {
             if (guests.length === 0) {
                 throw new DatabaseError("No guests provided for batch creation.");
             }
 
-            const allEventNames = Array.from(
+            const allSubEventNames = Array.from(
                 new Set(
-                    guests.flatMap(guest => guest.events.map(event => event.name))
+                    guests.flatMap(guest => guest.subEvents.map(subEvent => subEvent.name))
                 )
             );
 
-            const fetchedEventsMap = await this.fetchEventsByNames(weddingId, allEventNames);
+            const fetchedSubEventsMap = await this.fetchSubEventsByNames(eventId, allSubEventNames);
 
-            for (const name of allEventNames) {
-                if (!fetchedEventsMap.has(name)) {
-                    throw new DatabaseError(`Event with name "${name}" does not exist.`);
+            for (const name of allSubEventNames) {
+                if (!fetchedSubEventsMap.has(name)) {
+                    throw new DatabaseError(`SubEvent with name "${name}" does not exist.`);
                 }
             }
 
             const validatedGuests = guests.map(guest => {
 
-                const validatedEvents: Array<string> = guest.events.map(event => {
-                    const fetchedEvent = fetchedEventsMap.get(event.name);
-                    if (fetchedEvent) {
-                        return fetchedEvent.id;
+                const validatedSubEvents: Array<string> = guest.subEvents.map(subEvent => {
+                    const fetchedSubEvent = fetchedSubEventsMap.get(subEvent.name);
+                    if (fetchedSubEvent) {
+                        return fetchedSubEvent.id;
                     } else {
-                        throw new DatabaseError(`Event with name "${event.name}" was not found.`);
+                        throw new DatabaseError(`Event with name "${subEvent.name}" was not found.`);
                     }
                 });
 
                 return {
                     ...guest,
-                    events: validatedEvents,
+                    subEvents: validatedSubEvents,
                 };
             });
 
@@ -413,11 +413,11 @@ export class GuestDao {
                 batchGuests.forEach(guest => {
                     const newGuestRef = this.guestsCollection.doc();
                     guest.id = newGuestRef.id;
-                    guest.weddingId = weddingId;
+                    guest.eventId = eventId;
                     guest.name = validator.escape(guest.name.trim());
                     guest.email = validator.escape(guest.email.trim());
                     guest.phone = validator.escape(guest.phone.trim());
-                    guest.attendingEvents = [];
+                    guest.attendingSubEvents = [];
                     batch.set(newGuestRef, guest);
                 });
 
@@ -429,7 +429,7 @@ export class GuestDao {
     }
 
 
-    async deleteGuest(weddingId: string, guestId: string): Promise<void> {
+    async deleteGuest(eventId: string, guestId: string): Promise<void> {
         try {
             const guestRef = this.guestsCollection.doc(guestId);
             const guestDoc = await guestRef.get();
@@ -442,8 +442,8 @@ export class GuestDao {
             if (!guestData) {
                 throw new Error('Guest data is undefined.');
             }
-            if (guestData.weddingId !== weddingId) {
-                throw new Error('Guest does not belong to the specified wedding.');
+            if (guestData.eventId !== eventId) {
+                throw new Error('Guest does not belong to the specified event.');
             }
 
             await guestRef.delete();
@@ -452,7 +452,7 @@ export class GuestDao {
         }
     }
 
-    async batchDeleteGuests(weddingId: string, guests: Guest[]): Promise<void> {
+    async batchDeleteGuests(eventId: string, guests: Guest[]): Promise<void> {
         try {
             const batchSize = 500;
             const getAllLimit = 100;
@@ -479,7 +479,7 @@ export class GuestDao {
                         }
 
                         const guestData = docSnapshot.data();
-                        if (guestData && guestData.weddingId === weddingId) {
+                        if (guestData && guestData.eventId === eventId) {
                             batch.delete(docSnapshot.ref);
                         }
                     });
@@ -492,7 +492,7 @@ export class GuestDao {
         }
     }
 
-    async batchUpdateGuests(weddingId: string, guests: Partial<Guest>[]): Promise<void> {
+    async batchUpdateGuests(eventId: string, guests: Partial<Guest>[]): Promise<void> {
         try {
 
             const batchSize = 500;
@@ -515,8 +515,8 @@ export class GuestDao {
                         continue;
                     }
 
-                    if (guest.weddingId && guest.weddingId !== weddingId) {
-                        throw new CustomError(`Guest weddingId mismatch for guest id ${guest.id}`, 400);
+                    if (guest.eventId && guest.eventId !== eventId) {
+                        throw new CustomError(`Guest eventId mismatch for guest id ${guest.id}`, 400);
                     }
 
                     const docRef = this.guestsCollection.doc(guest.id!);
@@ -558,27 +558,27 @@ export class GuestDao {
         }
     }
 
-    async getValidatedEvents(guest: Guest, weddingId: string, events: WeddingEvent[]) {
-        const eventNames = Array.from(new Set(events.map(event => event.name)));
+    async getValidatedSubEvents(guest: Guest, eventId: string, subEvents: SubEvent[]) {
+        const subEventNames = Array.from(new Set(subEvents.map(subEvent => subEvent.name)));
 
-        const fetchedEventsMap = await this.fetchEventsByNames(weddingId, eventNames);
+        const fetchedSubEventsMap = await this.fetchSubEventsByNames(eventId, subEventNames);
 
-        for (const name of eventNames) {
-            if (!fetchedEventsMap.has(name)) {
+        for (const name of subEventNames) {
+            if (!fetchedSubEventsMap.has(name)) {
                 throw new DatabaseError(`Event with name "${name}" does not exist.`);
             }
         }
 
-        const validatedEvents: Array<string> = events.map(event => {
-            const fetchedEvent = fetchedEventsMap.get(event.name);
-            if (fetchedEvent) {
-                return fetchedEvent.id;
+        const validatedSubEvents: Array<string> = subEvents.map(subEvent => {
+            const fetchedSubEvent = fetchedSubEventsMap.get(subEvent.name);
+            if (fetchedSubEvent) {
+                return fetchedSubEvent.id;
             } else {
-                throw new DatabaseError(`Event with name "${event.name}" was not found.`);
+                throw new DatabaseError(`SubEvent with name "${subEvent.name}" was not found.`);
             }
         });
 
-        return validatedEvents;
+        return validatedSubEvents;
     }
 
 }

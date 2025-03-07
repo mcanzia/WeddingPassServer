@@ -19,10 +19,10 @@ export class SurveyDao {
         this.guestsCollection = db.collection('guests');
     }
 
-    async getAllSurveys(weddingId: string): Promise<Array<Survey>> {
+    async getAllSurveys(eventId: string): Promise<Array<Survey>> {
         try {
             const snapshot: QuerySnapshot<DocumentData> = await this.surveysCollection
-                .where('weddingId', '==', weddingId)
+                .where('eventId', '==', eventId)
                 .get();
 
             if (snapshot.empty) {
@@ -39,14 +39,14 @@ export class SurveyDao {
 
             return surveys;
         } catch (error) {
-            throw error;
+            throw new DatabaseError(`Could not retrieve surveys: ${error}`);
         }
     }
 
-    async getPublishedSurveys(weddingId: string): Promise<Array<Survey>> {
+    async getPublishedSurveys(eventId: string): Promise<Array<Survey>> {
         try {
             const snapshot: QuerySnapshot<DocumentData> = await this.surveysCollection
-                .where('weddingId', '==', weddingId)
+                .where('eventId', '==', eventId)
                 .where('published', '==', true)
                 .get();
 
@@ -68,7 +68,7 @@ export class SurveyDao {
         }
     }
 
-    async getSurveyById(weddingId: string, surveyId: string): Promise<Survey> {
+    async getSurveyById(eventId: string, surveyId: string): Promise<Survey> {
         try {
             const surveyRef = this.surveysCollection.doc(surveyId);
             const surveyDoc = await surveyRef.get();
@@ -79,8 +79,8 @@ export class SurveyDao {
 
             const surveyData = surveyDoc.data() as Survey;
 
-            if (surveyData.weddingId !== weddingId) {
-                throw new Error('Survey does not belong to the specified wedding.');
+            if (surveyData.eventId !== eventId) {
+                throw new Error('Survey does not belong to the specified event.');
             }
 
             surveyData.id = surveyDoc.id;
@@ -91,13 +91,13 @@ export class SurveyDao {
         }
     }
 
-    async saveSurvey(weddingId: string, survey: Survey): Promise<Survey> {
+    async saveSurvey(eventId: string, survey: Survey): Promise<Survey> {
         try {
             const surveyId = survey.id || this.surveysCollection.doc().id;
             const surveyRef = this.surveysCollection.doc(surveyId);
 
             survey.id = surveyId;
-            survey.weddingId = weddingId;
+            survey.eventId = eventId;
 
             await surveyRef.set(survey, { merge: true });
             return survey;
@@ -106,7 +106,7 @@ export class SurveyDao {
         }
     }
 
-    async deleteSurvey(weddingId: string, surveyId: string): Promise<void> {
+    async deleteSurvey(eventId: string, surveyId: string): Promise<void> {
         try {
             const surveyRef = this.surveysCollection.doc(surveyId);
             const surveyDoc = await surveyRef.get();
@@ -117,8 +117,8 @@ export class SurveyDao {
 
             const surveyData = surveyDoc.data() as Survey;
 
-            if (surveyData.weddingId !== weddingId) {
-                throw new Error('Survey does not belong to the specified wedding.');
+            if (surveyData.eventId !== eventId) {
+                throw new Error('Survey does not belong to the specified event.');
             }
 
             await surveyRef.delete();
@@ -129,7 +129,7 @@ export class SurveyDao {
 
     //TODO - move to its own DAO
     // Survey Responses
-    async getAllSurveyResponses(weddingId: string, surveyId: string): Promise<Array<SurveyResponse>> {
+    async getAllSurveyResponses(eventId: string, surveyId: string): Promise<Array<SurveyResponse>> {
         try {
             const surveyDocRef = this.surveysCollection.doc(surveyId);
             const surveyDoc = await surveyDocRef.get();
@@ -139,8 +139,8 @@ export class SurveyDao {
             }
 
             const surveyData = surveyDoc.data() as Survey;
-            if (surveyData.weddingId !== weddingId) {
-                throw new Error('Survey does not belong to the specified wedding.');
+            if (surveyData.eventId !== eventId) {
+                throw new Error('Survey does not belong to the specified event.');
             }
 
             const surveyResponsesCollection = surveyDocRef.collection('surveyResponses');
@@ -156,7 +156,7 @@ export class SurveyDao {
                 const responseData = doc.data();
                 const guestId = responseData.guest;
 
-                const guest = await this.guestDao.getGuestById(weddingId, guestId);
+                const guest = await this.guestDao.getGuestById(eventId, guestId);
 
                 const surveyResponse = new SurveyResponse(
                     doc.id,
@@ -176,12 +176,12 @@ export class SurveyDao {
     }
 
 
-    async getAllSurveyResponsesForGuest(weddingId: string, guestId: string): Promise<Array<SurveyResponse>> {
+    async getAllSurveyResponsesForGuest(eventId: string, guestId: string): Promise<Array<SurveyResponse>> {
         try {
             const querySnapshot = await db
                 .collectionGroup('surveyResponses')
                 .where('guest', '==', guestId)
-                .where('survey.weddingId', '==', weddingId)
+                .where('survey.eventId', '==', eventId)
                 .get();
 
             if (querySnapshot.empty) {
@@ -193,7 +193,7 @@ export class SurveyDao {
             for (const doc of querySnapshot.docs) {
                 const responseData = doc.data();
 
-                const guest = await this.guestDao.getGuestById(weddingId, guestId);
+                const guest = await this.guestDao.getGuestById(eventId, guestId);
 
                 const surveyResponse = new SurveyResponse(
                     doc.id,
@@ -215,7 +215,7 @@ export class SurveyDao {
 
 
     async getSurveyResponseById(
-        weddingId: string,
+        eventId: string,
         surveyId: string,
         surveyResponseId: string
     ): Promise<SurveyResponse> {
@@ -240,7 +240,7 @@ export class SurveyDao {
             }
 
             const guestId = responseData.guest;
-            const guest = await this.guestDao.getGuestById(weddingId, guestId);
+            const guest = await this.guestDao.getGuestById(eventId, guestId);
 
             const surveyResponse = new SurveyResponse(
                 surveyResponseDoc.id,
@@ -258,7 +258,7 @@ export class SurveyDao {
 
 
     async getSurveyResponseByGuest(
-        weddingId: string,
+        eventId: string,
         surveyId: string,
         guestId: string
     ): Promise<SurveyResponse> {
@@ -271,8 +271,8 @@ export class SurveyDao {
             }
 
             const surveyData = surveyDoc.data() as Survey;
-            if (surveyData.weddingId !== weddingId) {
-                throw new DatabaseError('Survey does not belong to the specified wedding.');
+            if (surveyData.eventId !== eventId) {
+                throw new DatabaseError('Survey does not belong to the specified event.');
             }
 
             const survey = {
@@ -294,7 +294,7 @@ export class SurveyDao {
             const surveyResponseDoc = querySnapshot.docs[0];
             const responseData = surveyResponseDoc.data();
 
-            const guest = await this.guestDao.getGuestById(weddingId, guestId);
+            const guest = await this.guestDao.getGuestById(eventId, guestId);
 
             const surveyResponse = new SurveyResponse(
                 surveyResponseDoc.id,
@@ -311,7 +311,7 @@ export class SurveyDao {
     }
 
     async saveSurveyResponse(
-        weddingId: string,
+        eventId: string,
         surveyId: string,
         surveyResponse: SurveyResponse
     ): Promise<SurveyResponse> {
@@ -323,8 +323,8 @@ export class SurveyDao {
             }
 
             const surveyData = surveyDoc.data() as Survey;
-            if (surveyData.weddingId !== weddingId) {
-                throw new DatabaseError('Survey does not belong to the specified wedding.');
+            if (surveyData.eventId !== eventId) {
+                throw new DatabaseError('Survey does not belong to the specified event.');
             }
 
             const surveyResponsesCollection = surveyDocRef.collection('surveyResponses');
@@ -366,7 +366,7 @@ export class SurveyDao {
         }
     }
 
-    async batchAddSurveyResponses(weddingId: string, surveyResponses: SurveyResponse[]): Promise<SurveyResponse[]> {
+    async batchAddSurveyResponses(eventId: string, surveyResponses: SurveyResponse[]): Promise<SurveyResponse[]> {
         try {
             if (!surveyResponses.length) {
                 return [];
@@ -430,7 +430,7 @@ export class SurveyDao {
     }
 
     async deleteSurveyResponse(
-        weddingId: string,
+        eventId: string,
         surveyId: string,
         surveyResponseId: string
     ): Promise<void> {
@@ -442,8 +442,8 @@ export class SurveyDao {
             }
 
             const surveyData = surveyDoc.data() as Survey;
-            if (surveyData.weddingId !== weddingId) {
-                throw new DatabaseError('Survey does not belong to the specified wedding.');
+            if (surveyData.eventId !== eventId) {
+                throw new DatabaseError('Survey does not belong to the specified event.');
             }
 
             const surveyResponseDocRef = surveyDocRef.collection('surveyResponses').doc(surveyResponseId);
@@ -460,7 +460,7 @@ export class SurveyDao {
     }
 
     async fetchPartySurveyResponses(
-        weddingId: string,
+        eventId: string,
         surveyId: string,
         guestId: string
     ): Promise<Array<SurveyResponse>> {
@@ -474,7 +474,7 @@ export class SurveyDao {
             const groupNumber = guestData.groupNumber;
 
             const guestsSnapshot = await this.guestsCollection
-                .where('weddingId', '==', weddingId)
+                .where('eventId', '==', eventId)
                 .where('groupNumber', '==', groupNumber)
                 .get();
 
@@ -499,7 +499,7 @@ export class SurveyDao {
             for (const chunk of chunks) {
                 const querySnapshot = await db
                     .collectionGroup('surveyResponses')
-                    .where('survey.weddingId', '==', weddingId)
+                    .where('survey.eventId', '==', eventId)
                     .where('survey.id', '==', surveyId)
                     .where('guest', 'in', chunk)
                     .get();
@@ -510,7 +510,7 @@ export class SurveyDao {
                 for (const doc of querySnapshot.docs) {
                     const responseData = doc.data();
                     const guestId = responseData.guest;
-                    const guest = await this.guestDao.getGuestById(weddingId, guestId);
+                    const guest = await this.guestDao.getGuestById(eventId, guestId);
 
                     const surveyResponse = new SurveyResponse(
                         doc.id,
