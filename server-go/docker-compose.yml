@@ -1,0 +1,14 @@
+version: '3.8'
+services:
+  go-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: event-manager-go-server
+    env_file:
+      - .env.server.production
+    volumes:
+      - ./logs/server/:/app/logs/server/
+    ports:
+      - "7500:7500"
+    restart: unless-stopped
