@@ -26,7 +26,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: Dockerfile
+          file: server-go/Dockerfile
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/event-manager-go-server:latest
         env:
